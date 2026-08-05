@@ -1,0 +1,173 @@
+@import "tailwindcss";
+
+/* ===== MedSys Healthcare Design System (from Google Stitch) ===== */
+@theme {
+  /* Primary Colors */
+  --color-primary: #003f87;
+  --color-primary-container: #0056b3;
+  --color-primary-fixed: #d7e2ff;
+  --color-primary-fixed-dim: #acc7ff;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #bbd0ff;
+  --color-on-primary-fixed: #001a40;
+  --color-on-primary-fixed-variant: #004491;
+  --color-inverse-primary: #acc7ff;
+
+  /* Secondary Colors */
+  --color-secondary: #006c4f;
+  --color-secondary-container: #67fcc6;
+  --color-secondary-fixed: #67fcc6;
+  --color-secondary-fixed-dim: #44dfab;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-container: #007354;
+  --color-on-secondary-fixed: #002116;
+  --color-on-secondary-fixed-variant: #00513a;
+
+  /* Tertiary Colors */
+  --color-tertiary: #3a434a;
+  --color-tertiary-container: #515a62;
+  --color-tertiary-fixed: #dbe4ed;
+  --color-tertiary-fixed-dim: #bfc8d0;
+  --color-on-tertiary: #ffffff;
+  --color-on-tertiary-container: #c8d1da;
+  --color-on-tertiary-fixed: #141d23;
+  --color-on-tertiary-fixed-variant: #3f484f;
+
+  /* Error Colors */
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+  --color-on-error: #ffffff;
+  --color-on-error-container: #93000a;
+
+  /* Surface Colors */
+  --color-surface: #f8f9fa;
+  --color-surface-bright: #f8f9fa;
+  --color-surface-dim: #d9dadb;
+  --color-surface-variant: #e1e3e4;
+  --color-surface-tint: #115cb9;
+  --color-surface-container: #edeeef;
+  --color-surface-container-low: #f3f4f5;
+  --color-surface-container-high: #e7e8e9;
+  --color-surface-container-highest: #e1e3e4;
+  --color-surface-container-lowest: #ffffff;
+  --color-on-surface: #191c1d;
+  --color-on-surface-variant: #424752;
+  --color-on-background: #191c1d;
+  --color-background: #f8f9fa;
+  --color-inverse-surface: #2e3132;
+  --color-inverse-on-surface: #f0f1f2;
+
+  /* Outline */
+  --color-outline: #727784;
+  --color-outline-variant: #c2c6d4;
+
+  /* Font Family */
+  --font-sans: 'Inter', sans-serif;
+
+  /* Font Size */
+  --font-size-h1: 32px;
+  --font-size-h1-mobile: 24px;
+  --font-size-h2: 24px;
+  --font-size-h3: 20px;
+  --font-size-body-lg: 16px;
+  --font-size-body-sm: 14px;
+  --font-size-label-caps: 12px;
+  --font-size-code: 14px;
+}
+
+/* ===== Global Styles ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-on-surface);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== Material Symbols ===== */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
+  display: inline-block;
+  line-height: 1;
+}
+
+.material-symbols-outlined.filled {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* ===== Form Input Focus ===== */
+.form-input-focus:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(0, 63, 135, 0.1);
+}
+
+/* ===== Transitions ===== */
+.login-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.step-transition {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== Password Strength Bar ===== */
+.strength-bar {
+  height: 4px;
+  border-radius: 2px;
+  background-color: var(--color-surface-container-highest);
+  transition: background-color 0.3s ease;
+}
+
+/* ===== Custom Radio ===== */
+.custom-radio:checked {
+  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3ccircle cx='8' cy='8' r='3'/%3e%3c/svg%3e");
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-outline-variant);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-outline);
+}
+
+/* ===== Animations ===== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+.animate-slide-in {
+  animation: slideInRight 0.3s ease-out;
+}
