@@ -5,6 +5,7 @@ import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import DashboardLayout from "./components/layout/DashboardLayout";
 import StaffManagement from "./pages/StaffManagement";
+import PatientManagement from "./pages/PatientManagement";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
       <Route path="/dashboard" element={<DashboardLayout />}>
         <Route index element={<AdminDashboard />} />
         <Route path="staff-management" element={<StaffManagement />} />
+        <Route path="patient-management" element={<PatientManagement />} />
       </Route>
 
       {/* Default redirect */}
