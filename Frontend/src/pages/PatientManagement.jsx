@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Users,
   Calendar,
@@ -9,8 +9,65 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import PatientTable from '../components/PatientManagement/PatientTable';
+import AddPatientForm from '../components/PatientManagement/AddPatientForm';
+import ConfirmationModal from '../components/common/ConfirmationModal';
 
 const PatientManagement = () => {
+  const [showAddPatientForm, setShowAddPatientForm] = useState(false);
+  const [patientFormMode, setPatientFormMode] = useState("add");
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const isDeleteConfirmOpen = Boolean(deleteTarget);
+
+  useEffect(() => {
+    const handleEscape = (event) => {
+      if (event.key === "Escape") {
+        setShowAddPatientForm(false);
+        setDeleteTarget(null);
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, []);
+
+  const handleAddPatientSubmit = (event) => {
+    event.preventDefault();
+    console.log("Create new patient");
+    handleClosePatientForm();
+  };
+
+  const handleOpenAddPatient = () => {
+    setSelectedPatient(null);
+    setPatientFormMode("add");
+    setShowAddPatientForm(true);
+  };
+
+  const handleOpenEditPatient = (patient) => {
+    setDeleteTarget(null);
+    setSelectedPatient(patient);
+    setPatientFormMode("edit");
+    setShowAddPatientForm(true);
+  };
+
+  const handleOpenDeleteConfirm = (patient) => {
+    setShowAddPatientForm(false);
+    setSelectedPatient(null);
+    setPatientFormMode("add");
+    setDeleteTarget(patient);
+  };
+
+  const handleConfirmDelete = () => {
+    console.log("Delete patient", deleteTarget);
+    setDeleteTarget(null);
+  };
+
+  const handleClosePatientForm = () => {
+    setShowAddPatientForm(false);
+    setSelectedPatient(null);
+    setPatientFormMode("add");
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       <div className="flex flex-1">
@@ -30,7 +87,11 @@ const PatientManagement = () => {
                   Access and manage comprehensive clinical patient records.
                 </p>
               </div>
-              <button className="flex items-center gap-2 bg-blue-900 hover:bg-blue-950 text-white text-sm font-semibold px-4 py-2.5 rounded-lg shadow-sm transition-colors">
+              <button
+                type="button"
+                onClick={handleOpenAddPatient}
+                className="flex items-center gap-2 bg-blue-900 hover:bg-blue-950 text-white text-sm font-semibold px-4 py-2.5 rounded-lg shadow-sm transition-colors"
+              >
                 <UserPlus className="w-4 h-4" />
                 <span>Register New Patient</span>
               </button>
@@ -139,7 +200,11 @@ const PatientManagement = () => {
             </div>
 
             {/* Patient Table Component */}
-            <PatientTable />
+            <PatientTable
+              onView={handleOpenEditPatient}
+              onEdit={handleOpenEditPatient}
+              onDelete={handleOpenDeleteConfirm}
+            />
 
             {/* Bottom Compliance & Privacy Banners */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -183,6 +248,25 @@ const PatientManagement = () => {
           </main>
         </div>
       </div>
+
+      {showAddPatientForm && (
+        <AddPatientForm
+          mode={patientFormMode}
+          patient={selectedPatient}
+          onClose={handleClosePatientForm}
+          onSubmit={handleAddPatientSubmit}
+        />
+      )}
+
+      <ConfirmationModal
+        open={isDeleteConfirmOpen}
+        title="Delete Patient"
+        message={`Are you sure you want to delete ${deleteTarget?.name || "this patient"}? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 }

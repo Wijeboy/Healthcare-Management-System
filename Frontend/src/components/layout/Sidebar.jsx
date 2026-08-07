@@ -2,19 +2,31 @@ import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 
 const navItems = [
-  { icon: "dashboard", label: "Dashboard", path: "/dashboard" },
+  {
+    icon: "dashboard",
+    label: "Dashboard",
+    path: "/dashboard",
+  },
   {
     icon: "calendar_today",
     label: "Appointments",
     path: "/dashboard/appointments",
   },
-  { icon: "folder_shared", label: "Records", path: "/dashboard/records" },
+  {
+    icon: "folder_shared",
+    label: "Records",
+    path: "/dashboard/records",
+  },
   {
     icon: "medical_services",
     label: "Prescriptions",
     path: "/dashboard/prescriptions",
   },
-  { icon: "payments", label: "Payments", path: "/dashboard/payments" },
+  {
+    icon: "payments",
+    label: "Payments",
+    path: "/dashboard/payments",
+  },
   {
     icon: "people",
     label: "Staff Management",
