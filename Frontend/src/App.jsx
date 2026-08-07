@@ -1,27 +1,39 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
-import LoginPage from './pages/LoginPage'
-import RegisterPage from './pages/RegisterPage'
-import ForgotPasswordPage from './pages/ForgotPasswordPage'
-import AdminDashboard from './pages/AdminDashboard'
-import DashboardLayout from './components/layout/DashboardLayout'
+import React from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import ScheduleAppointmentPage from "./pages/ScheduleAppointment";
+import RecordsPage from "./pages/Records";
+import PrescriptionsPage from "./pages/Prescriptions";
+import PrescriptionFormPage from "./pages/PrescriptionForm";
+import PrescriptionViewPage from "./pages/PrescriptionView";
+import DoctorDashboard from "./pages/doctor/DoctorDashboard";
+import DoctorProfile from "./pages/doctor/DoctorProfile";
+import DoctorSchedule from "./pages/doctor/DoctorSchedule";
+import TodaysAppointments from "./pages/doctor/TodaysAppointments";
+import DoctorAppointmentDetails from "./pages/doctor/DoctorAppointmentDetails";
+import PatientHistory from "./pages/doctor/PatientHistory";
+import ClinicalNotifications from "./pages/doctor/ClinicalNotifications";
 
-function App() {
+export default function App() {
   return (
     <Routes>
-      {/* Public Routes */}
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
-      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-      
-      {/* Protected Routes (wrapped in DashboardLayout) */}
-      <Route path="/dashboard" element={<DashboardLayout />}>
-        <Route index element={<AdminDashboard />} />
-      </Route>
+      <Route path="/" element={<Navigate to="/doctor" replace />} />
 
-      {/* Default redirect */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      {/* Doctor portal */}
+      <Route path="/doctor" element={<DoctorDashboard />} />
+      <Route path="/doctor/profile" element={<DoctorProfile />} />
+      <Route path="/doctor/schedule" element={<DoctorSchedule />} />
+      <Route path="/doctor/appointments/today" element={<TodaysAppointments />} />
+      <Route path="/doctor/appointments/:id" element={<DoctorAppointmentDetails />} />
+      <Route path="/doctor/patients/:patientId" element={<PatientHistory />} />
+      <Route path="/doctor/notifications" element={<ClinicalNotifications />} />
+
+      {/* Shared pages (Records, Prescriptions, booking) — same DoctorSidebar shell */}
+      <Route path="/appointments/new" element={<ScheduleAppointmentPage />} />
+      <Route path="/records" element={<RecordsPage />} />
+      <Route path="/prescriptions" element={<PrescriptionsPage />} />
+      <Route path="/prescriptions/new" element={<PrescriptionFormPage />} />
+      <Route path="/prescriptions/:id/edit" element={<PrescriptionFormPage />} />
+      <Route path="/prescriptions/:id" element={<PrescriptionViewPage />} />
     </Routes>
-  )
+  );
 }
-
-export default App
