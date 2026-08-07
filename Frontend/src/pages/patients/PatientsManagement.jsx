@@ -77,8 +77,11 @@ const PatientsManagement = () => {
             totalCount="12,842"
             currentPage={currentPage}
             onPageChange={setCurrentPage}
+            onViewPatient={(patient) =>
+              console.log("View patient:", patient)
+            }
             onEditPatient={(patient) =>
-              navigate(`/dashboard/patients-management/add-patient?mode=edit&id=${patient.id}`, {
+              navigate(`/dashboard/patients-management/edit-patient?id=${patient.id}`, {
                 state: { patient },
               })
             }

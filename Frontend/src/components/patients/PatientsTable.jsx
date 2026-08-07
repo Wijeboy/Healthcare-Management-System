@@ -14,6 +14,7 @@ const PatientsTable = ({
   totalCount,
   currentPage,
   onPageChange,
+  onViewPatient,
   onEditPatient,
 }) => {
   const [openMenuId, setOpenMenuId] = useState(null);
@@ -201,6 +202,10 @@ const PatientsTable = ({
                       <div className="absolute right-0 top-full mt-2 w-40 rounded-xl border border-slate-200 bg-white shadow-lg z-20 overflow-hidden">
                         <button
                           type="button"
+                          onClick={() => {
+                            onViewPatient?.(patient);
+                            setOpenMenuId(null);
+                          }}
                           className="w-full px-3 py-2.5 text-left text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2"
                         >
                           <Eye size={14} />
