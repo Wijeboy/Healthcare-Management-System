@@ -8,6 +8,7 @@ import DashboardLayout from "./components/layout/DashboardLayout";
 import PatientManagement from "./pages/patients/PatientManagement";
 import DoctorsManagement from "./pages/doctors/DoctorsManagement";
 import AddDoctorPage from "./pages/doctors/AddDoctorPage";
+import EditDoctorPage from "./pages/doctors/EditDoctorPage";
 
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
         <Route index element={<AdminDashboard />} />
         <Route path="doctors-management" element={<DoctorsManagement />} />
         <Route path="doctors-management/add-doctor" element={<AddDoctorPage />} />
+        <Route path="doctors-management/edit-doctor" element={<EditDoctorPage />} />
         <Route path="patients-management" element={<PatientManagement />} />
       </Route>
 

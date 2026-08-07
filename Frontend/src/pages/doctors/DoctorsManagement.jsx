@@ -13,6 +13,7 @@ import { mockdoctors } from "../../data/mockData";
 import DoctorsStatCard from "../../components/doctors/DoctorsStatCard";
 import DoctorsFilterBar from "../../components/doctors/DoctorsFilterBar";
 import DoctorCard from "../../components/doctors/DoctorCard";
+import ConfirmationModal from "../../components/common/ConfirmationModal";
 
 const DoctorsManagement = () => {
   const navigate = useNavigate();
@@ -20,6 +21,8 @@ const DoctorsManagement = () => {
   const [department, setDepartment] = useState("All");
   const [specialization, setSpecialization] = useState("All");
   const [status, setStatus] = useState("All");
+  const [doctors, setDoctors] = useState(mockdoctors);
+  const [doctorToDelete, setDoctorToDelete] = useState(null);
 
   const handleClearFilters = () => {
     setSearchTerm("");
@@ -27,6 +30,23 @@ const DoctorsManagement = () => {
     setSpecialization("All");
     setStatus("All");
   };
+
+  const handleEditDoctor = (doctorId) => {
+    navigate(`/dashboard/doctors-management/edit-doctor?id=${doctorId}`);
+  };
+
+  const handleDeleteDoctor = (doctorId) => {
+    setDoctorToDelete(doctors.find((doctor) => doctor.id === doctorId) || null);
+  };
+
+  const confirmDeleteDoctor = () => {
+    if (!doctorToDelete) return;
+    setDoctors((currentDoctors) =>
+      currentDoctors.filter((doctor) => doctor.id !== doctorToDelete.id),
+    );
+    setDoctorToDelete(null);
+  };
+
   return (
     <div className="flex h-screen bg-[#F8FAFC] text-[#1E293B] font-sans antialiased overflow-hidden">
       <div className="flex-1 flex flex-col overflow-y-auto">
@@ -110,8 +130,13 @@ const DoctorsManagement = () => {
             </div>
 
             <div className="p-6 grid grid-cols-3 gap-5">
-              {mockdoctors.map((doc) => (
-                <DoctorCard key={doc.id} doctor={doc} />
+              {doctors.map((doc) => (
+                <DoctorCard
+                  key={doc.id}
+                  doctor={doc}
+                  onEdit={handleEditDoctor}
+                  onDelete={handleDeleteDoctor}
+                />
               ))}
             </div>
 
@@ -143,6 +168,20 @@ const DoctorsManagement = () => {
           </div>
         </main>
       </div>
+
+      <ConfirmationModal
+        open={Boolean(doctorToDelete)}
+        title="Delete Doctor"
+        message={
+          doctorToDelete
+            ? `Are you sure you want to delete ${doctorToDelete.name}? This action cannot be undone.`
+            : ""
+        }
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={confirmDeleteDoctor}
+        onCancel={() => setDoctorToDelete(null)}
+      />
     </div>
   );
 };

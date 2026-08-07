@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import PersonalInfoSection from '../../components/add-doctor/PersonalInfoSection';
-import ProfessionalInfoSection from '../../components/add-doctor/ProfessionalInfoSection';
-import AvailabilitySection from '../../components/add-doctor/AvailabilitySection';
-import AccountAccessSection from '../../components/add-doctor/AccountAccessSection';
+import PersonalInfoSection from '../../components/doctors/add-doctor/PersonalInfoSection';
+import ProfessionalInfoSection from '../../components/doctors/add-doctor/ProfessionalInfoSection';
+import AvailabilitySection from '../../components/doctors/add-doctor/AvailabilitySection';
+import AccountAccessSection from '../../components/doctors/add-doctor/AccountAccessSection';
 
 const AddDoctorPage = () => {
     const navigate = useNavigate();
