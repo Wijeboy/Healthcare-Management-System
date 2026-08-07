@@ -9,6 +9,7 @@ import AddDoctorPage from "./pages/doctors/AddDoctorPage";
 import EditDoctorPage from "./pages/doctors/EditDoctorPage";
 import DoctorDetails from "./pages/doctors/DoctorDetails";
 import PatientsManagement from "./pages/patients/PatientsManagement";
+import AddPatient from "./pages/patients/AddPatient";
 
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
         <Route path="doctors-management/add-doctor" element={<AddDoctorPage />} />
         <Route path="doctors-management/edit-doctor" element={<EditDoctorPage />} />
         <Route path="patients-management" element={<PatientsManagement />} />
+        <Route path="patients-management/add-patient" element={<AddPatient />} />
       </Route>
 
       {/* Default redirect */}

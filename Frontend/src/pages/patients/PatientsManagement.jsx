@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
 import PatientStatCards from "../../components/patients/PatientStatCards";
 import PatientFilterBar from "../../components/patients/PatientFilterBar";
@@ -7,6 +8,7 @@ import PatientComplianceWidgets from "../../components/patients/PatientComplianc
 import { mockPatients } from "../../data/mockData";
 
 const PatientsManagement = () => {
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState({
     search: "",
@@ -43,7 +45,10 @@ const PatientsManagement = () => {
               </p>
             </div>
 
-            <button className="px-4 py-2.5 bg-[#0256CA] hover:bg-blue-700 text-white font-bold text-xs rounded-xl flex items-center gap-2 shadow-sm transition">
+            <button
+              className="px-4 py-2.5 bg-[#0256CA] hover:bg-blue-700 text-white font-bold text-xs rounded-xl flex items-center gap-2 shadow-sm transition cursor-pointer"
+              onClick={() => navigate("/dashboard/patients-management/add-patient")}
+            >
               <Plus size={16} />
               Register New Patient
             </button>
@@ -72,6 +77,11 @@ const PatientsManagement = () => {
             totalCount="12,842"
             currentPage={currentPage}
             onPageChange={setCurrentPage}
+            onEditPatient={(patient) =>
+              navigate(`/dashboard/patients-management/add-patient?mode=edit&id=${patient.id}`, {
+                state: { patient },
+              })
+            }
           />
 
           {/* Compliance & Privacy Footer Widgets */}
