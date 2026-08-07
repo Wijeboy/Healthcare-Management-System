@@ -21,7 +21,6 @@ const DoctorsManagement = () => {
   const [department, setDepartment] = useState("All");
   const [specialization, setSpecialization] = useState("All");
   const [status, setStatus] = useState("All");
-  const [doctors, setDoctors] = useState(mockDoctors);
   const [doctorToDelete, setDoctorToDelete] = useState(null);
 
   const handleClearFilters = () => {
@@ -40,14 +39,14 @@ const DoctorsManagement = () => {
   };
 
   const handleDeleteDoctor = (doctorId) => {
-    setDoctorToDelete(doctors.find((doctor) => doctor.id === doctorId) || null);
+    setDoctorToDelete(
+      mockDoctors.find((doctor) => doctor.id === doctorId) || null,
+    );
   };
 
   const confirmDeleteDoctor = () => {
     if (!doctorToDelete) return;
-    setDoctors((currentDoctors) =>
-      currentDoctors.filter((doctor) => doctor.id !== doctorToDelete.id),
-    );
+    console.log("Delete doctor requested:", doctorToDelete);
     setDoctorToDelete(null);
   };
 
@@ -134,7 +133,7 @@ const DoctorsManagement = () => {
             </div>
 
             <div className="p-6 grid grid-cols-3 gap-5">
-              {doctors.map((doc) => (
+              {mockDoctors.map((doc) => (
                 <DoctorCard
                   key={doc.id}
                   doctor={doc}

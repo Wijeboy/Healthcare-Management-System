@@ -5,7 +5,7 @@ import EditPersonalInfoSection from "../../components/doctors/edit-doctor/EditPe
 import EditProfessionalInfoSection from "../../components/doctors/edit-doctor/EditProfessionalInfoSection";
 import EditAvailabilitySection from "../../components/doctors/edit-doctor/EditAvailabilitySection";
 import EditAccountAccessSection from "../../components/doctors/edit-doctor/EditAccountAccessSection";
-import { mockDoctors, updateMockDoctor } from "../../data/mockData";
+import { mockDoctors } from "../../data/mockData";
 
 const buildFormDataFromDoctor = (doctorId, doctorProfile) => {
   if (!doctorProfile) {
@@ -37,9 +37,11 @@ const buildFormDataFromDoctor = (doctorId, doctorProfile) => {
     };
   }
 
-  const scheduleHours = doctorProfile.scheduleDetails?.[0]?.hours || "08:00 AM - 04:00 PM";
+  const scheduleHours =
+    doctorProfile.scheduleDetails?.[0]?.hours || "08:00 AM - 04:00 PM";
   const [startTime, endTime] = scheduleHours.split(" - ");
-  const experienceValue = doctorProfile.professional?.experience || doctorProfile.experience || "";
+  const experienceValue =
+    doctorProfile.professional?.experience || doctorProfile.experience || "";
 
   return {
     initials: doctorProfile.initials ?? "",
@@ -59,12 +61,18 @@ const buildFormDataFromDoctor = (doctorId, doctorProfile) => {
     startTime: startTime ?? "08:00 AM",
     endTime: endTime ?? "04:00 PM",
     duration: doctorProfile.professional?.consultationDuration ?? "30 minutes",
-    availabilityStatus: doctorProfile.availabilityText === "Available" ? "Available" : doctorProfile.availabilityText ?? "Available",
+    availabilityStatus:
+      doctorProfile.availabilityText === "Available"
+        ? "Available"
+        : doctorProfile.availabilityText ?? "Available",
     systemRole: doctorProfile.account?.systemRole ?? "Doctor",
     accountStatus: doctorProfile.account?.accountStatus ?? "Active",
     tempPassword: "",
     username: doctorProfile.account?.username ?? "",
-    lastUpdated: doctorProfile.account?.lastUpdated ?? doctorProfile.account?.profileCreated ?? "",
+    lastUpdated:
+      doctorProfile.account?.lastUpdated ??
+      doctorProfile.account?.profileCreated ??
+      "",
     updatedBy: doctorProfile.account?.updatedBy ?? "",
   };
 };
@@ -135,56 +143,9 @@ const EditDoctorPage = () => {
 
   const handleSave = (e) => {
     e?.preventDefault();
-    const nextDoctor = {
-      initials: formData.initials,
-      name: formData.fullName,
-      status: formData.accountStatus,
-      specialty: formData.department?.toUpperCase() || "",
-      email: formData.email,
-      phone: formData.phone,
-      schedule: `${workingDays.join(", ")} · ${formData.startTime}-${formData.endTime}`,
-      licenceNumber: formData.licenceNumber,
-      department: formData.department,
-      specialization: formData.specialization,
-      bio: formData.bio,
-      experience: formData.experience,
-      availabilityText: formData.availabilityStatus,
-      personal: {
-        fullName: formData.fullName,
-        dob: formData.dob,
-        gender: formData.gender,
-        email: formData.email,
-        phone: formData.phone,
-        address: formData.address,
-      },
-      professional: {
-        department: formData.department,
-        specialization: formData.specialization,
-        qualification: formData.qualification,
-        licenceNumber: formData.licenceNumber,
-        experience: formData.experience,
-        consultationDuration: formData.duration,
-      },
-      scheduleDetails: workingDays.map((day) => ({
-        day,
-        hours: `${formData.startTime} - ${formData.endTime}`,
-        status: "AVAILABLE",
-        isAvailable: true,
-      })),
-      account: {
-        ...selectedDoctor?.account,
-        systemRole: formData.systemRole,
-        accountStatus: formData.accountStatus,
-        username: formData.username,
-        updatedBy: formData.updatedBy || selectedDoctor?.account?.updatedBy || "",
-        lastUpdated:
-          formData.lastUpdated || selectedDoctor?.account?.lastUpdated || "",
-      },
-      upcomingAppointments: selectedDoctor?.upcomingAppointments || [],
-    };
-
-    updateMockDoctor(doctorId, nextDoctor);
-    console.log("Updated doctor profile data:", nextDoctor);
+    navigate(`/dashboard/doctors-management/details?id=${doctorId}`, {
+      state: { doctor: selectedDoctor },
+    });
   };
 
   return (
@@ -208,8 +169,8 @@ const EditDoctorPage = () => {
               Edit Doctor
             </h1>
             <p className="text-xs text-slate-500 mt-1">
-              Update the doctor's personal information, professional details,
-              availability, and account access.
+              View the doctor's profile in edit mode. Changes are local to the
+              form and are not persisted.
             </p>
           </div>
 
@@ -233,8 +194,13 @@ const EditDoctorPage = () => {
               initials: selectedDoctor?.initials || formData.initials,
               name: selectedDoctor?.name || formData.fullName,
               id: selectedDoctor?.id || formData.doctorId,
-              department: selectedDoctor?.professional?.department || selectedDoctor?.department || selectedDoctor?.specialty || formData.department,
-              accountStatus: selectedDoctor?.account?.accountStatus || formData.accountStatus,
+              department:
+                selectedDoctor?.professional?.department ||
+                selectedDoctor?.department ||
+                selectedDoctor?.specialty ||
+                formData.department,
+              accountStatus:
+                selectedDoctor?.account?.accountStatus || formData.accountStatus,
               lastUpdated: formData.lastUpdated,
               updatedBy: formData.updatedBy,
             }}

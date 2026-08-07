@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Edit, MoreHorizontal, ArrowLeft } from "lucide-react";
 import { mockDoctors } from "../../data/mockData";
 import DoctorProfileHeaderCard from "../../components/doctors/doctor-details/DoctorProfileHeaderCard";
@@ -11,16 +11,22 @@ import UpcomingAppointmentsTable from "../../components/doctors/doctor-details/U
 
 const DoctorDetails = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState("Overview");
   const doctorId = searchParams.get("id");
+  const editedDoctor = location.state?.doctor;
 
   const doctor = useMemo(() => {
+    if (editedDoctor?.id === doctorId) {
+      return editedDoctor;
+    }
+
     const selectedDoctor = mockDoctors.find((item) => item.id === doctorId);
     if (!selectedDoctor) return null;
 
     return selectedDoctor;
-  }, [doctorId]);
+  }, [doctorId, editedDoctor]);
 
   if (!doctorId || !doctor) {
     return (
