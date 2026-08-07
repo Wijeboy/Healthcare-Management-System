@@ -1,12 +1,7 @@
 import React from "react";
-import { Upload, Save } from "lucide-react";
+import { Upload } from "lucide-react";
 
-const EditPersonalInfoSection = ({
-  formData,
-  handleChange,
-  onReset,
-  onSave,
-}) => {
+const EditPersonalInfoSection = ({ formData, handleChange }) => {
   return (
     <div className="bg-white border border-[#E2E8F0] rounded-xl p-6 shadow-sm mb-6">
       <div className="flex items-center justify-between mb-6">
@@ -147,30 +142,6 @@ const EditPersonalInfoSection = ({
         </div>
       </div>
 
-      {/* Floating Section Action Bar */}
-      <div className="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-slate-100">
-        <button
-          type="button"
-          className="px-4 py-1.5 border border-[#CBD5E1] bg-white text-slate-700 font-bold text-xs rounded-lg hover:bg-slate-50 transition"
-        >
-          Cancel
-        </button>
-        <button
-          type="button"
-          onClick={onReset}
-          className="px-4 py-1.5 border border-[#CBD5E1] bg-white text-slate-700 font-bold text-xs rounded-lg hover:bg-slate-50 transition"
-        >
-          Reset Changes
-        </button>
-        <button
-          type="button"
-          onClick={onSave}
-          className="px-4 py-1.5 bg-[#0256CA] hover:bg-blue-700 text-white font-bold text-xs rounded-lg flex items-center gap-1.5 shadow-sm transition"
-        >
-          <Save size={14} />
-          Save Changes
-        </button>
-      </div>
     </div>
   );
 };

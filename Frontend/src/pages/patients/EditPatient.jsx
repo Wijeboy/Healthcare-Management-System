@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import EditPatientHeaderBanner from "../../components/patients/edit-patient/EditPatientHeaderBanner";
 import EditContactInfoSection from "../../components/patients/edit-patient/EditContactInfoSection";
 import EditMedicalInfoSection from "../../components/patients/edit-patient/EditMedicalInfoSection";
@@ -86,9 +86,13 @@ const buildFormDataFromPatient = (patientId, patientProfile) => {
 
 const EditPatient = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const patientId = searchParams.get("id");
-  const selectedPatient = mockPatients.find((patient) => patient.id === patientId);
+  const selectedPatient =
+    location.state?.patient ||
+    mockPatients.find((patient) => patient.id === patientId);
+  const patientNotFound = Boolean(patientId) && !selectedPatient;
 
   const [formData, setFormData] = useState(() =>
     buildFormDataFromPatient(patientId, selectedPatient)
@@ -125,6 +129,24 @@ const EditPatient = () => {
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-[#1E293B] font-sans p-8">
       <div className="max-w-5xl mx-auto">
+        {patientNotFound ? (
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
+            <h1 className="text-xl font-bold text-amber-900">
+              Patient not found
+            </h1>
+            <p className="mt-2 text-sm text-amber-800">
+              We could not find a patient record for id <span className="font-semibold">{patientId}</span>.
+            </p>
+            <button
+              type="button"
+              onClick={() => navigate("/dashboard/patients-management")}
+              className="mt-4 rounded-lg bg-[#0256CA] px-4 py-2 text-xs font-bold text-white hover:bg-blue-700 transition"
+            >
+              Back to Patients Management
+            </button>
+          </div>
+        ) : (
+          <>
         <div className="mb-5">
           <nav className="text-xs font-medium text-slate-500 mb-1 flex items-center gap-1.5">
             <button type="button" onClick={() => navigate("/dashboard/patients-management")} className="text-[#2563EB] hover:underline font-semibold">
@@ -149,8 +171,6 @@ const EditPatient = () => {
           <EditPersonalInfoSection
             formData={formData}
             handleChange={handleChange}
-            onReset={handleReset}
-            onSave={handleSubmit}
           />
           <EditContactInfoSection
             formData={formData}
@@ -170,7 +190,32 @@ const EditPatient = () => {
             handleToggle={handleToggleInvitation}
             onGeneratePassword={handleGeneratePassword}
           />
+
+          <div className="flex items-center justify-end gap-3 mt-8">
+            <button
+              type="button"
+              onClick={() => navigate("/dashboard/patients-management")}
+              className="px-4 py-2 border border-[#CBD5E1] bg-white text-slate-700 font-bold text-xs rounded-lg hover:bg-slate-50 transition"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleReset}
+              className="px-4 py-2 border border-[#CBD5E1] bg-white text-slate-700 font-bold text-xs rounded-lg hover:bg-slate-50 transition"
+            >
+              Reset Changes
+            </button>
+            <button
+              type="submit"
+              className="px-5 py-2 bg-[#0256CA] hover:bg-blue-700 text-white font-bold text-xs rounded-lg shadow-sm transition"
+            >
+              Save Changes
+            </button>
+          </div>
         </form>
+          </>
+        )}
       </div>
     </div>
   );

@@ -5,11 +5,13 @@ import PatientStatCards from "../../components/patients/PatientStatCards";
 import PatientFilterBar from "../../components/patients/PatientFilterBar";
 import PatientsTable from "../../components/patients/PatientsTable";
 import PatientComplianceWidgets from "../../components/patients/PatientComplianceWidgets";
+import ConfirmationModal from "../../components/common/ConfirmationModal";
 import { mockPatients } from "../../data/mockData";
 
 const PatientsManagement = () => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
+  const [patientToDelete, setPatientToDelete] = useState(null);
   const [filters, setFilters] = useState({
     search: "",
     ageRange: "All",
@@ -29,6 +31,17 @@ const PatientsManagement = () => {
       lastVisitDate: "",
     });
   };
+
+  const handleDeletePatient = (patient) => {
+    setPatientToDelete(patient);
+  };
+
+  const confirmDeletePatient = () => {
+    if (!patientToDelete) return;
+    console.log("Delete patient requested:", patientToDelete);
+    setPatientToDelete(null);
+  };
+
   return (
     <div className="flex h-screen bg-[#F8FAFC] text-[#1E293B] font-sans antialiased overflow-hidden">
       <div className="flex-1 flex flex-col overflow-y-auto">
@@ -85,12 +98,27 @@ const PatientsManagement = () => {
                 state: { patient },
               })
             }
+            onDeletePatient={handleDeletePatient}
           />
 
           {/* Compliance & Privacy Footer Widgets */}
           <PatientComplianceWidgets />
         </main>
       </div>
+
+      <ConfirmationModal
+        open={Boolean(patientToDelete)}
+        title="Delete Patient"
+        message={
+          patientToDelete
+            ? `Are you sure you want to delete ${patientToDelete.name}? This action cannot be undone.`
+            : ""
+        }
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={confirmDeletePatient}
+        onCancel={() => setPatientToDelete(null)}
+      />
     </div>
   );
 };

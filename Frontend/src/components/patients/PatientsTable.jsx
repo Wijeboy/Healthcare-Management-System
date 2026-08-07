@@ -16,6 +16,7 @@ const PatientsTable = ({
   onPageChange,
   onViewPatient,
   onEditPatient,
+  onDeletePatient,
 }) => {
   const [openMenuId, setOpenMenuId] = useState(null);
   const menuRefs = useRef({});
@@ -33,13 +34,8 @@ const PatientsTable = ({
   }, [openMenuId]);
 
   const handleDelete = (patient) => {
-    const confirmed = window.confirm(
-      `Delete ${patient.name}? This action cannot be undone.`
-    );
-    if (confirmed) {
-      console.log("Delete patient:", patient);
-      setOpenMenuId(null);
-    }
+    onDeletePatient?.(patient);
+    setOpenMenuId(null);
   };
 
   return (
