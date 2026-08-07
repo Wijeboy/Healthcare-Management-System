@@ -159,7 +159,7 @@ const PatientDetails = () => {
               <button
                 type="button"
                 onClick={handleEdit}
-                className="px-4 py-2 border border-[#CBD5E1] bg-white text-slate-700 font-bold text-xs rounded-lg hover:bg-slate-50 flex items-center gap-2 shadow-sm transition"
+                className="px-4 py-2 bg-[#0256CA] hover:bg-blue-700 text-white text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-sm transition cursor-pointer"
               >
                 <Edit size={14} />
                 Edit Patient
@@ -189,7 +189,9 @@ const PatientDetails = () => {
                 <AccountAccessCard account={patientData.account} />
               </div>
 
-              <UpcomingAppointmentsCard appointments={patientData.appointments} />
+              <UpcomingAppointmentsCard
+                appointments={patientData.appointments}
+              />
             </div>
           )}
 

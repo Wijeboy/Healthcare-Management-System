@@ -64,12 +64,12 @@ const AddPatient = () => {
         {/* Top Header */}
         <div className="mb-6">
           <nav className="text-xs font-medium text-slate-500 mb-1 flex items-center gap-1.5">
-            <a
-              href="#"
+            <button
               className="text-[#2563EB] hover:underline font-semibold"
+              onClick={() => navigate("/dashboard/patients-management")}
             >
               Patients Management
-            </a>
+            </button>
             <span>›</span>
             <span className="text-slate-400">Add Patient</span>
           </nav>
