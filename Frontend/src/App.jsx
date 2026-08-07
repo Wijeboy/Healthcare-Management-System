@@ -12,6 +12,7 @@ import PatientsManagement from "./pages/patients/PatientsManagement";
 import AddPatient from "./pages/patients/AddPatient";
 import EditPatient from "./pages/patients/EditPatient";
 import PatientDetails from "./pages/patients/PatientDetails";
+import SystemSettingsPage from "./pages/SystemSettingsPage";
 
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
         <Route path="patients-management/details" element={<PatientDetails />} />
         <Route path="patients-management/add-patient" element={<AddPatient />} />
         <Route path="patients-management/edit-patient" element={<EditPatient />} />
+        <Route path="system-settings" element={<SystemSettingsPage />} />
       </Route>
 
       {/* Default redirect */}
