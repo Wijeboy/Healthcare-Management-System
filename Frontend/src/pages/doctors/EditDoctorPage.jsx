@@ -1,24 +1,82 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import EditDoctorHeaderBanner from "../../components/doctors/edit-doctor/EditDoctorHeaderBanner";
 import EditPersonalInfoSection from "../../components/doctors/edit-doctor/EditPersonalInfoSection";
 import EditProfessionalInfoSection from "../../components/doctors/edit-doctor/EditProfessionalInfoSection";
 import EditAvailabilitySection from "../../components/doctors/edit-doctor/EditAvailabilitySection";
 import EditAccountAccessSection from "../../components/doctors/edit-doctor/EditAccountAccessSection";
-import {
-  initialDoctorFormData,
-  doctorProfilesById,
-} from "../../data/doctorProfiles";
+import { mockDoctors, updateMockDoctor } from "../../data/mockData";
+
+const buildFormDataFromDoctor = (doctorId, doctorProfile) => {
+  if (!doctorProfile) {
+    return {
+      initials: "",
+      fullName: "",
+      email: "",
+      phone: "",
+      dob: "",
+      gender: "",
+      address: "",
+      doctorId: doctorId || "",
+      licenceNumber: "",
+      department: "",
+      specialization: "",
+      qualification: "",
+      experience: "",
+      bio: "",
+      startTime: "08:00 AM",
+      endTime: "04:00 PM",
+      duration: "30 minutes",
+      availabilityStatus: "Available",
+      systemRole: "Doctor",
+      accountStatus: "Active",
+      tempPassword: "",
+      username: "",
+      lastUpdated: "",
+      updatedBy: "",
+    };
+  }
+
+  const scheduleHours = doctorProfile.scheduleDetails?.[0]?.hours || "08:00 AM - 04:00 PM";
+  const [startTime, endTime] = scheduleHours.split(" - ");
+  const experienceValue = doctorProfile.professional?.experience || doctorProfile.experience || "";
+
+  return {
+    initials: doctorProfile.initials ?? "",
+    fullName: doctorProfile.personal?.fullName ?? doctorProfile.name ?? "",
+    email: doctorProfile.personal?.email ?? "",
+    phone: doctorProfile.personal?.phone ?? "",
+    dob: doctorProfile.personal?.dob ?? "",
+    gender: doctorProfile.personal?.gender ?? "",
+    address: doctorProfile.personal?.address ?? "",
+    doctorId: doctorProfile.id ?? doctorId ?? "",
+    licenceNumber: doctorProfile.professional?.licenceNumber ?? "",
+    department: doctorProfile.professional?.department ?? "",
+    specialization: doctorProfile.professional?.specialization ?? "",
+    qualification: doctorProfile.professional?.qualification ?? "",
+    experience: experienceValue.replace(/\s+Years?$/, ""),
+    bio: doctorProfile.bio ?? "",
+    startTime: startTime ?? "08:00 AM",
+    endTime: endTime ?? "04:00 PM",
+    duration: doctorProfile.professional?.consultationDuration ?? "30 minutes",
+    availabilityStatus: doctorProfile.availabilityText === "Available" ? "Available" : doctorProfile.availabilityText ?? "Available",
+    systemRole: doctorProfile.account?.systemRole ?? "Doctor",
+    accountStatus: doctorProfile.account?.accountStatus ?? "Active",
+    tempPassword: "",
+    username: doctorProfile.account?.username ?? "",
+    lastUpdated: doctorProfile.account?.lastUpdated ?? doctorProfile.account?.profileCreated ?? "",
+    updatedBy: doctorProfile.account?.updatedBy ?? "",
+  };
+};
 
 const EditDoctorPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const doctorId = searchParams.get("id");
-  const selectedDoctor = doctorProfilesById[doctorId];
+  const selectedDoctor = mockDoctors.find((doctor) => doctor.id === doctorId);
+  const initialFormData = buildFormDataFromDoctor(doctorId, selectedDoctor);
 
-  const [formData, setFormData] = useState(
-    initialDoctorFormData,
-  );
+  const [formData, setFormData] = useState(initialFormData);
   const [workingDays, setWorkingDays] = useState([
     "Mon",
     "Tue",
@@ -27,6 +85,19 @@ const EditDoctorPage = () => {
     "Fri",
   ]);
   const [sendInvitation, setSendInvitation] = useState(true);
+
+  useEffect(() => {
+    setFormData(buildFormDataFromDoctor(doctorId, selectedDoctor));
+    setWorkingDays(
+      selectedDoctor?.scheduleDetails?.reduce((days, slot) => {
+        if (slot.isAvailable) {
+          const shortDay = slot.day.slice(0, 3);
+          return days.includes(shortDay) ? days : [...days, shortDay];
+        }
+        return days;
+      }, []) || ["Mon", "Tue", "Wed", "Thu", "Fri"],
+    );
+  }, [doctorId, selectedDoctor]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -50,18 +121,70 @@ const EditDoctorPage = () => {
   };
 
   const handleReset = () => {
-    setFormData(initialDoctorFormData);
-    setWorkingDays(["Mon", "Tue", "Wed", "Thu", "Fri"]);
+    setFormData(buildFormDataFromDoctor(doctorId, selectedDoctor));
+    setWorkingDays(
+      selectedDoctor?.scheduleDetails?.reduce((days, slot) => {
+        if (slot.isAvailable) {
+          const shortDay = slot.day.slice(0, 3);
+          return days.includes(shortDay) ? days : [...days, shortDay];
+        }
+        return days;
+      }, []) || ["Mon", "Tue", "Wed", "Thu", "Fri"],
+    );
   };
 
   const handleSave = (e) => {
     e?.preventDefault();
-    console.log("Updated doctor profile data:", {
-      doctorId,
-      formData,
-      workingDays,
-      sendInvitation,
-    });
+    const nextDoctor = {
+      initials: formData.initials,
+      name: formData.fullName,
+      status: formData.accountStatus,
+      specialty: formData.department?.toUpperCase() || "",
+      email: formData.email,
+      phone: formData.phone,
+      schedule: `${workingDays.join(", ")} · ${formData.startTime}-${formData.endTime}`,
+      licenceNumber: formData.licenceNumber,
+      department: formData.department,
+      specialization: formData.specialization,
+      bio: formData.bio,
+      experience: formData.experience,
+      availabilityText: formData.availabilityStatus,
+      personal: {
+        fullName: formData.fullName,
+        dob: formData.dob,
+        gender: formData.gender,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+      },
+      professional: {
+        department: formData.department,
+        specialization: formData.specialization,
+        qualification: formData.qualification,
+        licenceNumber: formData.licenceNumber,
+        experience: formData.experience,
+        consultationDuration: formData.duration,
+      },
+      scheduleDetails: workingDays.map((day) => ({
+        day,
+        hours: `${formData.startTime} - ${formData.endTime}`,
+        status: "AVAILABLE",
+        isAvailable: true,
+      })),
+      account: {
+        ...selectedDoctor?.account,
+        systemRole: formData.systemRole,
+        accountStatus: formData.accountStatus,
+        username: formData.username,
+        updatedBy: formData.updatedBy || selectedDoctor?.account?.updatedBy || "",
+        lastUpdated:
+          formData.lastUpdated || selectedDoctor?.account?.lastUpdated || "",
+      },
+      upcomingAppointments: selectedDoctor?.upcomingAppointments || [],
+    };
+
+    updateMockDoctor(doctorId, nextDoctor);
+    console.log("Updated doctor profile data:", nextDoctor);
   };
 
   return (
@@ -107,11 +230,11 @@ const EditDoctorPage = () => {
 
           <EditDoctorHeaderBanner
             doctor={{
-              initials: doctorProfilesById[doctorId]?.initials || selectedDoctor?.initials || formData.initials,
-              name: doctorProfilesById[doctorId]?.name || selectedDoctor?.name || formData.fullName,
-              id: doctorProfilesById[doctorId]?.id || selectedDoctor?.id || formData.doctorId,
-              department: doctorProfilesById[doctorId]?.department || selectedDoctor?.specialty || formData.department,
-              accountStatus: doctorProfilesById[doctorId]?.account?.accountStatus || formData.accountStatus,
+              initials: selectedDoctor?.initials || formData.initials,
+              name: selectedDoctor?.name || formData.fullName,
+              id: selectedDoctor?.id || formData.doctorId,
+              department: selectedDoctor?.professional?.department || selectedDoctor?.department || selectedDoctor?.specialty || formData.department,
+              accountStatus: selectedDoctor?.account?.accountStatus || formData.accountStatus,
               lastUpdated: formData.lastUpdated,
               updatedBy: formData.updatedBy,
             }}

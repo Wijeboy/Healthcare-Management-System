@@ -9,7 +9,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { mockdoctors } from "../../data/mockData";
+import { mockDoctors } from "../../data/mockData";
 import DoctorsStatCard from "../../components/doctors/DoctorsStatCard";
 import DoctorsFilterBar from "../../components/doctors/DoctorsFilterBar";
 import DoctorCard from "../../components/doctors/DoctorCard";
@@ -21,7 +21,7 @@ const DoctorsManagement = () => {
   const [department, setDepartment] = useState("All");
   const [specialization, setSpecialization] = useState("All");
   const [status, setStatus] = useState("All");
-  const [doctors, setDoctors] = useState(mockdoctors);
+  const [doctors, setDoctors] = useState(mockDoctors);
   const [doctorToDelete, setDoctorToDelete] = useState(null);
 
   const handleClearFilters = () => {

@@ -1,8 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Edit, MoreHorizontal, ArrowLeft } from "lucide-react";
-import { doctorProfilesById } from "../../data/doctorProfiles";
-import { mockdoctors } from "../../data/mockData";
+import { mockDoctors } from "../../data/mockData";
 import DoctorProfileHeaderCard from "../../components/doctors/doctor-details/DoctorProfileHeaderCard";
 import PersonalInfoCard from "../../components/doctors/doctor-details/PersonalInfoCard";
 import ProfessionalInfoCard from "../../components/doctors/doctor-details/ProfessionalInfoCard";
@@ -17,49 +16,10 @@ const DoctorDetails = () => {
   const doctorId = searchParams.get("id");
 
   const doctor = useMemo(() => {
-    const selectedDoctor = mockdoctors.find((item) => item.id === doctorId);
+    const selectedDoctor = mockDoctors.find((item) => item.id === doctorId);
     if (!selectedDoctor) return null;
 
-    return doctorProfilesById[doctorId] ?? {
-      initials: selectedDoctor.initials,
-      name: selectedDoctor.name,
-      status: selectedDoctor.status,
-      id: selectedDoctor.id,
-      licenceNumber: "Not available",
-      department: selectedDoctor.specialty,
-      specialization: selectedDoctor.specialty,
-      bio: "Detailed profile information has not been added for this doctor yet.",
-      experience: "Not available",
-      patientsTreated: "Not available",
-      appointmentsThisMonth: "Not available",
-      availabilityText: selectedDoctor.schedule,
-      personal: {
-        fullName: selectedDoctor.name,
-        dob: "Not available",
-        gender: "Not available",
-        email: selectedDoctor.email,
-        phone: selectedDoctor.phone,
-        address: "Not available",
-      },
-      professional: {
-        department: selectedDoctor.specialty,
-        specialization: selectedDoctor.specialty,
-        qualification: "Not available",
-        licenceNumber: "Not available",
-        experience: "Not available",
-        consultationDuration: "Not available",
-      },
-      schedule: [],
-      account: {
-        systemRole: "Doctor",
-        accountStatus: selectedDoctor.status,
-        username: "Not available",
-        lastLogin: "Not available",
-        profileCreated: "Not available",
-        invitationStatus: "Not available",
-      },
-      upcomingAppointments: [],
-    };
+    return selectedDoctor;
   }, [doctorId]);
 
   if (!doctorId || !doctor) {
@@ -164,7 +124,7 @@ const DoctorDetails = () => {
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <CurrentAvailabilityCard schedule={doctor.schedule} />
+                <CurrentAvailabilityCard schedule={doctor.scheduleDetails || []} />
                 <AccountAccessCard account={doctor.account} />
               </div>
 
