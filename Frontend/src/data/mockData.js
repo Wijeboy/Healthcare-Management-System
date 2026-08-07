@@ -1,65 +1,6 @@
-export const mockdoctors = [
-  {
-    id: "DR-1042",
-    initials: "SC",
-    name: "Dr. Sarah Chen",
-    specialty: "CARDIOLOGY",
-    email: "sarah.chen@medimate.lk",
-    phone: "+94 77 123 4567",
-    schedule: "Mon–Fri · 8:00 AM–4:00 PM",
-    status: "ACTIVE",
-  },
-  {
-    id: "DR-1087",
-    initials: "JW",
-    name: "Dr. James Wilson",
-    specialty: "NEUROLOGY",
-    email: "james.wilson@medimate.lk",
-    phone: "+94 71 458 9021",
-    schedule: "Mon–Thu · 9:00 AM–5:00 PM",
-    status: "ACTIVE",
-  },
-  {
-    id: "DR-1150",
-    initials: "RK",
-    name: "Dr. Robert Kim",
-    specialty: "PEDIATRICS",
-    email: "robert.kim@medimate.lk",
-    phone: "+94 76 221 9088",
-    schedule: "Tue–Sat · 8:30 AM–3:30 PM",
-    status: "ACTIVE",
-  },
-  {
-    id: "DR-1172",
-    initials: "MP",
-    name: "Dr. Maya Perera",
-    specialty: "ORTHOPEDICS",
-    email: "maya.perera@medimate.lk",
-    phone: "+94 75 670 1122",
-    schedule: "Temporarily unavailable",
-    status: "ON LEAVE",
-  },
-  {
-    id: "DR-1210",
-    initials: "NJ",
-    name: "Dr. Nimal Jayawardhana",
-    specialty: "GENERAL MEDICINE",
-    email: "nimal.j@medimate.lk",
-    phone: "+94 70 332 4488",
-    schedule: "Mon–Fri · 7:30 AM–2:30 PM",
-    status: "ACTIVE",
-  },
-  {
-    id: "DR-1244",
-    initials: "AF",
-    name: "Dr. Amal Fernando",
-    specialty: "DERMATOLOGY",
-    email: "amal.fernando@medimate.lk",
-    phone: "+94 72 981 2241",
-    schedule: "No active schedule",
-    status: "INACTIVE",
-  },
-];
+import { doctorListItems } from "./doctorProfiles";
+
+export const mockdoctors = doctorListItems;
 
 export const mockPatients = [
   {

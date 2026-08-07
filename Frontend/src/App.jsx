@@ -9,6 +9,7 @@ import PatientManagement from "./pages/patients/PatientManagement";
 import DoctorsManagement from "./pages/doctors/DoctorsManagement";
 import AddDoctorPage from "./pages/doctors/AddDoctorPage";
 import EditDoctorPage from "./pages/doctors/EditDoctorPage";
+import DoctorDetails from "./pages/doctors/DoctorDetails";
 
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
       <Route path="/dashboard" element={<DashboardLayout />}>
         <Route index element={<AdminDashboard />} />
         <Route path="doctors-management" element={<DoctorsManagement />} />
+        <Route path="doctors-management/details" element={<DoctorDetails />} />
         <Route path="doctors-management/add-doctor" element={<AddDoctorPage />} />
         <Route path="doctors-management/edit-doctor" element={<EditDoctorPage />} />
         <Route path="patients-management" element={<PatientManagement />} />

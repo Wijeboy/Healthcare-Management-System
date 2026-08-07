@@ -1,51 +1,23 @@
 import React, { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { mockdoctors } from "../../data/mockData";
 import EditDoctorHeaderBanner from "../../components/doctors/edit-doctor/EditDoctorHeaderBanner";
 import EditPersonalInfoSection from "../../components/doctors/edit-doctor/EditPersonalInfoSection";
 import EditProfessionalInfoSection from "../../components/doctors/edit-doctor/EditProfessionalInfoSection";
 import EditAvailabilitySection from "../../components/doctors/edit-doctor/EditAvailabilitySection";
 import EditAccountAccessSection from "../../components/doctors/edit-doctor/EditAccountAccessSection";
-
-const initialDoctorData = {
-  initials: "SC",
-  fullName: "Dr. Sarah Chen",
-  email: "sarah.chen@medimate.lk",
-  phone: "+94 77 123 4567",
-  dob: "03/14/1986",
-  gender: "Female",
-  address: "No. 24, Lake Road, Colombo 07, Sri Lanka",
-  doctorId: "DR-1042",
-  licenceNumber: "SLMC-45872",
-  department: "Cardiology",
-  specialization: "Interventional Cardiology",
-  qualification: "MBBS, MD Cardiology",
-  experience: "12",
-  bio: "Consultant cardiologist with 12 years of clinical experience in interventional cardiology, cardiac diagnostics, and long-term patient care.",
-  startTime: "08:00 AM",
-  endTime: "04:00 PM",
-  duration: "30 minutes",
-  availabilityStatus: "Available",
-  systemRole: "Doctor",
-  accountStatus: "Active",
-  tempPassword: "Medimate@2026",
-  username: "sarah.chen",
-  lastUpdated: "03 Aug 2026, 10:30 AM",
-  updatedBy: "Imasha - Senior Admin",
-};
-
-const doctorDetailsById = {
-  "DR-1042": initialDoctorData,
-};
+import {
+  initialDoctorFormData,
+  doctorProfilesById,
+} from "../../data/doctorProfiles";
 
 const EditDoctorPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const doctorId = searchParams.get("id");
-  const selectedDoctor = mockdoctors.find((doctor) => doctor.id === doctorId);
+  const selectedDoctor = doctorProfilesById[doctorId];
 
   const [formData, setFormData] = useState(
-    doctorDetailsById[doctorId] || initialDoctorData,
+    initialDoctorFormData,
   );
   const [workingDays, setWorkingDays] = useState([
     "Mon",
@@ -78,7 +50,7 @@ const EditDoctorPage = () => {
   };
 
   const handleReset = () => {
-    setFormData(doctorDetailsById[doctorId] || initialDoctorData);
+    setFormData(initialDoctorFormData);
     setWorkingDays(["Mon", "Tue", "Wed", "Thu", "Fri"]);
   };
 
@@ -135,11 +107,11 @@ const EditDoctorPage = () => {
 
           <EditDoctorHeaderBanner
             doctor={{
-              initials: selectedDoctor?.initials || formData.initials,
-              name: selectedDoctor?.name || formData.fullName,
-              id: selectedDoctor?.id || formData.doctorId,
-              department: selectedDoctor?.specialty || formData.department,
-              accountStatus: formData.accountStatus,
+              initials: doctorProfilesById[doctorId]?.initials || selectedDoctor?.initials || formData.initials,
+              name: doctorProfilesById[doctorId]?.name || selectedDoctor?.name || formData.fullName,
+              id: doctorProfilesById[doctorId]?.id || selectedDoctor?.id || formData.doctorId,
+              department: doctorProfilesById[doctorId]?.department || selectedDoctor?.specialty || formData.department,
+              accountStatus: doctorProfilesById[doctorId]?.account?.accountStatus || formData.accountStatus,
               lastUpdated: formData.lastUpdated,
               updatedBy: formData.updatedBy,
             }}

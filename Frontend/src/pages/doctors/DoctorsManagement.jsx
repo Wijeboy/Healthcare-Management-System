@@ -35,6 +35,10 @@ const DoctorsManagement = () => {
     navigate(`/dashboard/doctors-management/edit-doctor?id=${doctorId}`);
   };
 
+  const handleViewDoctor = (doctorId) => {
+    navigate(`/dashboard/doctors-management/details?id=${doctorId}`);
+  };
+
   const handleDeleteDoctor = (doctorId) => {
     setDoctorToDelete(doctors.find((doctor) => doctor.id === doctorId) || null);
   };
@@ -134,6 +138,7 @@ const DoctorsManagement = () => {
                 <DoctorCard
                   key={doc.id}
                   doctor={doc}
+                  onView={handleViewDoctor}
                   onEdit={handleEditDoctor}
                   onDelete={handleDeleteDoctor}
                 />
