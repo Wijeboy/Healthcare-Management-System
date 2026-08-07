@@ -40,7 +40,7 @@ const PatientHeaderCard = ({ patient }) => {
 
         {/* Stats Grid */}
         <div className="w-full lg:w-auto grid grid-cols-2 gap-px bg-slate-100 border border-slate-100 rounded-lg overflow-hidden shrink-0">
-          <div className="bg-white p-3.5 min-w-[140px]">
+          <div className="bg-white p-3.5 min-w-35">
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
               LAST VISIT
             </p>
@@ -48,7 +48,7 @@ const PatientHeaderCard = ({ patient }) => {
               {patient.lastVisit}
             </p>
           </div>
-          <div className="bg-white p-3.5 min-w-[140px]">
+          <div className="bg-white p-3.5 min-w-35">
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
               UPCOMING APPOINTMENT
             </p>
@@ -56,7 +56,7 @@ const PatientHeaderCard = ({ patient }) => {
               {patient.upcomingAppointment}
             </p>
           </div>
-          <div className="bg-white p-3.5 min-w-[140px]">
+          <div className="bg-white p-3.5 min-w-35">
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
               MEDICAL RECORDS
             </p>
@@ -64,7 +64,7 @@ const PatientHeaderCard = ({ patient }) => {
               {patient.medicalRecordsCount} Records
             </p>
           </div>
-          <div className="bg-white p-3.5 min-w-[140px]">
+          <div className="bg-white p-3.5 min-w-35">
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
               RISK ALERTS
             </p>
