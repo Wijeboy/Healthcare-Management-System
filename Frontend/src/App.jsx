@@ -4,12 +4,11 @@ import RegisterPage from "./pages/RegisterPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import DashboardLayout from "./components/layout/DashboardLayout";
-
-import PatientManagement from "./pages/patients/PatientManagement";
 import DoctorsManagement from "./pages/doctors/DoctorsManagement";
 import AddDoctorPage from "./pages/doctors/AddDoctorPage";
 import EditDoctorPage from "./pages/doctors/EditDoctorPage";
 import DoctorDetails from "./pages/doctors/DoctorDetails";
+import PatientsManagement from "./pages/patients/PatientsManagement";
 
 
 function App() {
@@ -27,7 +26,7 @@ function App() {
         <Route path="doctors-management/details" element={<DoctorDetails />} />
         <Route path="doctors-management/add-doctor" element={<AddDoctorPage />} />
         <Route path="doctors-management/edit-doctor" element={<EditDoctorPage />} />
-        <Route path="patients-management" element={<PatientManagement />} />
+        <Route path="patients-management" element={<PatientsManagement />} />
       </Route>
 
       {/* Default redirect */}
