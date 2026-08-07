@@ -78,7 +78,10 @@ const PatientsTable = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 text-xs">
-            {patients.map((patient) => (
+            {patients.map((patient, index) => {
+              const openUpward = index >= patients.length - 2;
+
+              return (
               <tr key={patient.id} className="hover:bg-slate-50/70 transition">
                 {/* ID */}
                 <td className="py-3.5 px-4 font-bold text-slate-900">
@@ -195,7 +198,11 @@ const PatientsTable = ({
                     </button>
 
                     {openMenuId === patient.id && (
-                      <div className="absolute right-0 top-full mt-2 w-40 rounded-xl border border-slate-200 bg-white shadow-lg z-20 overflow-hidden">
+                      <div
+                        className={`absolute right-0 w-40 rounded-xl border border-slate-200 bg-white shadow-lg z-20 overflow-hidden ${
+                          openUpward ? "bottom-full mb-2" : "top-full mt-2"
+                        }`}
+                      >
                         <button
                           type="button"
                           onClick={() => {
@@ -231,7 +238,8 @@ const PatientsTable = ({
                   </div>
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>

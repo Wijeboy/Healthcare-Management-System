@@ -36,6 +36,15 @@ const PatientsManagement = () => {
     setPatientToDelete(patient);
   };
 
+  const handleViewPatient = (patient) => {
+    navigate(
+      `/dashboard/patients-management/details?id=${encodeURIComponent(patient.id)}`,
+      {
+      state: { patient },
+      }
+    );
+  };
+
   const confirmDeletePatient = () => {
     if (!patientToDelete) return;
     console.log("Delete patient requested:", patientToDelete);
@@ -90,13 +99,14 @@ const PatientsManagement = () => {
             totalCount="12,842"
             currentPage={currentPage}
             onPageChange={setCurrentPage}
-            onViewPatient={(patient) =>
-              console.log("View patient:", patient)
-            }
+            onViewPatient={handleViewPatient}
             onEditPatient={(patient) =>
-              navigate(`/dashboard/patients-management/edit-patient?id=${patient.id}`, {
-                state: { patient },
-              })
+              navigate(
+                `/dashboard/patients-management/edit-patient?id=${encodeURIComponent(patient.id)}`,
+                {
+                  state: { patient },
+                }
+              )
             }
             onDeletePatient={handleDeletePatient}
           />
