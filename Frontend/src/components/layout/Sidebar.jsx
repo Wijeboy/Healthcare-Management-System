@@ -29,13 +29,13 @@ const navItems = [
   },
   {
     icon: "people",
-    label: "Staff Management",
-    path: "/dashboard/staff-management",
+    label: "Doctor Management",
+    path: "/dashboard/doctors-management",
   },
   {
     icon: "person",
     label: "Patient Management",
-    path: "/dashboard/patient-management",
+    path: "/dashboard/patients-management",
   },
 ];
 

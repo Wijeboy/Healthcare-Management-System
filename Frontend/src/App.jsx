@@ -4,8 +4,11 @@ import RegisterPage from "./pages/RegisterPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import DashboardLayout from "./components/layout/DashboardLayout";
-import StaffManagement from "./pages/StaffManagement";
-import PatientManagement from "./pages/PatientManagement";
+
+import PatientManagement from "./pages/patients/PatientManagement";
+import DoctorsManagement from "./pages/doctors/DoctorsManagement";
+import AddDoctorPage from "./pages/doctors/AddDoctorPage";
+
 
 function App() {
   return (
@@ -18,8 +21,9 @@ function App() {
       {/* Protected Routes (wrapped in DashboardLayout) */}
       <Route path="/dashboard" element={<DashboardLayout />}>
         <Route index element={<AdminDashboard />} />
-        <Route path="staff-management" element={<StaffManagement />} />
-        <Route path="patient-management" element={<PatientManagement />} />
+        <Route path="doctors-management" element={<DoctorsManagement />} />
+        <Route path="doctors-management/add-doctor" element={<AddDoctorPage />} />
+        <Route path="patients-management" element={<PatientManagement />} />
       </Route>
 
       {/* Default redirect */}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from "react";
 import {
   Users,
   Calendar,
@@ -8,9 +8,9 @@ import {
   Info,
   ShieldCheck,
 } from "lucide-react";
-import PatientTable from '../components/PatientManagement/PatientTable';
-import AddPatientForm from '../components/PatientManagement/AddPatientForm';
-import ConfirmationModal from '../components/common/ConfirmationModal';
+import PatientTable from "../../components/patients/PatientTable";
+import AddPatientForm from "../../components/patients/AddPatientForm";
+import ConfirmationModal from "../../components/common/ConfirmationModal";
 
 const PatientManagement = () => {
   const [showAddPatientForm, setShowAddPatientForm] = useState(false);
@@ -71,11 +71,8 @@ const PatientManagement = () => {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       <div className="flex flex-1">
-        
         {/* Workspace */}
         <div className="flex-1 flex flex-col min-w-0">
-      
-
           <main className="p-8 space-y-6 overflow-y-auto">
             {/* Header */}
             <div className="flex items-center justify-between">
@@ -269,6 +266,6 @@ const PatientManagement = () => {
       />
     </div>
   );
-}
+};
 
-export default PatientManagement
+export default PatientManagement;
