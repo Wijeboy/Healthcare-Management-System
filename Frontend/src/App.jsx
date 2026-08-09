@@ -24,8 +24,11 @@ import StaffDetails from "./pages/staff/StaffDetails";
 
 import ReportsAnalytics from "./pages/reports/ReportsAnalytics";
 
-// Thisuli - Global Appointment Scheduler
+// Thisuli - Appointment Scheduler
 import GlobalAppointmentScheduler from "./pages/GlobalAppointmentScheduler";
+
+// Thisuli - Medical Records Upload
+import RecordsUploadMain from "./pages/RecordsUploadMain";
 
 function App() {
   return (
@@ -86,9 +89,15 @@ function App() {
           path="appointments"
           element={<GlobalAppointmentScheduler />}
         />
+
+        {/* Thisuli - Medical Records */}
+        <Route
+          path="records"
+          element={<RecordsUploadMain />}
+        />
       </Route>
 
-      {/* Default redirect */}
+      {/* Default Redirect */}
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
