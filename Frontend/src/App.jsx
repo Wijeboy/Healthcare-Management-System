@@ -4,21 +4,28 @@ import RegisterPage from "./pages/RegisterPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import DashboardLayout from "./components/layout/DashboardLayout";
+
 import DoctorsManagement from "./pages/doctors/DoctorsManagement";
 import AddDoctorPage from "./pages/doctors/AddDoctorPage";
 import EditDoctorPage from "./pages/doctors/EditDoctorPage";
 import DoctorDetails from "./pages/doctors/DoctorDetails";
+
 import PatientsManagement from "./pages/patients/PatientsManagement";
 import AddPatient from "./pages/patients/AddPatient";
 import EditPatient from "./pages/patients/EditPatient";
 import PatientDetails from "./pages/patients/PatientDetails";
+
 import SystemSettingsPage from "./pages/SystemSettingsPage";
+
 import StaffManagement from "./pages/staff/StaffManagement";
 import AddStaff from "./pages/staff/AddStaff";
 import EditStaff from "./pages/staff/EditStaff";
 import StaffDetails from "./pages/staff/StaffDetails";
+
 import ReportsAnalytics from "./pages/reports/ReportsAnalytics";
 
+// Thisuli - Global Appointment Scheduler
+import GlobalAppointmentScheduler from "./pages/GlobalAppointmentScheduler";
 
 function App() {
   return (
@@ -28,23 +35,57 @@ function App() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
-      {/* Protected Routes (wrapped in DashboardLayout) */}
+      {/* Protected Routes */}
       <Route path="/dashboard" element={<DashboardLayout />}>
         <Route index element={<AdminDashboard />} />
+
+        {/* Doctor Management */}
         <Route path="doctors-management" element={<DoctorsManagement />} />
-        <Route path="doctors-management/details" element={<DoctorDetails />} />
-        <Route path="doctors-management/add-doctor" element={<AddDoctorPage />} />
-        <Route path="doctors-management/edit-doctor" element={<EditDoctorPage />} />
+        <Route
+          path="doctors-management/details"
+          element={<DoctorDetails />}
+        />
+        <Route
+          path="doctors-management/add-doctor"
+          element={<AddDoctorPage />}
+        />
+        <Route
+          path="doctors-management/edit-doctor"
+          element={<EditDoctorPage />}
+        />
+
+        {/* Patient Management */}
         <Route path="patients-management" element={<PatientsManagement />} />
-        <Route path="patients-management/details" element={<PatientDetails />} />
-        <Route path="patients-management/add-patient" element={<AddPatient />} />
-        <Route path="patients-management/edit-patient" element={<EditPatient />} />
+        <Route
+          path="patients-management/details"
+          element={<PatientDetails />}
+        />
+        <Route
+          path="patients-management/add-patient"
+          element={<AddPatient />}
+        />
+        <Route
+          path="patients-management/edit-patient"
+          element={<EditPatient />}
+        />
+
+        {/* Staff Management */}
         <Route path="staff-management" element={<StaffManagement />} />
         <Route path="staff-management/add-staff" element={<AddStaff />} />
         <Route path="staff-management/edit-staff" element={<EditStaff />} />
         <Route path="staff-management/details" element={<StaffDetails />} />
+
+        {/* Reports */}
         <Route path="reports-analytics" element={<ReportsAnalytics />} />
+
+        {/* System Settings */}
         <Route path="system-settings" element={<SystemSettingsPage />} />
+
+        {/* Thisuli - Appointment Scheduler */}
+        <Route
+          path="appointments"
+          element={<GlobalAppointmentScheduler />}
+        />
       </Route>
 
       {/* Default redirect */}
