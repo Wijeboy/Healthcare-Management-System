@@ -1,7 +1,9 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+
 import AdminDashboard from "./pages/AdminDashboard";
 import DashboardLayout from "./components/layout/DashboardLayout";
 
@@ -15,20 +17,22 @@ import AddPatient from "./pages/patients/AddPatient";
 import EditPatient from "./pages/patients/EditPatient";
 import PatientDetails from "./pages/patients/PatientDetails";
 
-import SystemSettingsPage from "./pages/SystemSettingsPage";
-
 import StaffManagement from "./pages/staff/StaffManagement";
 import AddStaff from "./pages/staff/AddStaff";
 import EditStaff from "./pages/staff/EditStaff";
 import StaffDetails from "./pages/staff/StaffDetails";
 
 import ReportsAnalytics from "./pages/reports/ReportsAnalytics";
+import SystemSettingsPage from "./pages/SystemSettingsPage";
 
 // Thisuli - Appointment Scheduler
 import GlobalAppointmentScheduler from "./pages/GlobalAppointmentScheduler";
 
-// Thisuli - Medical Records Upload
+// Thisuli - Medical Records
 import RecordsUploadMain from "./pages/RecordsUploadMain";
+
+// Thisuli - Financial & Billing Reports
+import FinancialBillingReports from "./pages/FinancialBillingReports";
 
 function App() {
   return (
@@ -38,7 +42,7 @@ function App() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
-      {/* Protected Routes */}
+      {/* Protected Dashboard Routes */}
       <Route path="/dashboard" element={<DashboardLayout />}>
         <Route index element={<AdminDashboard />} />
 
@@ -58,7 +62,10 @@ function App() {
         />
 
         {/* Patient Management */}
-        <Route path="patients-management" element={<PatientsManagement />} />
+        <Route
+          path="patients-management"
+          element={<PatientsManagement />}
+        />
         <Route
           path="patients-management/details"
           element={<PatientDetails />}
@@ -74,9 +81,18 @@ function App() {
 
         {/* Staff Management */}
         <Route path="staff-management" element={<StaffManagement />} />
-        <Route path="staff-management/add-staff" element={<AddStaff />} />
-        <Route path="staff-management/edit-staff" element={<EditStaff />} />
-        <Route path="staff-management/details" element={<StaffDetails />} />
+        <Route
+          path="staff-management/add-staff"
+          element={<AddStaff />}
+        />
+        <Route
+          path="staff-management/edit-staff"
+          element={<EditStaff />}
+        />
+        <Route
+          path="staff-management/details"
+          element={<StaffDetails />}
+        />
 
         {/* Reports */}
         <Route path="reports-analytics" element={<ReportsAnalytics />} />
@@ -94,6 +110,12 @@ function App() {
         <Route
           path="records"
           element={<RecordsUploadMain />}
+        />
+
+        {/* Thisuli - Financial & Billing Reports */}
+        <Route
+          path="payments"
+          element={<FinancialBillingReports />}
         />
       </Route>
 
