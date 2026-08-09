@@ -10,37 +10,25 @@ import DashboardLayout from './components/layout/DashboardLayout'
 import GlobalAppointmentScheduler from './pages/GlobalAppointmentScheduler'
 import RecordsUploadMain from './pages/RecordsUploadMain'
 import FinancialBillingReports from './pages/FinancialBillingReports'
+import SystemSettingsAccessControl from './pages/SystemSettingsAccessControl'
 
 function App() {
   return (
     <Routes>
 
-      {/* =========================
-          Public Routes
-      ========================== */}
-      <Route
-        path="/login"
-        element={<LoginPage />}
-      />
-
-      <Route
-        path="/register"
-        element={<RegisterPage />}
-      />
-
+      {/* Public Routes */}
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
       <Route
         path="/forgot-password"
         element={<ForgotPasswordPage />}
       />
 
-      {/* =========================
-          Dashboard Routes
-      ========================== */}
+      {/* Dashboard Routes */}
       <Route
         path="/dashboard"
         element={<DashboardLayout />}
       >
-
         {/* Admin Dashboard */}
         <Route
           index
@@ -65,11 +53,14 @@ function App() {
           element={<FinancialBillingReports />}
         />
 
+        {/* System Settings & Access Control */}
+        <Route
+          path="settings"
+          element={<SystemSettingsAccessControl />}
+        />
       </Route>
 
-      {/* =========================
-          Default Redirect
-      ========================== */}
+      {/* Default Redirect */}
       <Route
         path="*"
         element={<Navigate to="/login" replace />}
