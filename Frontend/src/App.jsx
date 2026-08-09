@@ -4,6 +4,7 @@ import RegisterPage from './pages/RegisterPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import AdminDashboard from './pages/AdminDashboard'
 import DashboardLayout from './components/layout/DashboardLayout'
+import GlobalAppointmentScheduler from './pages/GlobalAppointmentScheduler'
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
       {/* Protected Routes (wrapped in DashboardLayout) */}
       <Route path="/dashboard" element={<DashboardLayout />}>
         <Route index element={<AdminDashboard />} />
+        <Route path="appointments" element={<GlobalAppointmentScheduler />} />
       </Route>
 
       {/* Default redirect */}
