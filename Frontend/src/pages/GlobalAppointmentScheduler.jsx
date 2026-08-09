@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import AppointmentMonthView from '../components/appointments/AppointmentMonthView'
+import AppointmentDayView from '../components/appointments/AppointmentDayView'
 
 export default function GlobalAppointmentScheduler() {
   const [view, setView] = useState('week')
@@ -78,6 +79,7 @@ export default function GlobalAppointmentScheduler() {
               <option>Pediatrics</option>
               <option>Radiology</option>
               <option>Orthopedics</option>
+              <option>Dermatology</option>
             </select>
 
             <button
@@ -161,7 +163,6 @@ export default function GlobalAppointmentScheduler() {
 
             {/* Day Headers */}
             <div className="grid grid-cols-[80px_repeat(6,1fr)] border-b border-outline-variant bg-surface-container-low">
-
               <div className="border-r border-outline-variant"></div>
 
               {[
@@ -460,26 +461,9 @@ export default function GlobalAppointmentScheduler() {
 
       {/* =====================================================
           DAY VIEW
-          We will replace this after you send the Day UI.
       ====================================================== */}
       {view === 'day' && (
-        <div className="bg-surface p-6">
-          <div className="flex min-h-[500px] items-center justify-center rounded-xl border border-outline-variant bg-white">
-            <div className="text-center">
-              <span className="material-symbols-outlined text-5xl text-slate-300">
-                calendar_today
-              </span>
-
-              <h3 className="mt-3 text-lg font-semibold text-on-surface">
-                Day View
-              </h3>
-
-              <p className="mt-1 text-sm text-on-surface-variant">
-                Day scheduler will be added next.
-              </p>
-            </div>
-          </div>
-        </div>
+        <AppointmentDayView />
       )}
 
     </section>
