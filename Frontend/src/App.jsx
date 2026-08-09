@@ -34,6 +34,9 @@ import RecordsUploadMain from "./pages/RecordsUploadMain";
 // Thisuli - Financial & Billing Reports
 import FinancialBillingReports from "./pages/FinancialBillingReports";
 
+// Thisuli - System Settings & Access Control
+import SystemSettingsAccessControl from "./pages/SystemSettingsAccessControl";
+
 function App() {
   return (
     <Routes>
@@ -97,8 +100,11 @@ function App() {
         {/* Reports */}
         <Route path="reports-analytics" element={<ReportsAnalytics />} />
 
-        {/* System Settings */}
-        <Route path="system-settings" element={<SystemSettingsPage />} />
+        {/* Existing Team System Settings */}
+        <Route
+          path="system-settings"
+          element={<SystemSettingsPage />}
+        />
 
         {/* Thisuli - Appointment Scheduler */}
         <Route
@@ -116,6 +122,12 @@ function App() {
         <Route
           path="payments"
           element={<FinancialBillingReports />}
+        />
+
+        {/* Thisuli - System Settings & Access Control */}
+        <Route
+          path="settings"
+          element={<SystemSettingsAccessControl />}
         />
       </Route>
 
