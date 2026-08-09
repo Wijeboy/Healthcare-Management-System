@@ -5,23 +5,40 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import AdminDashboard from './pages/AdminDashboard'
 import DashboardLayout from './components/layout/DashboardLayout'
 import GlobalAppointmentScheduler from './pages/GlobalAppointmentScheduler'
+import RecordsUploadMain from './pages/RecordsUploadMain'
 
 function App() {
   return (
     <Routes>
+
       {/* Public Routes */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-      
-      {/* Protected Routes (wrapped in DashboardLayout) */}
+
+      {/* Dashboard Routes */}
       <Route path="/dashboard" element={<DashboardLayout />}>
         <Route index element={<AdminDashboard />} />
-        <Route path="appointments" element={<GlobalAppointmentScheduler />} />
+
+        {/* Appointment Scheduler */}
+        <Route
+          path="appointments"
+          element={<GlobalAppointmentScheduler />}
+        />
+
+        {/* Medical Records */}
+        <Route
+          path="records"
+          element={<RecordsUploadMain />}
+        />
       </Route>
 
-      {/* Default redirect */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      {/* Default Redirect */}
+      <Route
+        path="*"
+        element={<Navigate to="/login" replace />}
+      />
+
     </Routes>
   )
 }
