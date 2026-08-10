@@ -33,6 +33,11 @@ const navItems = [
     path: "/dashboard/doctors-management",
   },
   {
+    icon: "people_alt",
+    label: "Staff Management",
+    path: "/dashboard/staff-management",
+  },
+  {
     icon: "person",
     label: "Patient Management",
     path: "/dashboard/patients-management",

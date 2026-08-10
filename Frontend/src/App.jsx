@@ -13,6 +13,10 @@ import AddPatient from "./pages/patients/AddPatient";
 import EditPatient from "./pages/patients/EditPatient";
 import PatientDetails from "./pages/patients/PatientDetails";
 import SystemSettingsPage from "./pages/SystemSettingsPage";
+import StaffManagement from "./pages/staff/StaffManagement";
+import AddStaff from "./pages/staff/AddStaff";
+import EditStaff from "./pages/staff/EditStaff";
+import StaffDetails from "./pages/staff/StaffDetails";
 
 
 function App() {
@@ -34,6 +38,10 @@ function App() {
         <Route path="patients-management/details" element={<PatientDetails />} />
         <Route path="patients-management/add-patient" element={<AddPatient />} />
         <Route path="patients-management/edit-patient" element={<EditPatient />} />
+        <Route path="staff-management" element={<StaffManagement />} />
+        <Route path="staff-management/add-staff" element={<AddStaff />} />
+        <Route path="staff-management/edit-staff" element={<EditStaff />} />
+        <Route path="staff-management/details" element={<StaffDetails />} />
         <Route path="system-settings" element={<SystemSettingsPage />} />
       </Route>
 
