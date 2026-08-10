@@ -28,6 +28,11 @@ const navItems = [
     path: "/dashboard/payments",
   },
   {
+    icon: "query_stats",
+    label: "Reports & Analytics",
+    path: "/dashboard/reports-analytics",
+  },
+  {
     icon: "people",
     label: "Doctor Management",
     path: "/dashboard/doctors-management",

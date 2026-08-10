@@ -2,51 +2,52 @@ import React, { useState } from "react";
 import RolesPermissionsMatrix from "../components/settings/RolesPermissionsMatrix";
 import SecurityMetricsCards from "../components/settings/SecurityMetricsCards";
 import SettingsSidebarNav from "../components/settings/SettingsSidebarNav";
+import GeneralSettingsPanel from "../components/settings/GeneralSettingsPanel";
+import AuditLogsPanel from "../components/settings/AuditLogsPanel";
 
 
 const SystemSettingsPage = () => {
   const [activeTab, setActiveTab] = useState("roles");
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-[#1E293B] font-sans p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Page Heading */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            System Settings & Access Control
-          </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Manage enterprise-level configurations, user roles, and security
-            audit protocols.
-          </p>
-        </div>
+    <div className="flex h-screen bg-[radial-gradient(circle_at_top_left,_#eff6ff_0%,_#f8fafc_45%,_#ffffff_100%)] text-[#1E293B] font-sans antialiased overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-y-auto">
+        <main className="p-8 space-y-8 max-w-7xl">
+          <section className="space-y-2">
+            <p className="text-[11px] font-bold uppercase tracking-[0.35em] text-slate-400">
+              System Settings
+            </p>
+            <h1 className="text-2xl md:text-[30px] font-bold tracking-tight text-slate-900">
+              Access control and operational settings
+            </h1>
+            <p className="max-w-3xl text-sm text-slate-500 leading-6">
+              Configure role permissions, general hospital system defaults, and
+              review audit activity from a single place.
+            </p>
+          </section>
 
-        {/* Settings Content Grid */}
-        <div className="flex flex-col md:flex-row gap-6 items-start">
-          <SettingsSidebarNav
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-          />
+          <div className="grid grid-cols-1 xl:grid-cols-[280px_1fr] gap-6 items-start">
+            <aside className="xl:sticky xl:top-6">
+              <SettingsSidebarNav
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+              />
+            </aside>
 
-          <div className="w-full flex-1">
-            {activeTab === "roles" && (
-              <>
-                <RolesPermissionsMatrix />
-                <SecurityMetricsCards />
-              </>
-            )}
+            <section className="space-y-6">
+              {activeTab === "general" && <GeneralSettingsPanel />}
 
-            {activeTab !== "roles" && (
-              <div className="bg-white border border-[#E2E8F0] rounded-2xl p-12 text-center text-slate-400 font-medium">
-                Content for{" "}
-                <span className="capitalize">
-                  {activeTab.replace("-", " ")}
-                </span>{" "}
-                settings goes here.
-              </div>
-            )}
+              {activeTab === "roles" && (
+                <>
+                  <RolesPermissionsMatrix />
+                  <SecurityMetricsCards />
+                </>
+              )}
+
+              {activeTab === "audit" && <AuditLogsPanel />}
+            </section>
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );

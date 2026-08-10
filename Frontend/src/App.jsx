@@ -17,6 +17,7 @@ import StaffManagement from "./pages/staff/StaffManagement";
 import AddStaff from "./pages/staff/AddStaff";
 import EditStaff from "./pages/staff/EditStaff";
 import StaffDetails from "./pages/staff/StaffDetails";
+import ReportsAnalytics from "./pages/reports/ReportsAnalytics";
 
 
 function App() {
@@ -42,6 +43,7 @@ function App() {
         <Route path="staff-management/add-staff" element={<AddStaff />} />
         <Route path="staff-management/edit-staff" element={<EditStaff />} />
         <Route path="staff-management/details" element={<StaffDetails />} />
+        <Route path="reports-analytics" element={<ReportsAnalytics />} />
         <Route path="system-settings" element={<SystemSettingsPage />} />
       </Route>
 
