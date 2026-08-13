@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { Link } from "react-router-dom"
 import NotificationPanel from '../dashboard/NotificationPanel'
 
 export default function Navbar() {
@@ -52,9 +53,13 @@ export default function Navbar() {
         </div>
 
         {/* Settings */}
-        <button className="p-2 rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors active:scale-95">
+        <Link
+          to="/dashboard/system-settings"
+          className="p-2 rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors active:scale-95"
+          aria-label="Open system settings"
+        >
           <span className="material-symbols-outlined">settings</span>
-        </button>
+        </Link>
 
         {/* User Avatar */}
         <div className="h-8 w-8 rounded-full bg-primary overflow-hidden border border-outline-variant cursor-pointer hover:ring-2 hover:ring-primary/30 transition-all">
