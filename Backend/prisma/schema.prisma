@@ -1,0 +1,11 @@
+// This is your Prisma schema file.
+// Medimate Healthcare Management System
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
