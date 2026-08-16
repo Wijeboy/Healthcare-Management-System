@@ -1,5 +1,5 @@
-// This is your Prisma schema file.
 // Medimate Healthcare Management System
+// Prisma Schema - Financial & Billing Module
 
 generator client {
   provider = "prisma-client-js"
@@ -8,4 +8,96 @@ generator client {
 datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
+}
+
+// ========================================
+// FINANCIAL & BILLING ENUMS
+// ========================================
+
+enum InvoiceStatus {
+  DRAFT
+  PENDING
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  BANK_TRANSFER
+  INSURANCE
+  ONLINE
+}
+
+// ========================================
+// INVOICE
+// ========================================
+
+model Invoice {
+  id             String        @id @default(auto()) @map("_id") @db.ObjectId
+
+  invoiceNumber  String        @unique
+  patientId      String
+  appointmentId  String?
+
+  items           Json
+
+  subtotal        Float
+  taxAmount       Float         @default(0)
+  discountAmount  Float         @default(0)
+  totalAmount     Float
+
+  amountPaid      Float         @default(0)
+  balanceDue      Float
+
+  status          InvoiceStatus @default(PENDING)
+
+  issueDate       DateTime      @default(now())
+  dueDate         DateTime?
+
+  notes           String?
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  payments        Payment[]
+}
+
+// ========================================
+// PAYMENT
+// ========================================
+
+model Payment {
+  id                    String        @id @default(auto()) @map("_id") @db.ObjectId
+
+  paymentReference      String        @unique
+
+  invoiceId             String        @db.ObjectId
+  invoice               Invoice       @relation(fields: [invoiceId], references: [id])
+
+  patientId             String
+
+  amount                 Float
+
+  method                 PaymentMethod
+  status                 PaymentStatus @default(PENDING)
+
+  gateway                String?
+  gatewayTransactionId   String?
+  gatewayResponse        Json?
+
+  paidAt                 DateTime?
+
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
 }
