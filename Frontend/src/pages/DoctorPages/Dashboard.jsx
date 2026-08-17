@@ -1,13 +1,8 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { CalendarDays, Users, FileWarning, Plus, ChevronRight, Sparkles } from "lucide-react";
 import Avatar from "../../components/common/Avatar";
-import { useAppointments } from "../../hooks/useAppointments";
-import { useRecords } from "../../hooks/useRecords";
-import { CURRENT_DOCTOR_NAME, PATIENTS } from "../../services/doctorApi";
 import { formatLongDate } from "../../utils/date";
-
-const TODAY = { year: 2026, month: 9, day: 25 };
 
 const STATUS_DOT = {
   Completed: "bg-emerald-500",
@@ -16,26 +11,16 @@ const STATUS_DOT = {
   Canceled: "bg-rose-500",
 };
 
-export default function DoctorDashboardPage() {
+export default function DoctorDashboardPage({ doctorName, totalPatients, pendingReports, todaysAppointments, recentReports, today }) {
   const navigate = useNavigate();
-  const { allAppointments } = useAppointments();
-  const { records } = useRecords();
-
-  const myAppointments = useMemo(() => allAppointments.filter((a) => a.doctor === CURRENT_DOCTOR_NAME), [allAppointments]);
-  const todaysAppointments = useMemo(
-    () => myAppointments.filter((a) => a.year === TODAY.year && a.month === TODAY.month && a.day === TODAY.day).sort((a, b) => a.hour - b.hour),
-    [myAppointments]
-  );
-  const pendingReports = useMemo(() => records.filter((r) => r.result === "Abnormal").length, [records]);
-  const recentReports = useMemo(() => records.slice(0, 3), [records]);
-  const dateLabel = formatLongDate(TODAY.year, TODAY.month, TODAY.day);
+  const dateLabel = formatLongDate(today.year, today.month, today.day);
 
   return (
     <div className="p-8">
       <div className="mb-5 flex items-start justify-between">
         <div>
           <h2 className="text-xl font-bold text-primary">Dashboard</h2>
-          <p className="mt-1 text-sm text-on-surface-variant">Welcome back, {CURRENT_DOCTOR_NAME}. Here's your overview for today.</p>
+          <p className="mt-1 text-sm text-on-surface-variant">Welcome back, {doctorName}. Here's your overview for today.</p>
         </div>
         <button onClick={() => navigate("/doctor/appointments/new")} className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-on-primary hover:bg-primary-container">
           <Plus size={16} /> New Appointment
@@ -54,7 +39,7 @@ export default function DoctorDashboardPage() {
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600"><Users size={18} /></div>
           <div>
             <p className="text-xs text-on-surface-variant">Total Patients</p>
-            <p className="text-2xl font-bold text-on-surface">{PATIENTS.length}</p>
+            <p className="text-2xl font-bold text-on-surface">{totalPatients}</p>
           </div>
         </div>
         <div className="flex items-center gap-3 rounded-2xl border border-outline-variant bg-white p-5">
@@ -134,8 +119,8 @@ export default function DoctorDashboardPage() {
             {recentReports.map((r) => (
               <button key={r.id} onClick={() => navigate(`/doctor/patients/${r.patientId}`)} className="flex w-full items-center justify-between rounded-xl border border-slate-100 px-4 py-3 text-left hover:bg-slate-50">
                 <div>
-                  <p className="text-sm font-medium text-on-surface">{r.reportName} \u2014 {r.patient}</p>
-                  <p className="text-xs text-on-surface-variant">Uploaded \u00b7 {r.date}</p>
+                  <p className="text-sm font-medium text-on-surface">{r.reportName} — {r.patient}</p>
+                  <p className="text-xs text-on-surface-variant">Uploaded · {r.date}</p>
                 </div>
                 <ChevronRight size={16} className="text-slate-300" />
               </button>

@@ -22,7 +22,7 @@ import UserManagement from "./pages/AdminPages/UserManagement";
 import PatientDashboard from "./pages/PatientDashboard";
 
 // --- Doctor Portal pages (all doctor-only content lives under DoctorPages/) ---
-import DoctorDashboardPage from "./pages/DoctorPages/Dashboard";
+import DoctorDashboardPage from "./pages/DoctorDashboard";
 import DoctorProfilePage from "./pages/DoctorPages/Profile";
 import DoctorSchedulePage from "./pages/DoctorPages/Schedule";
 import TodaysAppointmentsPage from "./pages/DoctorPages/TodaysAppointments";
