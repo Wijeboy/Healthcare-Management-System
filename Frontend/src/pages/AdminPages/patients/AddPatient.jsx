@@ -69,9 +69,23 @@ const AddPatient = () => {
   const validateForm = () =>
     requiredFields.filter((field) => isMissing(field));
 
+  const calcAge = (dobStr) => {
+    if (!dobStr) return "";
+    const dob = new Date(dobStr);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+    return age > 0 ? String(age) : "";
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === "dob") {
+      setFormData((prev) => ({ ...prev, dob: value, age: calcAge(value) }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleToggleInvitation = () => {
@@ -146,7 +160,7 @@ const AddPatient = () => {
         <div className="mb-6">
           <nav className="text-xs font-medium text-slate-500 mb-1 flex items-center gap-1.5">
             <button
-              className="text-[#2563EB] hover:underline font-semibold"
+              className="text-[#2563EB] hover:underline font-semibold cursor-pointer"
               onClick={() => navigate("/admin/patients")}
             >
               Patients Management
@@ -207,7 +221,7 @@ const AddPatient = () => {
             <button
               type="button"
               disabled={loading}
-              className="px-4 py-2 border border-[#CBD5E1] bg-white text-slate-700 font-bold text-xs rounded-lg hover:bg-slate-50 transition disabled:opacity-50"
+              className="px-4 py-2 border border-[#CBD5E1] bg-white text-slate-700 font-bold text-xs rounded-lg hover:bg-slate-50 transition disabled:opacity-50 cursor-pointer"
               onClick={() => navigate("/admin/patients")}
             >
               Cancel
@@ -215,14 +229,14 @@ const AddPatient = () => {
             <button
               type="button"
               disabled={loading}
-              className="px-4 py-2 border border-[#CBD5E1] bg-white text-slate-700 font-bold text-xs rounded-lg hover:bg-slate-50 transition disabled:opacity-50"
+              className="px-4 py-2 border border-[#CBD5E1] bg-white text-slate-700 font-bold text-xs rounded-lg hover:bg-slate-50 transition disabled:opacity-50 cursor-pointer"
             >
               Save as Draft
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-5 py-2 bg-[#0256CA] hover:bg-blue-700 text-white font-bold text-xs rounded-lg flex items-center gap-1.5 shadow-sm transition disabled:opacity-50"
+              className="px-5 py-2 bg-[#0256CA] hover:bg-blue-700 text-white font-bold text-xs rounded-lg flex items-center gap-1.5 shadow-sm transition disabled:opacity-50 cursor-pointer"
             >
               {loading ? <Loader2 size={15} className="animate-spin" /> : <Plus size={15} />}
               {loading ? "Registering..." : "Register Patient"}
@@ -235,3 +249,6 @@ const AddPatient = () => {
 };
 
 export default AddPatient;
+
+
+

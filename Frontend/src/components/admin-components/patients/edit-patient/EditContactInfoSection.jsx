@@ -62,3 +62,5 @@ const EditContactInfoSection = ({ formData, handleChange }) => {
 };
 
 export default EditContactInfoSection;
+
+

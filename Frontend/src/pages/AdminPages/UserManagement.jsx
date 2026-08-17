@@ -47,7 +47,7 @@ function EditRoleModal({ user, onClose, onSave }) {
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-lg font-bold text-slate-800">Change Role</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 cursor-pointer">
             <X size={20} />
           </button>
         </div>
@@ -72,14 +72,14 @@ function EditRoleModal({ user, onClose, onSave }) {
         <div className="flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            className="flex-1 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex-1 py-2.5 bg-[#1E3A8A] hover:bg-blue-900 text-white rounded-xl text-sm font-semibold disabled:opacity-60 flex items-center justify-center gap-2"
+            className="flex-1 py-2.5 bg-[#1E3A8A] hover:bg-blue-900 text-white rounded-xl text-sm font-semibold disabled:opacity-60 flex items-center justify-center gap-2 cursor-pointer"
           >
             {saving ? (
               <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Saving...</>
@@ -177,7 +177,7 @@ const UserManagement = () => {
           </div>
           <button
             onClick={fetchUsers}
-            className="p-2.5 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 transition"
+            className="p-2.5 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 transition cursor-pointer"
             title="Refresh"
           >
             <RefreshCw size={16} />
@@ -264,7 +264,7 @@ const UserManagement = () => {
             <div className="p-12 flex flex-col items-center gap-3 text-red-500">
               <AlertCircle size={32} />
               <p className="text-sm font-medium">{error}</p>
-              <button onClick={fetchUsers} className="text-xs underline text-slate-500">Try again</button>
+              <button onClick={fetchUsers} className="text-xs underline text-slate-500 cursor-pointer">Try again</button>
             </div>
           )}
 
@@ -398,3 +398,7 @@ const UserManagement = () => {
 };
 
 export default UserManagement;
+
+
+
+

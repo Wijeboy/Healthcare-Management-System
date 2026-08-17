@@ -169,7 +169,7 @@ const StaffTable = ({ staffList = mockStaff, onView, onEdit, onDelete }) => {
                           >
                             <button
                               type="button"
-                              className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-xs font-medium text-slate-700 hover:bg-slate-50 transition"
+                              className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-xs font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer"
                               onClick={() => handleView(staff)}
                             >
                               <Eye size={14} />
@@ -177,7 +177,7 @@ const StaffTable = ({ staffList = mockStaff, onView, onEdit, onDelete }) => {
                             </button>
                             <button
                               type="button"
-                              className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-xs font-medium text-slate-700 hover:bg-slate-50 transition"
+                              className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-xs font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer"
                               onClick={() => handleEdit(staff)}
                             >
                               <PencilLine size={14} />
@@ -185,7 +185,7 @@ const StaffTable = ({ staffList = mockStaff, onView, onEdit, onDelete }) => {
                             </button>
                             <button
                               type="button"
-                              className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-xs font-medium text-rose-600 hover:bg-rose-50 transition"
+                              className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-xs font-medium text-rose-600 hover:bg-rose-50 transition cursor-pointer"
                               onClick={() => handleDelete(staff)}
                             >
                               <Trash2 size={14} />
@@ -227,7 +227,7 @@ const StaffTable = ({ staffList = mockStaff, onView, onEdit, onDelete }) => {
               <button
                 type="button"
                 onClick={confirmDelete}
-                className="rounded-lg bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-rose-700 transition-colors"
+                className="rounded-lg bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-rose-700 transition-colors cursor-pointer"
               >
                 Delete Staff
               </button>
@@ -240,3 +240,7 @@ const StaffTable = ({ staffList = mockStaff, onView, onEdit, onDelete }) => {
 };
 
 export default StaffTable;
+
+
+
+

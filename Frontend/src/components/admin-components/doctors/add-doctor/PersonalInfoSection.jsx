@@ -1,8 +1,9 @@
 import React from 'react'
-import { Calendar, Upload } from 'lucide-react';
+import { Upload } from 'lucide-react';
 import FormSectionHeader from './FormSectionHeader';
 
-const PersonalInfoSection = ({ formData, onChange, errors }) => {
+const PersonalInfoSection = ({ formData, onChange, errors, showRequiredMark }) => {
+  const required = (field) => showRequiredMark ? showRequiredMark(field) : false;
   return (
     <div className="bg-white border border-[#E2E8F0] rounded-xl p-6">
       <FormSectionHeader
@@ -26,14 +27,14 @@ const PersonalInfoSection = ({ formData, onChange, errors }) => {
           <div className="flex items-center gap-3">
             <button
               type="button"
-              className="px-3 py-1.5 bg-white border border-[#CBD5E1] text-slate-700 text-xs font-semibold rounded-lg hover:bg-slate-50 flex items-center gap-1.5 transition"
+              className="px-3 py-1.5 bg-white border border-[#CBD5E1] text-slate-700 text-xs font-semibold rounded-lg hover:bg-slate-50 flex items-center gap-1.5 transition cursor-pointer"
             >
               <Upload size={14} />
               Upload Photo
             </button>
             <button
               type="button"
-              className="text-xs font-semibold text-rose-600 hover:underline"
+              className="text-xs font-semibold text-rose-600 hover:underline cursor-pointer"
             >
               Remove
             </button>
@@ -46,7 +47,7 @@ const PersonalInfoSection = ({ formData, onChange, errors }) => {
         {/* Full Name */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1">
-            Full Name <span className="text-rose-500">*</span>
+            Full Name {required("fullName") && <span className="text-rose-500">*</span>}
           </label>
           <input
             type="text"
@@ -68,7 +69,7 @@ const PersonalInfoSection = ({ formData, onChange, errors }) => {
         {/* Email */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1">
-            Email Address <span className="text-rose-500">*</span>
+            Email Address {required("email") && <span className="text-rose-500">*</span>}
           </label>
           <input
             type="email"
@@ -90,7 +91,7 @@ const PersonalInfoSection = ({ formData, onChange, errors }) => {
         {/* Phone */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1">
-            Phone Number <span className="text-rose-500">*</span>
+            Phone Number {required("phone") && <span className="text-rose-500">*</span>}
           </label>
           <input
             type="text"
@@ -114,20 +115,13 @@ const PersonalInfoSection = ({ formData, onChange, errors }) => {
           <label className="block text-xs font-semibold text-slate-700 mb-1">
             Date of Birth
           </label>
-          <div className="relative">
-            <input
-              type="text"
-              name="dob"
-              value={formData.dob}
-              onChange={onChange}
-              placeholder="mm/dd/yyyy"
-              className="w-full pl-3.5 pr-10 py-2 border border-[#CBD5E1] rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-            />
-            <Calendar
-              size={16}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-            />
-          </div>
+          <input
+            type="date"
+            name="dob"
+            value={formData.dob}
+            onChange={onChange}
+            className="w-full px-3.5 py-2 border border-[#CBD5E1] rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+          />
         </div>
 
         {/* Gender */}
@@ -169,3 +163,6 @@ const PersonalInfoSection = ({ formData, onChange, errors }) => {
 };
 
 export default PersonalInfoSection
+
+
+

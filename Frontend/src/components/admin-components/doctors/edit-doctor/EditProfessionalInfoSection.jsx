@@ -1,6 +1,7 @@
 import React from 'react'
 
-const EditProfessionalInfoSection = ({ formData, onChange }) => {
+const EditProfessionalInfoSection = ({ formData, onChange, showRequiredMark }) => {
+  const required = (field) => showRequiredMark ? showRequiredMark(field) : false;
   return (
     <div className="bg-white border border-[#E2E8F0] rounded-xl p-6">
       {/* Section Header */}
@@ -38,7 +39,7 @@ const EditProfessionalInfoSection = ({ formData, onChange }) => {
         {/* Medical Licence Number */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1">
-            Medical Licence Number <span className="text-rose-500">*</span>
+            Medical Licence Number {required("licenceNumber") && <span className="text-rose-500">*</span>}
           </label>
           <input
             type="text"
@@ -52,7 +53,7 @@ const EditProfessionalInfoSection = ({ formData, onChange }) => {
         {/* Department */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1">
-            Department <span className="text-rose-500">*</span>
+            Department {required("department") && <span className="text-rose-500">*</span>}
           </label>
           <select
             name="department"
@@ -71,7 +72,7 @@ const EditProfessionalInfoSection = ({ formData, onChange }) => {
         {/* Specialization */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1">
-            Specialization <span className="text-rose-500">*</span>
+            Specialization {required("specialization") && <span className="text-rose-500">*</span>}
           </label>
           <input
             type="text"
@@ -99,7 +100,7 @@ const EditProfessionalInfoSection = ({ formData, onChange }) => {
         {/* Years of Experience */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1">
-            Years of Experience <span className="text-rose-500">*</span>
+            Years of Experience {required("experience") && <span className="text-rose-500">*</span>}
           </label>
           <input
             type="text"
@@ -133,3 +134,5 @@ const EditProfessionalInfoSection = ({ formData, onChange }) => {
 };
 
 export default EditProfessionalInfoSection
+
+

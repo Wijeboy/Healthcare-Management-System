@@ -1,5 +1,5 @@
 import prisma from '../../config/prisma.js';
-import { getDb, ObjectId } from '../../config/mongo.js';
+import { getDb, ObjectId, checkUniqueNic } from '../../config/mongo.js';
 
 // GET all doctors — pagination, search, filter by department/status
 export const getDoctors = async (req, res) => {
@@ -15,9 +15,9 @@ export const getDoctors = async (req, res) => {
           { department: { contains: search, mode: 'insensitive' } },
         ]
       }),
-      ...(department && { department }),
-      ...(status && { status }),
-      ...(availability && { availability }),
+      ...(department && department !== 'All' && { department }),
+      ...(status && status !== 'All' && { status }),
+      ...(availability && availability !== 'All' && { availability }),
     };
 
     const [doctors, total] = await Promise.all([
@@ -48,7 +48,12 @@ export const getDoctorById = async (req, res) => {
   try {
     const doctor = await prisma.doctor.findUnique({
       where: { id: req.params.id },
-      include: { user: { select: { email: true, status: true, createdAt: true } } }
+      include: { 
+        user: { select: { email: true, status: true, createdAt: true } },
+        appointments: true,
+        medicalRecords: true,
+        prescriptions: true,
+      }
     });
     if (!doctor) return res.status(404).json({ error: 'Doctor not found' });
     res.json(doctor);
@@ -62,7 +67,7 @@ export const createDoctor = async (req, res) => {
   try {
     const {
       email, password,
-      fullName, phone, dob, gender, address,
+      fullName, phone, dob, gender, nationalId, nic, address,
       licenceNumber, department, specialization, qualification,
       experience, bio,
       startTime, endTime, workingDays, consultationDuration, availability,
@@ -70,11 +75,19 @@ export const createDoctor = async (req, res) => {
     } = req.body;
 
     const db = await getDb();
+    const effectiveNic = nationalId || nic || null;
 
     if (email) {
       const existingUser = await db.collection("User").findOne({ email });
       if (existingUser) {
         return res.status(409).json({ error: 'A doctor with this email already exists' });
+      }
+    }
+
+    if (effectiveNic) {
+      const existsInRole = await checkUniqueNic(db, effectiveNic);
+      if (existsInRole) {
+        return res.status(409).json({ error: `National ID / NIC '${effectiveNic}' is already registered for a ${existsInRole} in the system.` });
       }
     }
 
@@ -99,6 +112,7 @@ export const createDoctor = async (req, res) => {
       phone: phone || "",
       dob: dob || null,
       gender: gender || null,
+      nationalId: effectiveNic,
       address: address || null,
       licenceNumber: licenceNumber || null,
       department: department || "General",
@@ -130,7 +144,7 @@ export const createDoctor = async (req, res) => {
 export const updateDoctor = async (req, res) => {
   try {
     const {
-      fullName, phone, dob, gender, address,
+      fullName, phone, dob, gender, nationalId, nic, address,
       licenceNumber, department, specialization, qualification,
       experience, bio,
       startTime, endTime, workingDays, consultationDuration, availability,
@@ -139,12 +153,21 @@ export const updateDoctor = async (req, res) => {
 
     const db = await getDb();
     const doctorId = new ObjectId(req.params.id);
+    const effectiveNic = nationalId || nic || undefined;
+
+    if (effectiveNic) {
+      const existsInRole = await checkUniqueNic(db, effectiveNic, req.params.id);
+      if (existsInRole) {
+        return res.status(409).json({ error: `National ID / NIC '${effectiveNic}' is already registered for a ${existsInRole} in the system.` });
+      }
+    }
 
     const updateFields = {
       ...(fullName !== undefined && { fullName }),
       ...(phone !== undefined && { phone }),
       ...(dob !== undefined && { dob }),
       ...(gender !== undefined && { gender }),
+      ...(effectiveNic !== undefined && { nationalId: effectiveNic }),
       ...(address !== undefined && { address }),
       ...(licenceNumber !== undefined && { licenceNumber }),
       ...(department !== undefined && { department }),

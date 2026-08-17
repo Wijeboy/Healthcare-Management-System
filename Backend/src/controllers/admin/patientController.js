@@ -1,35 +1,21 @@
 import prisma from '../../config/prisma.js';
-import { getDb, ObjectId } from '../../config/mongo.js';
+import { getDb, ObjectId, checkUniqueNic } from '../../config/mongo.js';
 
-// GET all patients — pagination, search, filter by gender/bloodGroup/status
+// GET all patients — pagination, search, filter
 export const getPatients = async (req, res) => {
   try {
-    const { page = 1, limit = 10, search, gender, bloodGroup, status, ageRange } = req.query;
+    const { page = 1, limit = 10, search, status } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
-
-    // Build age range filter
-    let ageFilter = {};
-    if (ageRange && ageRange !== 'All') {
-      const ranges = {
-        '0-18':  { gte: 0,  lte: 18 },
-        '19-35': { gte: 19, lte: 35 },
-        '36-60': { gte: 36, lte: 60 },
-        '60+':   { gte: 61 },
-      };
-      if (ranges[ageRange]) ageFilter = { age: ranges[ageRange] };
-    }
 
     const where = {
       ...(search && {
         OR: [
           { fullName: { contains: search, mode: 'insensitive' } },
           { phone:    { contains: search, mode: 'insensitive' } },
+          { user: { email: { contains: search, mode: 'insensitive' } } }
         ]
       }),
-      ...(gender    && gender    !== 'All' && { gender }),
-      ...(bloodGroup && bloodGroup !== 'All' && { bloodGroup }),
-      ...(status    && status    !== 'All' && { status }),
-      ...ageFilter,
+      ...(status && status !== 'All' && { status })
     };
 
     const [patients, total] = await Promise.all([
@@ -65,9 +51,9 @@ export const getPatientById = async (req, res) => {
         appointments: true,
         medicalRecords: true,
         prescriptions: true,
-        payments: true,
       }
     });
+
     if (!patient) return res.status(404).json({ error: 'Patient not found' });
     res.json(patient);
   } catch (error) {
@@ -75,18 +61,30 @@ export const getPatientById = async (req, res) => {
   }
 };
 
+// Helper calc age
+const calcAgeFromDob = (dobStr) => {
+  if (!dobStr) return null;
+  const dobDate = new Date(dobStr);
+  const today = new Date();
+  let calculated = today.getFullYear() - dobDate.getFullYear();
+  const m = today.getMonth() - dobDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) calculated--;
+  return calculated > 0 ? calculated : null;
+};
+
 // POST — create new patient
 export const createPatient = async (req, res) => {
   try {
     const {
       email, password,
-      fullName, phone, dob, bloodGroup, age, gender, address, allergies,
+      fullName, phone, dob, bloodGroup, age, gender, nationalId, nic, address, allergies,
       existingConditions, currentMedications, medicalNotes,
       emergencyName, emergencyRelationship, emergencyPhone, emergencyEmail,
       status
     } = req.body;
 
     const db = await getDb();
+    const effectiveNic = nationalId || nic || null;
 
     if (email) {
       const existingUser = await db.collection("User").findOne({ email });
@@ -95,9 +93,17 @@ export const createPatient = async (req, res) => {
       }
     }
 
+    if (effectiveNic) {
+      const existsInRole = await checkUniqueNic(db, effectiveNic);
+      if (existsInRole) {
+        return res.status(409).json({ error: `National ID / NIC '${effectiveNic}' is already registered for a ${existsInRole} in the system.` });
+      }
+    }
+
     const userId = new ObjectId();
     const patientId = new ObjectId();
     const now = new Date();
+    const computedAge = age ? parseInt(age) : calcAgeFromDob(dob);
 
     const userDoc = {
       _id: userId,
@@ -116,8 +122,9 @@ export const createPatient = async (req, res) => {
       phone: phone || "",
       dob: dob || null,
       bloodGroup: bloodGroup || null,
-      age: age ? parseInt(age) : null,
+      age: computedAge,
       gender: gender || null,
+      nationalId: effectiveNic,
       address: address || null,
       allergies: allergies || null,
       existingConditions: existingConditions || null,
@@ -146,7 +153,7 @@ export const createPatient = async (req, res) => {
 export const updatePatient = async (req, res) => {
   try {
     const {
-      fullName, phone, dob, bloodGroup, age, gender, address, allergies,
+      fullName, phone, dob, bloodGroup, age, gender, nationalId, nic, address, allergies,
       existingConditions, currentMedications, medicalNotes,
       emergencyName, emergencyRelationship, emergencyPhone, emergencyEmail,
       status
@@ -154,14 +161,25 @@ export const updatePatient = async (req, res) => {
 
     const db = await getDb();
     const patientId = new ObjectId(req.params.id);
+    const effectiveNic = nationalId || nic || undefined;
+
+    if (effectiveNic) {
+      const existsInRole = await checkUniqueNic(db, effectiveNic, req.params.id);
+      if (existsInRole) {
+        return res.status(409).json({ error: `National ID / NIC '${effectiveNic}' is already registered for a ${existsInRole} in the system.` });
+      }
+    }
+
+    const computedAge = age !== undefined ? (age ? parseInt(age) : null) : (dob ? calcAgeFromDob(dob) : undefined);
 
     const updateFields = {
       ...(fullName !== undefined && { fullName }),
       ...(phone !== undefined && { phone }),
       ...(dob !== undefined && { dob }),
       ...(bloodGroup !== undefined && { bloodGroup }),
-      ...(age !== undefined && { age: age ? parseInt(age) : null }),
+      ...(computedAge !== undefined && { age: computedAge }),
       ...(gender !== undefined && { gender }),
+      ...(effectiveNic !== undefined && { nationalId: effectiveNic }),
       ...(address !== undefined && { address }),
       ...(allergies !== undefined && { allergies }),
       ...(existingConditions !== undefined && { existingConditions }),

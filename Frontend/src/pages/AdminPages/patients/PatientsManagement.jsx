@@ -103,7 +103,7 @@ const PatientsManagement = () => {
             <div className="flex items-center gap-2">
               <button
                 onClick={fetchPatients}
-                className="p-2.5 border border-slate-200 rounded-xl text-slate-500 hover:bg-slate-50 transition"
+                className="p-2.5 border border-slate-200 rounded-xl text-slate-500 hover:bg-slate-50 transition cursor-pointer"
                 title="Refresh"
               >
                 <RefreshCw size={16} />
@@ -144,7 +144,7 @@ const PatientsManagement = () => {
             <div className="bg-white rounded-xl border border-red-200 p-12 flex flex-col items-center gap-3 text-red-500">
               <AlertCircle size={32} />
               <p className="text-sm font-medium">{error}</p>
-              <button onClick={fetchPatients} className="text-xs underline text-slate-500">Try again</button>
+              <button onClick={fetchPatients} className="text-xs underline text-slate-500 cursor-pointer">Try again</button>
             </div>
           )}
 
@@ -193,3 +193,6 @@ const PatientsManagement = () => {
 };
 
 export default PatientsManagement;
+
+
+

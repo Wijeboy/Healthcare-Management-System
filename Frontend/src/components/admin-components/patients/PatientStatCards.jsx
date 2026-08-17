@@ -68,3 +68,4 @@ const PatientStatCards = ({ stats }) => {
 };
 
 export default PatientStatCards
+

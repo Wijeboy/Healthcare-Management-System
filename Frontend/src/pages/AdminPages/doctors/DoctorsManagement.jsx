@@ -111,7 +111,7 @@ const DoctorsManagement = () => {
             <div className="flex items-center gap-2">
               <button
                 onClick={fetchDoctors}
-                className="p-2.5 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 transition"
+                className="p-2.5 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 transition cursor-pointer"
                 title="Refresh"
               >
                 <RefreshCw size={16} />
@@ -169,7 +169,7 @@ const DoctorsManagement = () => {
               <div className="p-12 flex flex-col items-center justify-center gap-3 text-red-500">
                 <AlertCircle size={32} />
                 <p className="text-sm font-medium">{error}</p>
-                <button onClick={fetchDoctors} className="text-xs underline text-slate-500">
+                <button onClick={fetchDoctors} className="text-xs underline text-slate-500 cursor-pointer">
                   Try again
                 </button>
               </div>
@@ -254,3 +254,7 @@ const DoctorsManagement = () => {
 };
 
 export default DoctorsManagement;
+
+
+
+

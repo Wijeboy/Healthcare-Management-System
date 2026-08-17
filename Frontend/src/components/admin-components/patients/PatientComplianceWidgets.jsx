@@ -19,7 +19,7 @@ const PatientComplianceWidgets = () => {
             Patient records are synchronized with the central health information
             system. Access and changes should be logged during implementation.
           </p>
-          <button className="px-4 py-2 bg-white text-[#0256CA] font-bold text-xs rounded-lg hover:bg-blue-50 transition shadow-sm">
+          <button className="px-4 py-2 bg-white text-[#0256CA] font-bold text-xs rounded-lg hover:bg-blue-50 transition shadow-sm cursor-pointer">
             View Compliance Logs
           </button>
         </div>
@@ -45,3 +45,5 @@ const PatientComplianceWidgets = () => {
 }
 
 export default PatientComplianceWidgets
+
+

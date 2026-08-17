@@ -10,11 +10,21 @@ import { staffApi } from "../../../services/api";
 import toast from "react-hot-toast";
 import { getFriendlyErrorMessage } from "../../../utils/userMessages";
 
+const calcAge = (dobStr) => {
+  if (!dobStr) return "";
+  const dob = new Date(dobStr);
+  const today = new Date();
+  let age = today.getFullYear() - dob.getFullYear();
+  const m = today.getMonth() - dob.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+  return age > 0 ? String(age) : "";
+};
+
 const buildFormData = (staff) => ({
   fullName: staff?.fullName || staff?.name || "",
   staffId: staff?.staffId || staff?.id || "",
   dob: staff?.dob || "",
-  age: staff?.age != null ? String(staff.age) : "",
+  age: staff?.age != null ? String(staff.age) : calcAge(staff?.dob),
   gender: staff?.gender || "",
   nationalId: staff?.nationalId || "",
   email: staff?.email || "",
@@ -42,6 +52,7 @@ const EditStaff = () => {
   const [error, setError] = useState("");
   const [submitError, setSubmitError] = useState("");
   const [formData, setFormData] = useState(() => buildFormData(location.state?.staff));
+  const [initialStaff, setInitialStaff] = useState(location.state?.staff ? buildFormData(location.state?.staff) : null);
 
   useEffect(() => {
     const fetchStaff = async () => {
@@ -53,7 +64,9 @@ const EditStaff = () => {
         setLoading(true);
         const res = await staffApi.getById(staffId);
         const staffData = res.data || res;
-        setFormData(buildFormData(staffData));
+        const built = buildFormData(staffData);
+        setFormData(built);
+        setInitialStaff(built);
       } catch (err) {
         console.error("Failed to load staff details:", err);
         setError("Failed to load staff record from server.");
@@ -161,7 +174,7 @@ const EditStaff = () => {
             </p>
           </div>
 
-          <EditStaffHeaderBanner staff={formData} />
+          <EditStaffHeaderBanner staff={initialStaff ?? formData} />
 
           {submitError && (
             <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm flex items-center gap-2">
@@ -188,7 +201,7 @@ const EditStaff = () => {
               <button
                 type="submit"
                 disabled={submitting}
-                className="rounded-lg bg-[#1E3A8A] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-950 transition-colors disabled:opacity-50 inline-flex items-center gap-2"
+                className="rounded-lg bg-[#1E3A8A] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-950 transition-colors disabled:opacity-50 inline-flex items-center gap-2 cursor-pointer"
               >
                 {submitting ? <Loader2 size={15} className="animate-spin" /> : null}
                 {submitting ? "Saving..." : "Save Changes"}
@@ -202,3 +215,7 @@ const EditStaff = () => {
 };
 
 export default EditStaff;
+
+
+
+

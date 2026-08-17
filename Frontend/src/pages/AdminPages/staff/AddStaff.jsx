@@ -139,14 +139,14 @@ const AddStaff = () => {
                 type="button"
                 onClick={handleSaveDraft}
                 disabled={loading}
-                className="rounded-lg border border-[#2563EB] px-4 py-2.5 text-sm font-semibold text-[#2563EB] hover:bg-blue-50 transition-colors disabled:opacity-50"
+                className="rounded-lg border border-[#2563EB] px-4 py-2.5 text-sm font-semibold text-[#2563EB] hover:bg-blue-50 transition-colors disabled:opacity-50 cursor-pointer"
               >
                 Save as Draft
               </button>
               <button
               type="submit"
               disabled={loading}
-              className="rounded-lg bg-[#1E3A8A] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-950 transition-colors inline-flex items-center gap-2 disabled:opacity-50"
+              className="rounded-lg bg-[#1E3A8A] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-950 transition-colors inline-flex items-center gap-2 disabled:opacity-50 cursor-pointer"
             >
                 {loading ? <Loader2 size={15} className="animate-spin" /> : <Plus size={15} />}
                 {loading ? "Creating..." : "Create Staff"}
@@ -160,3 +160,7 @@ const AddStaff = () => {
 };
 
 export default AddStaff;
+
+
+
+

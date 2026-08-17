@@ -69,3 +69,5 @@ const StaffPersonalInfoCard = ({ personal }) => {
 };
 
 export default StaffPersonalInfoCard;
+
+

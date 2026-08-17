@@ -1,5 +1,5 @@
 import prisma from '../../config/prisma.js';
-import { getDb, ObjectId } from '../../config/mongo.js';
+import { getDb, ObjectId, checkUniqueNic } from '../../config/mongo.js';
 
 // GET all staff — pagination, search, filter by department/status
 export const getStaff = async (req, res) => {
@@ -57,17 +57,28 @@ export const getStaffById = async (req, res) => {
   }
 };
 
+const calcAgeFromDob = (dobStr) => {
+  if (!dobStr) return null;
+  const dobDate = new Date(dobStr);
+  const today = new Date();
+  let calculated = today.getFullYear() - dobDate.getFullYear();
+  const m = today.getMonth() - dobDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) calculated--;
+  return calculated > 0 ? calculated : null;
+};
+
 // POST — create new staff member
 export const createStaff = async (req, res) => {
   try {
     const {
       email, password,
-      fullName, phone, dob, age, gender, nationalId, address,
+      fullName, phone, dob, age, gender, nationalId, nic, address,
       department, role, employeeStatus, accessLevel, shift, joiningDate,
       permissions, notes
     } = req.body;
 
     const db = await getDb();
+    const effectiveNic = nationalId || nic || null;
 
     if (email) {
       const existingUser = await db.collection("User").findOne({ email });
@@ -76,9 +87,17 @@ export const createStaff = async (req, res) => {
       }
     }
 
+    if (effectiveNic) {
+      const existsInRole = await checkUniqueNic(db, effectiveNic);
+      if (existsInRole) {
+        return res.status(409).json({ error: `National ID / NIC '${effectiveNic}' is already registered for a ${existsInRole} in the system.` });
+      }
+    }
+
     const userId = new ObjectId();
     const staffId = new ObjectId();
     const now = new Date();
+    const computedAge = age ? parseInt(age) : calcAgeFromDob(dob);
 
     const userDoc = {
       _id: userId,
@@ -97,9 +116,9 @@ export const createStaff = async (req, res) => {
       phone: phone || "",
       email: email || null,
       dob: dob || null,
-      age: age ? parseInt(age) : null,
+      age: computedAge,
       gender: gender || null,
-      nationalId: nationalId || null,
+      nationalId: effectiveNic,
       address: address || null,
       department: department || "Administration",
       role: role || "Nurse",
@@ -129,21 +148,31 @@ export const addStaff = createStaff;
 export const updateStaff = async (req, res) => {
   try {
     const {
-      fullName, phone, dob, age, gender, nationalId, address,
+      fullName, phone, dob, age, gender, nationalId, nic, address,
       department, role, employeeStatus, accessLevel, shift, joiningDate,
       permissions, notes
     } = req.body;
 
     const db = await getDb();
     const staffId = new ObjectId(req.params.id);
+    const effectiveNic = nationalId || nic || undefined;
+
+    if (effectiveNic) {
+      const existsInRole = await checkUniqueNic(db, effectiveNic, req.params.id);
+      if (existsInRole) {
+        return res.status(409).json({ error: `National ID / NIC '${effectiveNic}' is already registered for a ${existsInRole} in the system.` });
+      }
+    }
+
+    const computedAge = age !== undefined ? (age ? parseInt(age) : null) : (dob ? calcAgeFromDob(dob) : undefined);
 
     const updateFields = {
       ...(fullName !== undefined && { fullName }),
       ...(phone !== undefined && { phone }),
       ...(dob !== undefined && { dob }),
-      ...(age !== undefined && { age: age ? parseInt(age) : null }),
+      ...(computedAge !== undefined && { age: computedAge }),
       ...(gender !== undefined && { gender }),
-      ...(nationalId !== undefined && { nationalId }),
+      ...(effectiveNic !== undefined && { nationalId: effectiveNic }),
       ...(address !== undefined && { address }),
       ...(department !== undefined && { department }),
       ...(role !== undefined && { role }),

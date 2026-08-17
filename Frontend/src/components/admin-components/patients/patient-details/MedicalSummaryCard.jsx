@@ -74,3 +74,5 @@ const MedicalSummaryCard = ({ medical }) => {
 };
 
 export default MedicalSummaryCard;
+
+

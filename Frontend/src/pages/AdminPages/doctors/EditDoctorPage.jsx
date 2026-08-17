@@ -43,12 +43,23 @@ const buildFormDataFromDoctor = (doctorId, doc) => {
   // Initials
   const initials = doc.fullName ? doc.fullName.split(" ").map(n => n[0]).join("").toUpperCase() : "";
 
+  const calcAge = (dobStr) => {
+    if (!dobStr) return "";
+    const dob = new Date(dobStr);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+    return age > 0 ? String(age) : "";
+  };
+
   return {
     initials: initials || "",
     fullName: doc.fullName || "",
     email: doc.user?.email || "",
     phone: doc.phone || "",
     dob: doc.dob || "",
+    age: doc.age != null ? String(doc.age) : calcAge(doc.dob),
     gender: doc.gender || "",
     address: doc.address || "",
     doctorId: doc.id || doctorId || "",
@@ -82,6 +93,7 @@ const EditDoctorPage = () => {
   const [submitError, setSubmitError] = useState("");
 
   const [formData, setFormData] = useState(buildFormDataFromDoctor(doctorId, null));
+  const [initialDoctor, setInitialDoctor] = useState(null);
   const [workingDays, setWorkingDays] = useState(["Mon", "Tue", "Wed", "Thu", "Fri"]);
   const [sendInvitation, setSendInvitation] = useState(true);
 
@@ -90,7 +102,9 @@ const EditDoctorPage = () => {
     setError(null);
     try {
       const doc = await doctorApi.getById(doctorId);
-      setFormData(buildFormDataFromDoctor(doctorId, doc));
+      const built = buildFormDataFromDoctor(doctorId, doc);
+      setFormData(built);
+      setInitialDoctor(built);
       setWorkingDays(doc.workingDays || ["Mon", "Tue", "Wed", "Thu", "Fri"]);
     } catch (err) {
       console.error("Failed to load doctor details:", err);
@@ -110,6 +124,11 @@ const EditDoctorPage = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
+
+  const isMissing = (field) => !String(formData[field] ?? "").trim();
+  const showRequiredMark = (field) =>
+    ["fullName", "email", "phone", "licenceNumber", "department", "specialization", "experience", "accountStatus", "tempPassword"].includes(field) &&
+    isMissing(field);
 
   const toggleDay = (day) => {
     setWorkingDays((prev) =>
@@ -186,7 +205,7 @@ const EditDoctorPage = () => {
           <p className="text-sm font-medium">{error}</p>
           <button
             onClick={loadDoctor}
-            className="text-xs underline text-slate-500 block mx-auto mt-2"
+            className="text-xs underline text-slate-500 block mx-auto mt-2 cursor-pointer"
           >
             Try again
           </button>
@@ -237,13 +256,13 @@ const EditDoctorPage = () => {
 
           <EditDoctorHeaderBanner
             doctor={{
-              initials: formData.initials,
-              name: formData.fullName,
-              id: formData.doctorId,
-              department: formData.department,
-              accountStatus: formData.accountStatus,
-              lastUpdated: formData.lastUpdated,
-              updatedBy: formData.updatedBy,
+              initials: initialDoctor?.initials ?? formData.initials,
+              name: initialDoctor?.fullName ?? formData.fullName,
+              id: initialDoctor?.doctorId ?? formData.doctorId,
+              department: initialDoctor?.department ?? formData.department,
+              accountStatus: initialDoctor?.accountStatus ?? formData.accountStatus,
+              lastUpdated: initialDoctor?.lastUpdated ?? formData.lastUpdated,
+              updatedBy: initialDoctor?.updatedBy ?? formData.updatedBy,
             }}
           />
 
@@ -255,14 +274,16 @@ const EditDoctorPage = () => {
               </div>
             )}
 
-            <EditPersonalInfoSection
+          <EditPersonalInfoSection
               formData={formData}
               onChange={handleChange}
+              showRequiredMark={showRequiredMark}
             />
 
             <EditProfessionalInfoSection
               formData={formData}
               onChange={handleChange}
+              showRequiredMark={showRequiredMark}
             />
 
             <EditAvailabilitySection
@@ -270,6 +291,7 @@ const EditDoctorPage = () => {
               toggleDay={toggleDay}
               formData={formData}
               onChange={handleChange}
+              showRequiredMark={showRequiredMark}
             />
 
             <EditAccountAccessSection
@@ -278,6 +300,7 @@ const EditDoctorPage = () => {
               onGeneratePassword={handleGeneratePassword}
               sendInvitation={sendInvitation}
               setSendInvitation={setSendInvitation}
+              showRequiredMark={showRequiredMark}
             />
 
             <div className="flex items-center justify-end gap-3 border-t border-slate-200 bg-white px-6 py-4 rounded-xl">
@@ -293,14 +316,14 @@ const EditDoctorPage = () => {
                 type="button"
                 disabled={saving}
                 onClick={handleReset}
-                className="rounded-lg border border-[#2563EB] px-4 py-2.5 text-sm font-semibold text-[#2563EB] hover:bg-blue-50 transition-colors disabled:opacity-50"
+                className="rounded-lg border border-[#2563EB] px-4 py-2.5 text-sm font-semibold text-[#2563EB] hover:bg-blue-50 transition-colors disabled:opacity-50 cursor-pointer"
               >
                 Reset Changes
               </button>
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded-lg bg-[#1E3A8A] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-950 transition-colors disabled:opacity-50 inline-flex items-center gap-1.5"
+                className="rounded-lg bg-[#1E3A8A] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-950 transition-colors disabled:opacity-50 inline-flex items-center gap-1.5 cursor-pointer"
               >
                 {saving ? <Loader2 size={15} className="animate-spin" /> : null}
                 {saving ? "Saving..." : "Save Changes"}
@@ -314,3 +337,7 @@ const EditDoctorPage = () => {
 };
 
 export default EditDoctorPage;
+
+
+
+

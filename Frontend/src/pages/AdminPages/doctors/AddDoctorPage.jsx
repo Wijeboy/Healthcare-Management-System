@@ -69,6 +69,11 @@ const AddDoctorPage = () => {
     }
   };
 
+  const isMissing = (field) => !String(formData[field] ?? "").trim();
+  const showRequiredMark = (field) =>
+    ["fullName", "email", "phone", "licenceNumber", "department", "specialization", "experience", "accountStatus", "tempPassword"].includes(field) &&
+    isMissing(field);
+
   const toggleDay = (day) => {
     setWorkingDays((prev) =>
       prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day],
@@ -170,12 +175,14 @@ const AddDoctorPage = () => {
               formData={formData}
               onChange={handleChange}
               errors={errors}
+              showRequiredMark={showRequiredMark}
             />
 
             <ProfessionalInfoSection
               formData={formData}
               onChange={handleChange}
               errors={errors}
+              showRequiredMark={showRequiredMark}
             />
 
             <AvailabilitySection
@@ -183,6 +190,7 @@ const AddDoctorPage = () => {
               toggleDay={toggleDay}
               formData={formData}
               onChange={handleChange}
+              showRequiredMark={showRequiredMark}
             />
 
             <AccountAccessSection
@@ -191,6 +199,7 @@ const AddDoctorPage = () => {
               onGeneratePassword={handleGeneratePassword}
               sendInvitation={sendInvitation}
               setSendInvitation={setSendInvitation}
+              showRequiredMark={showRequiredMark}
             />
 
             <div className="flex items-center justify-end gap-3 border-t border-slate-200 bg-white px-6 py-4 rounded-xl">
@@ -206,14 +215,14 @@ const AddDoctorPage = () => {
                 type="button"
                 disabled={loading}
                 onClick={handleSaveDraft}
-                className="rounded-lg border border-[#2563EB] px-4 py-2.5 text-sm font-semibold text-[#2563EB] hover:bg-blue-50 transition-colors disabled:opacity-50"
+                className="rounded-lg border border-[#2563EB] px-4 py-2.5 text-sm font-semibold text-[#2563EB] hover:bg-blue-50 transition-colors disabled:opacity-50 cursor-pointer"
               >
                 Save as Draft
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="rounded-lg bg-[#1E3A8A] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-950 transition-colors disabled:opacity-50 inline-flex items-center gap-1.5"
+                className="rounded-lg bg-[#1E3A8A] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-950 transition-colors disabled:opacity-50 inline-flex items-center gap-1.5 cursor-pointer"
               >
                 {loading ? <Loader2 size={15} className="animate-spin" /> : null}
                 {loading ? "Adding..." : "Add Doctor"}
@@ -227,3 +236,7 @@ const AddDoctorPage = () => {
 };
 
 export default AddDoctorPage;
+
+
+
+

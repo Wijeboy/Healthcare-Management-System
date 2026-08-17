@@ -66,3 +66,5 @@ const EditPatientHeaderBanner = ({ patient }) => {
 };
 
 export default EditPatientHeaderBanner;
+
+

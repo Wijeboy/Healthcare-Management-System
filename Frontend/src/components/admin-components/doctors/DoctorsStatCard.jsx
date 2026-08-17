@@ -25,3 +25,4 @@ const DoctorsStatCard = ({ label, value, icon: Icon, colorTheme }) => {
 };
 
 export default DoctorsStatCard
+

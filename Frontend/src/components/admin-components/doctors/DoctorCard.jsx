@@ -105,3 +105,6 @@ const DoctorCard = ({ doctor, onView, onEdit, onDelete, deleting = false }) => {
 };
 
 export default DoctorCard
+
+
+

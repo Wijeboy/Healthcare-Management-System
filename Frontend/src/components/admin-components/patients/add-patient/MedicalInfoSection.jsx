@@ -105,3 +105,5 @@ const MedicalInfoSection = ({ formData, handleChange, showRequiredMark }) => {
 };
 
 export default MedicalInfoSection;
+
+

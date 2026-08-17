@@ -69,3 +69,5 @@ const ContactInfoCard = ({ contact }) => {
 };
 
 export default ContactInfoCard;
+
+

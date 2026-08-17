@@ -33,14 +33,14 @@ const PersonalInfoSection = ({ formData, handleChange, showRequiredMark }) => {
           <div className="flex items-center gap-3 mt-2.5">
             <button
               type="button"
-              className="px-3 py-1.5 border border-[#CBD5E1] bg-white text-slate-700 font-semibold text-xs rounded-lg hover:bg-slate-50 flex items-center gap-1.5 transition"
+              className="px-3 py-1.5 border border-[#CBD5E1] bg-white text-slate-700 font-semibold text-xs rounded-lg hover:bg-slate-50 flex items-center gap-1.5 transition cursor-pointer"
             >
               <Upload size={13} />
               Upload Photo
             </button>
             <button
               type="button"
-              className="text-xs font-semibold text-rose-600 hover:underline"
+              className="text-xs font-semibold text-rose-600 hover:underline cursor-pointer"
             >
               Remove
             </button>
@@ -156,3 +156,6 @@ const PersonalInfoSection = ({ formData, handleChange, showRequiredMark }) => {
 };
 
 export default PersonalInfoSection;
+
+
+

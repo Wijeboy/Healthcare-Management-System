@@ -24,10 +24,16 @@ const CurrentAvailabilityCard = ({ schedule }) => {
             key={idx}
             className="flex items-center justify-between py-2 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs"
           >
-            <span className="font-bold text-slate-800">{item.day}</span>
-            <span className="text-slate-600 font-medium">{item.hours}</span>
+            <div className="flex items-center gap-4 min-w-0 flex-1">
+              <span className="font-bold text-slate-800 w-28 shrink-0">
+                {item.day}
+              </span>
+              <span className="text-slate-600 font-medium">
+                {item.hours}
+              </span>
+            </div>
             <span
-              className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+              className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shrink-0 ${
                 item.isAvailable
                   ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
                   : "bg-slate-100 text-slate-400 border border-slate-200"
@@ -43,3 +49,4 @@ const CurrentAvailabilityCard = ({ schedule }) => {
 };
 
 export default CurrentAvailabilityCard
+

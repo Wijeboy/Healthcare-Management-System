@@ -66,7 +66,7 @@ const EditAccountAccessSection = ({
             <button
               type="button"
               onClick={onGeneratePassword}
-              className="px-3 py-2 border border-[#CBD5E1] bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-lg transition shrink-0"
+              className="px-3 py-2 border border-[#CBD5E1] bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-lg transition shrink-0 cursor-pointer"
             >
               Generate
             </button>
@@ -109,7 +109,7 @@ const EditAccountAccessSection = ({
           onClick={handleToggle}
           className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-200 ease-in-out ${
             formData.sendInvitation ? "bg-[#0256CA]" : "bg-slate-300"
-          }`}
+          } cursor-pointer`}
         >
           <div
             className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ease-in-out ${
@@ -123,3 +123,6 @@ const EditAccountAccessSection = ({
 };
 
 export default EditAccountAccessSection;
+
+
+

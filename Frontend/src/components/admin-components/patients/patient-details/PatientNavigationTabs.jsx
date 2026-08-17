@@ -34,3 +34,6 @@ const PatientNavigationTabs = ({ activeTab, setActiveTab }) => {
 };
 
 export default PatientNavigationTabs;
+
+
+

@@ -10,6 +10,16 @@ import MedicalSummaryCard from "../../../components/admin-components/patients/pa
 import AccountAccessCard from "../../../components/admin-components/patients/patient-details/AccountAccessCard";
 import UpcomingAppointmentsCard from "../../../components/admin-components/patients/patient-details/UpcomingAppointmentsCard";
 
+const calcAge = (dobStr) => {
+  if (!dobStr) return "";
+  const dob = new Date(dobStr);
+  const today = new Date();
+  let age = today.getFullYear() - dob.getFullYear();
+  const m = today.getMonth() - dob.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+  return age > 0 ? String(age) : "";
+};
+
 const buildPatientDetails = (p) => {
   if (!p) return null;
 
@@ -31,7 +41,7 @@ const buildPatientDetails = (p) => {
       id: p.id ?? "",
       userId,
       bloodGroup: p.bloodGroup ?? "",
-      age: String(p.age ?? ""),
+      age: p.age != null ? String(p.age) : calcAge(p.dob),
       gender: (p.gender ?? "").toUpperCase(),
       summaryNote: p.medicalNotes ?? "",
       lastVisit: "Not available",
@@ -42,7 +52,7 @@ const buildPatientDetails = (p) => {
     personal: {
       fullName: p.fullName ?? "",
       dob: p.dob ?? "",
-      age: String(p.age ?? ""),
+      age: p.age != null ? String(p.age) : calcAge(p.dob),
       gender: p.gender ?? "",
       bloodGroup: p.bloodGroup ?? "",
       patientId: p.id ?? "",
@@ -163,7 +173,7 @@ const PatientDetails = () => {
                 <button
                   type="button"
                   onClick={loadPatient}
-                  className="inline-flex items-center gap-2 rounded-lg bg-[#0256CA] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition-colors"
+                  className="inline-flex items-center gap-2 rounded-lg bg-[#0256CA] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition-colors cursor-pointer"
                 >
                   Try Again
                 </button>
@@ -211,7 +221,7 @@ const PatientDetails = () => {
                 <Edit size={14} />
                 Edit Patient
               </button>
-              <button className="p-2 border border-[#CBD5E1] bg-white text-slate-600 rounded-lg hover:bg-slate-50 transition">
+              <button className="p-2 border border-[#CBD5E1] bg-white text-slate-600 rounded-lg hover:bg-slate-50 transition cursor-pointer">
                 <MoreHorizontal size={16} />
               </button>
             </div>
@@ -256,3 +266,7 @@ const PatientDetails = () => {
 };
 
 export default PatientDetails;
+
+
+
+
