@@ -21,8 +21,26 @@ import ReportsAnalytics from "./pages/AdminPages/reports/ReportsAnalytics";
 import DoctorDashboard from "./pages/DoctorDashboard";
 import PatientDashboard from "./pages/PatientDashboard";
 
+const getCurrentRole = () => localStorage.getItem("hmsRole");
 
+function RequireRole({ role, children }) {
+  const currentRole = getCurrentRole();
 
+  if (!currentRole) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (currentRole !== role) {
+    if (currentRole === "Admin") return <Navigate to="/dashboard" replace />;
+    if (currentRole === "Doctor")
+      return <Navigate to="/dashboard/doctor" replace />;
+    if (currentRole === "Patient")
+      return <Navigate to="/dashboard/patient" replace />;
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+}
 
 function App() {
   return (
@@ -33,16 +51,38 @@ function App() {
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
       {/* Protected Routes (wrapped in DashboardLayout) */}
-      <Route path="/dashboard" element={<DashboardLayout />}>
+      <Route
+        path="/dashboard"
+        element={
+          <RequireRole role="Admin">
+            <DashboardLayout />
+          </RequireRole>
+        }
+      >
         <Route index element={<AdminDashboard />} />
         <Route path="doctors-management" element={<DoctorsManagement />} />
         <Route path="doctors-management/details" element={<DoctorDetails />} />
-        <Route path="doctors-management/add-doctor" element={<AddDoctorPage />} />
-        <Route path="doctors-management/edit-doctor" element={<EditDoctorPage />} />
+        <Route
+          path="doctors-management/add-doctor"
+          element={<AddDoctorPage />}
+        />
+        <Route
+          path="doctors-management/edit-doctor"
+          element={<EditDoctorPage />}
+        />
         <Route path="patients-management" element={<PatientsManagement />} />
-        <Route path="patients-management/details" element={<PatientDetails />} />
-        <Route path="patients-management/add-patient" element={<AddPatient />} />
-        <Route path="patients-management/edit-patient" element={<EditPatient />} />
+        <Route
+          path="patients-management/details"
+          element={<PatientDetails />}
+        />
+        <Route
+          path="patients-management/add-patient"
+          element={<AddPatient />}
+        />
+        <Route
+          path="patients-management/edit-patient"
+          element={<EditPatient />}
+        />
         <Route path="staff-management" element={<StaffManagement />} />
         <Route path="staff-management/add-staff" element={<AddStaff />} />
         <Route path="staff-management/edit-staff" element={<EditStaff />} />
@@ -52,8 +92,22 @@ function App() {
       </Route>
 
       {/* Role-specific dashboards */}
-      <Route path="/dashboard/doctor" element={<DoctorDashboard />} />
-      <Route path="/dashboard/patient" element={<PatientDashboard />} />
+      <Route
+        path="/dashboard/doctor"
+        element={
+          <RequireRole role="Doctor">
+            <DoctorDashboard />
+          </RequireRole>
+        }
+      />
+      <Route
+        path="/dashboard/patient"
+        element={
+          <RequireRole role="Patient">
+            <PatientDashboard />
+          </RequireRole>
+        }
+      />
 
       {/* Default redirect */}
       <Route path="*" element={<Navigate to="/login" replace />} />
