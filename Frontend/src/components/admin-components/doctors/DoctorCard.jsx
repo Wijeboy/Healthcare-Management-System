@@ -1,7 +1,7 @@
 import React from 'react'
-import { Mail, Phone, Clock, Eye, Edit2, Trash2 } from "lucide-react";
+import { Mail, Phone, Clock, Eye, Edit2, Trash2, Loader2 } from "lucide-react";
 
-const DoctorCard = ({ doctor, onView, onEdit, onDelete }) => {
+const DoctorCard = ({ doctor, onView, onEdit, onDelete, deleting = false }) => {
     const displayName = doctor.fullName || doctor.name || "Unnamed Doctor";
     const displaySpecialty = doctor.specialization || doctor.specialty || doctor.department || "Doctor";
     const displayEmail = doctor.email || doctor.user?.email || "Email not available";
@@ -79,21 +79,24 @@ const DoctorCard = ({ doctor, onView, onEdit, onDelete }) => {
         <div className="flex items-center gap-1">
           <button
             onClick={() => onView?.(doctor.id)}
+            disabled={deleting}
             className="p-1.5 border border-slate-200 rounded hover:bg-slate-50 text-slate-500 transition"
           >
             <Eye size={14} />
           </button>
           <button
             onClick={() => onEdit?.(doctor.id)}
+            disabled={deleting}
             className="p-1.5 border border-slate-200 rounded hover:bg-slate-50 text-slate-500 transition"
           >
             <Edit2 size={14} />
           </button>
           <button
             onClick={() => onDelete?.(doctor.id)}
-            className="p-1.5 border border-slate-200 rounded hover:bg-slate-50 text-slate-500 transition"
+            disabled={deleting}
+            className="p-1.5 border border-slate-200 rounded hover:bg-slate-50 text-slate-500 transition disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center"
           >
-            <Trash2 size={14} />
+            {deleting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
           </button>
         </div>
       </div>

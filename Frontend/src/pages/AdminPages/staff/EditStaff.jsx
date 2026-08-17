@@ -7,6 +7,8 @@ import ContactInfoSection from "../../../components/admin-components/staff/add-s
 import WorkInfoSection from "../../../components/admin-components/staff/add-staff/WorkInfoSection";
 import ReviewSection from "../../../components/admin-components/staff/add-staff/ReviewSection";
 import { staffApi } from "../../../services/api";
+import toast from "react-hot-toast";
+import { getFriendlyErrorMessage } from "../../../utils/userMessages";
 
 const buildFormData = (staff) => ({
   fullName: staff?.fullName || staff?.name || "",
@@ -92,10 +94,13 @@ const EditStaff = () => {
       };
 
       await staffApi.update(staffId, payload);
+      toast.success("Staff member updated successfully");
       navigate("/admin/staff");
     } catch (err) {
       console.error("Failed to update staff:", err);
-      setSubmitError("We could not update the staff record. Please try again.");
+      const message = getFriendlyErrorMessage(err, "We could not update the staff record. Please try again.");
+      setSubmitError(message);
+      toast.error(message);
     } finally {
       setSubmitting(false);
     }
@@ -183,12 +188,13 @@ const EditStaff = () => {
               <button
                 type="submit"
                 disabled={submitting}
-                className="rounded-lg bg-[#1E3A8A] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-950 transition-colors disabled:opacity-50"
+                className="rounded-lg bg-[#1E3A8A] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-950 transition-colors disabled:opacity-50 inline-flex items-center gap-2"
               >
+                {submitting ? <Loader2 size={15} className="animate-spin" /> : null}
                 {submitting ? "Saving..." : "Save Changes"}
               </button>
-            </div>
-          </form>
+          </div>
+        </form>
         </main>
       </div>
     </div>

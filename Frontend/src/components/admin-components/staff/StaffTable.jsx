@@ -10,7 +10,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { mockStaff } from "../../../data/mockData";
 
-const StaffTable = ({ staffList = mockStaff, onView, onEdit }) => {
+const StaffTable = ({ staffList = mockStaff, onView, onEdit, onDelete }) => {
   const navigate = useNavigate();
   const [openMenuId, setOpenMenuId] = useState(null);
   const [staffToDelete, setStaffToDelete] = useState(null);
@@ -48,12 +48,18 @@ const StaffTable = ({ staffList = mockStaff, onView, onEdit }) => {
 
   const handleDelete = (staff) => {
     setOpenMenuId(null);
+    if (onDelete) {
+      onDelete(staff);
+      return;
+    }
     setStaffToDelete(staff);
   };
 
   const confirmDelete = () => {
     if (!staffToDelete) return;
-    console.log("Delete staff:", staffToDelete);
+    if (onDelete) {
+      onDelete(staffToDelete);
+    }
     setStaffToDelete(null);
   };
 
@@ -65,7 +71,7 @@ const StaffTable = ({ staffList = mockStaff, onView, onEdit }) => {
           <div>
             <h3 className="text-base font-bold text-slate-800">Staff List</h3>
             <p className="text-xs text-slate-500 mt-0.5">
-              Showing 8 of 158 staff members
+              Showing {staffList.length} staff members
             </p>
           </div>
           <p className="text-xs text-slate-400 font-medium">
@@ -106,37 +112,38 @@ const StaffTable = ({ staffList = mockStaff, onView, onEdit }) => {
                             {getStaffName(staff)}
                           </p>
                           <p className="text-[11px] text-slate-400 mt-0.5">
-                            {staff.department || "Staff member"}
+                            {staff.age ? `${staff.age} years` : ""}{" "}
+                            {staff.gender ? `, ${staff.gender}` : ""}
                           </p>
                         </div>
                       </div>
                     </td>
                     <td className="py-3.5 px-4 whitespace-nowrap">
                       <p className="font-semibold text-slate-700 leading-tight">
-                        {staff.phone}
+                        {staff.phone || "N/A"}
                       </p>
                       <p className="text-[11px] text-slate-400 mt-0.5">
-                        {staff.email}
+                        {staff.email || staff.user?.email || "N/A"}
                       </p>
                     </td>
                     <td className="py-3.5 px-4 font-medium text-slate-700 whitespace-nowrap">
-                      {staff.role}
+                      {staff.role || "Staff"}
                     </td>
                     <td className="py-3.5 px-4 font-medium text-slate-700">
-                      {staff.department}
+                      {staff.department || "General"}
                     </td>
                     <td className="py-3.5 px-4 font-medium text-slate-700 whitespace-nowrap">
-                      {staff.lastLogin}
+                      {staff.lastLogin || "Recently"}
                     </td>
                     <td className="py-3.5 px-4 text-center">
                       <span
                         className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase border ${
-                          staff.status === "ACTIVE"
+                          (staff.employeeStatus || staff.status) === "Active" || (staff.employeeStatus || staff.status) === "ACTIVE"
                             ? "bg-emerald-50 text-emerald-600 border-emerald-200"
                             : "bg-amber-50 text-amber-600 border-amber-200"
                         }`}
                       >
-                        {staff.status}
+                        {staff.employeeStatus || staff.status || "Active"}
                       </span>
                     </td>
                     <td className="py-3.5 px-4 text-right relative">
@@ -194,35 +201,6 @@ const StaffTable = ({ staffList = mockStaff, onView, onEdit }) => {
             </tbody>
           </table>
         </div>
-
-        {/* Pagination */}
-        <div className="p-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-          <span>
-            Showing {staffList.length} of {mockStaff.length} staff members
-          </span>
-
-          <div className="flex items-center gap-1.5 font-medium">
-            <button className="p-1.5 border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-40 transition">
-              <ChevronLeft size={16} />
-            </button>
-            <button className="w-8 h-8 rounded-lg bg-[#1E3A8A] text-white font-bold">
-              1
-            </button>
-            <button className="w-8 h-8 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50">
-              2
-            </button>
-            <button className="w-8 h-8 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50">
-              3
-            </button>
-            <span className="px-1 text-slate-400">...</span>
-            <button className="w-8 h-8 border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50">
-              20
-            </button>
-            <button className="p-1.5 border border-slate-200 rounded-lg hover:bg-slate-50 transition">
-              <ChevronRight size={16} />
-            </button>
-          </div>
-        </div>
       </div>
 
       {staffToDelete && (
@@ -235,8 +213,7 @@ const StaffTable = ({ staffList = mockStaff, onView, onEdit }) => {
               Delete {getStaffName(staffToDelete)}?
             </h3>
             <p className="mt-2 text-sm text-slate-500">
-              This will remove the staff profile from the list. This action can
-              be replaced with a real backend delete later.
+              This will remove the staff profile from the system.
             </p>
 
             <div className="mt-6 flex items-center justify-end gap-3">

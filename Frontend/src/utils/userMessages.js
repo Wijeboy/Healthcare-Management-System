@@ -12,6 +12,9 @@ export const getFriendlyErrorMessage = (error, fallback = "Something went wrong.
   if (text.includes("not found")) {
     return "The requested record could not be found.";
   }
+  if (text.includes("already exists") || text.includes("duplicate") || text.includes("unique constraint")) {
+    return "An account with this email already exists. Please use a different email.";
+  }
   if (
     text.includes("validation") ||
     text.includes("required field") ||

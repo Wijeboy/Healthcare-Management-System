@@ -26,6 +26,7 @@ const DoctorsManagement = () => {
   const [error, setError]             = useState(null);
   const [doctorToDelete, setDoctorToDelete] = useState(null);
   const [deleting, setDeleting]       = useState(false);
+  const [deletingDoctorId, setDeletingDoctorId] = useState(null);
 
   const [searchTerm,     setSearchTerm]     = useState("");
   const [department,     setDepartment]     = useState("All");
@@ -74,6 +75,7 @@ const DoctorsManagement = () => {
   const confirmDeleteDoctor = async () => {
     if (!doctorToDelete) return;
     setDeleting(true);
+    setDeletingDoctorId(doctorToDelete.id);
     try {
       await doctorApi.delete(doctorToDelete.id);
       setDoctorToDelete(null);
@@ -84,6 +86,7 @@ const DoctorsManagement = () => {
       toast.error(getFriendlyErrorMessage(err, "We could not delete the doctor. Please try again."));
     } finally {
       setDeleting(false);
+      setDeletingDoctorId(null);
     }
   };
 
@@ -188,6 +191,7 @@ const DoctorsManagement = () => {
                   <DoctorCard
                     key={doc.id}
                     doctor={doc}
+                    deleting={deleting && deletingDoctorId === doc.id}
                     onView={(id) => navigate(`/admin/doctors/details?id=${id}`)}
                     onEdit={(id) => navigate(`/admin/doctors/edit?id=${id}`)}
                     onDelete={handleDeleteDoctor}
