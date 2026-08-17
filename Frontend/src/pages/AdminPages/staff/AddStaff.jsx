@@ -68,7 +68,8 @@ const AddStaff = () => {
       await staffApi.create(payload);
       navigate("/admin/staff");
     } catch (err) {
-      setSubmitError(err.message);
+      console.error("Failed to add staff:", err);
+      setSubmitError("We could not add the staff member. Please try again.");
     } finally {
       setLoading(false);
     }

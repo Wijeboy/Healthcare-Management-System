@@ -6,7 +6,9 @@ import EditProfessionalInfoSection from "../../../components/admin-components/do
 import EditAvailabilitySection from "../../../components/admin-components/doctors/edit-doctor/EditAvailabilitySection";
 import EditAccountAccessSection from "../../../components/admin-components/doctors/edit-doctor/EditAccountAccessSection";
 import { doctorApi } from "../../../services/api";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
+import toast from "react-hot-toast";
+import { getFriendlyErrorMessage } from "../../../utils/userMessages";
 
 const buildFormDataFromDoctor = (doctorId, doc) => {
   if (!doc) {
@@ -91,7 +93,8 @@ const EditDoctorPage = () => {
       setFormData(buildFormDataFromDoctor(doctorId, doc));
       setWorkingDays(doc.workingDays || ["Mon", "Tue", "Wed", "Thu", "Fri"]);
     } catch (err) {
-      setError(err.message);
+      console.error("Failed to load doctor details:", err);
+      setError("We could not load the doctor profile. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -153,9 +156,12 @@ const EditDoctorPage = () => {
       };
 
       await doctorApi.update(doctorId, payload);
+      toast.success("Doctor updated successfully");
       navigate(`/admin/doctors/details?id=${doctorId}`);
     } catch (err) {
-      setSubmitError(err.message);
+      console.error("Failed to update doctor:", err);
+      setSubmitError(getFriendlyErrorMessage(err, "We could not update the doctor. Please try again."));
+      toast.error(getFriendlyErrorMessage(err, "We could not update the doctor. Please try again."));
     } finally {
       setSaving(false);
     }
@@ -294,8 +300,9 @@ const EditDoctorPage = () => {
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded-lg bg-[#1E3A8A] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-950 transition-colors disabled:opacity-50"
+                className="rounded-lg bg-[#1E3A8A] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-950 transition-colors disabled:opacity-50 inline-flex items-center gap-1.5"
               >
+                {saving ? <Loader2 size={15} className="animate-spin" /> : null}
                 {saving ? "Saving..." : "Save Changes"}
               </button>
             </div>

@@ -1,4 +1,5 @@
 import prisma from '../../config/prisma.js';
+import { getDb, ObjectId } from '../../config/mongo.js';
 
 // GET all staff — pagination, search, filter by department/status
 export const getStaff = async (req, res) => {
@@ -56,8 +57,8 @@ export const getStaffById = async (req, res) => {
   }
 };
 
-// POST — add new staff member
-export const addStaff = async (req, res) => {
+// POST — create new staff member
+export const createStaff = async (req, res) => {
   try {
     const {
       email, password,
@@ -66,41 +67,63 @@ export const addStaff = async (req, res) => {
       permissions, notes
     } = req.body;
 
-    const newStaff = await prisma.$transaction(async (tx) => {
-      const user = await tx.user.create({
-        data: { email, password, role: 'Staff', status: employeeStatus || 'Active' }
-      });
-      return tx.staff.create({
-        data: {
-          userId: user.id,
-          fullName,
-          phone,
-          email,
-          dob,
-          age: age ? parseInt(age) : null,
-          gender,
-          nationalId,
-          address,
-          department,
-          role,
-          employeeStatus: employeeStatus || 'Active',
-          accessLevel: accessLevel || 'Standard',
-          shift,
-          joiningDate,
-          permissions: permissions || [],
-          notes,
-        }
-      });
-    });
+    const db = await getDb();
 
-    res.status(201).json(newStaff);
-  } catch (error) {
-    if (error.code === 'P2002') {
-      return res.status(409).json({ error: 'A staff member with this email already exists' });
+    if (email) {
+      const existingUser = await db.collection("User").findOne({ email });
+      if (existingUser) {
+        return res.status(409).json({ error: 'A staff member with this email already exists' });
+      }
     }
+
+    const userId = new ObjectId();
+    const staffId = new ObjectId();
+    const now = new Date();
+
+    const userDoc = {
+      _id: userId,
+      email: email || `staff_${staffId.toString().slice(-6)}@medimate.com`,
+      password: password || "Staff@123456",
+      role: 'Staff',
+      status: employeeStatus || 'Active',
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    const staffDoc = {
+      _id: staffId,
+      userId: userId,
+      fullName: fullName || "Staff Member",
+      phone: phone || "",
+      email: email || null,
+      dob: dob || null,
+      age: age ? parseInt(age) : null,
+      gender: gender || null,
+      nationalId: nationalId || null,
+      address: address || null,
+      department: department || "Administration",
+      role: role || "Nurse",
+      employeeStatus: employeeStatus || 'Active',
+      accessLevel: accessLevel || 'Standard',
+      shift: shift || "Day",
+      joiningDate: joiningDate || null,
+      permissions: permissions || [],
+      notes: notes || null,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    await db.collection("User").insertOne(userDoc);
+    await db.collection("Staff").insertOne(staffDoc);
+
+    const created = { id: staffId.toString(), userId: userId.toString(), ...staffDoc };
+    res.status(201).json(created);
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const addStaff = createStaff;
 
 // PUT — update staff details
 export const updateStaff = async (req, res) => {
@@ -111,22 +134,41 @@ export const updateStaff = async (req, res) => {
       permissions, notes
     } = req.body;
 
-    const updated = await prisma.staff.update({
-      where: { id: req.params.id },
-      data: {
-        fullName, phone, dob,
-        age: age ? parseInt(age) : undefined,
-        gender, nationalId, address,
-        department, role, employeeStatus, accessLevel, shift, joiningDate,
-        permissions: permissions || [],
-        notes,
-      }
-    });
-    res.json(updated);
-  } catch (error) {
-    if (error.code === 'P2025') {
+    const db = await getDb();
+    const staffId = new ObjectId(req.params.id);
+
+    const updateFields = {
+      ...(fullName !== undefined && { fullName }),
+      ...(phone !== undefined && { phone }),
+      ...(dob !== undefined && { dob }),
+      ...(age !== undefined && { age: age ? parseInt(age) : null }),
+      ...(gender !== undefined && { gender }),
+      ...(nationalId !== undefined && { nationalId }),
+      ...(address !== undefined && { address }),
+      ...(department !== undefined && { department }),
+      ...(role !== undefined && { role }),
+      ...(employeeStatus !== undefined && { employeeStatus }),
+      ...(accessLevel !== undefined && { accessLevel }),
+      ...(shift !== undefined && { shift }),
+      ...(joiningDate !== undefined && { joiningDate }),
+      ...(permissions !== undefined && { permissions }),
+      ...(notes !== undefined && { notes }),
+      updatedAt: new Date(),
+    };
+
+    const result = await db.collection("Staff").findOneAndUpdate(
+      { _id: staffId },
+      { $set: updateFields },
+      { returnDocument: 'after' }
+    );
+
+    if (!result) {
       return res.status(404).json({ error: 'Staff member not found' });
     }
+
+    const updated = { id: result._id.toString(), userId: result.userId?.toString(), ...result };
+    res.json(updated);
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -139,22 +181,28 @@ export const updateStaffStatus = async (req, res) => {
       return res.status(400).json({ error: 'Status must be Active or Inactive' });
     }
 
-    const [staff] = await prisma.$transaction([
-      prisma.staff.update({
-        where: { id: req.params.id },
-        data: { employeeStatus: status }
-      }),
-      prisma.user.updateMany({
-        where: { staff: { id: req.params.id } },
-        data: { status }
-      })
-    ]);
+    const db = await getDb();
+    const staffId = new ObjectId(req.params.id);
+
+    const staff = await db.collection("Staff").findOneAndUpdate(
+      { _id: staffId },
+      { $set: { employeeStatus: status, updatedAt: new Date() } },
+      { returnDocument: 'after' }
+    );
+
+    if (!staff) {
+      return res.status(404).json({ error: 'Staff member not found' });
+    }
+
+    if (staff.userId) {
+      await db.collection("User").updateOne(
+        { _id: staff.userId },
+        { $set: { status, updatedAt: new Date() } }
+      );
+    }
 
     res.json({ message: `Staff ${status === 'Active' ? 'activated' : 'deactivated'} successfully`, staff });
   } catch (error) {
-    if (error.code === 'P2025') {
-      return res.status(404).json({ error: 'Staff member not found' });
-    }
     res.status(500).json({ error: error.message });
   }
 };
@@ -163,15 +211,18 @@ export const updateStaffStatus = async (req, res) => {
 export const updatePermissions = async (req, res) => {
   try {
     const { permissions } = req.body;
-    const staff = await prisma.staff.update({
-      where: { id: req.params.id },
-      data: { permissions }
-    });
+    const db = await getDb();
+    const staffId = new ObjectId(req.params.id);
+
+    const staff = await db.collection("Staff").findOneAndUpdate(
+      { _id: staffId },
+      { $set: { permissions: permissions || [], updatedAt: new Date() } },
+      { returnDocument: 'after' }
+    );
+
+    if (!staff) return res.status(404).json({ error: 'Staff member not found' });
     res.json(staff);
   } catch (error) {
-    if (error.code === 'P2025') {
-      return res.status(404).json({ error: 'Staff member not found' });
-    }
     res.status(500).json({ error: error.message });
   }
 };
@@ -179,13 +230,16 @@ export const updatePermissions = async (req, res) => {
 // DELETE — hard delete staff member
 export const deleteStaff = async (req, res) => {
   try {
-    const staff = await prisma.staff.findUnique({ where: { id: req.params.id } });
+    const db = await getDb();
+    const staffId = new ObjectId(req.params.id);
+
+    const staff = await db.collection("Staff").findOne({ _id: staffId });
     if (!staff) return res.status(404).json({ error: 'Staff member not found' });
 
-    await prisma.$transaction([
-      prisma.staff.delete({ where: { id: req.params.id } }),
-      prisma.user.delete({ where: { id: staff.userId } })
-    ]);
+    await db.collection("Staff").deleteOne({ _id: staffId });
+    if (staff.userId) {
+      await db.collection("User").deleteOne({ _id: staff.userId });
+    }
 
     res.json({ message: 'Staff member deleted successfully' });
   } catch (error) {

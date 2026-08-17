@@ -1,10 +1,31 @@
+import React, { useState, useEffect } from "react";
 import StatsCard from "../components/admin-components/dashboard/StatsCard";
 import PatientTable from "../components/admin-components/dashboard/PatientTable";
 import FacilityStatus from "../components/admin-components/dashboard/FacilityStatus";
 import SystemAlerts from "../components/admin-components/dashboard/SystemAlerts";
 import AnalyticsCharts from "../components/admin-components/dashboard/AnalyticsCharts";
+import { patientApi, doctorApi } from "../services/api";
 
 export default function AdminDashboard() {
+  const [totalPatients, setTotalPatients] = useState("...");
+  const [totalDoctors, setTotalDoctors] = useState("...");
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const [patRes, docRes] = await Promise.all([
+          patientApi.getAll({ limit: 1 }),
+          doctorApi.getAll({ limit: 1 }),
+        ]);
+        if (patRes?.total !== undefined) setTotalPatients(patRes.total.toLocaleString());
+        if (docRes?.total !== undefined) setTotalDoctors(docRes.total.toLocaleString());
+      } catch (err) {
+        console.error("Failed to load dashboard metrics:", err);
+      }
+    };
+    fetchCounts();
+  }, []);
+
   return (
     <section className="p-6 space-y-6">
       {/* Dashboard Header */}
@@ -21,7 +42,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatsCard
           icon="person"
-          value="1,240"
+          value={totalPatients}
           label="Total Patients"
           trend="+2.4%"
           trendType="positive"
@@ -30,7 +51,7 @@ export default function AdminDashboard() {
         />
         <StatsCard
           icon="medical_information"
-          value="48"
+          value={totalDoctors}
           label="Active Doctors"
           trend="Steady"
           trendType="neutral"

@@ -6,6 +6,8 @@ import {
 } from "lucide-react";
 import { userApi } from "../../services/api";
 import ConfirmationModal from "../../components/common/ConfirmationModal";
+import toast from "react-hot-toast";
+import { getFriendlyErrorMessage } from "../../utils/userMessages";
 
 const ROLE_COLORS = {
   Admin:   "bg-purple-100 text-purple-700",
@@ -29,10 +31,12 @@ function EditRoleModal({ user, onClose, onSave }) {
     setSaving(true);
     try {
       await userApi.assignRole(user.id, role);
+      toast.success("User role updated successfully");
       onSave();
       onClose();
     } catch (err) {
-      alert(`Failed to update role: ${err.message}`);
+      console.error("Failed to update user role:", err);
+      toast.error(getFriendlyErrorMessage(err, "We could not update the role. Please try again."));
     } finally {
       setSaving(false);
     }
@@ -128,7 +132,8 @@ const UserManagement = () => {
         setTotalPages(res.totalPages || 1);
       }
     } catch (err) {
-      setError(err.message);
+      console.error("Failed to load users:", err);
+      setError("We could not load the users list. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -144,9 +149,11 @@ const UserManagement = () => {
     try {
       await userApi.delete(userToDelete.id);
       setUserToDelete(null);
+      toast.success("User deleted successfully");
       fetchUsers();
     } catch (err) {
-      alert(`Failed to delete user: ${err.message}`);
+      console.error("Failed to delete user:", err);
+      toast.error(getFriendlyErrorMessage(err, "We could not delete the user. Please try again."));
     } finally {
       setDeleting(false);
     }
@@ -384,6 +391,7 @@ const UserManagement = () => {
         cancelText="Cancel"
         onConfirm={confirmDelete}
         onCancel={() => setUserToDelete(null)}
+        loading={deleting}
       />
     </div>
   );

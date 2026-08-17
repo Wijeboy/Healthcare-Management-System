@@ -1,7 +1,7 @@
 import React from "react";
 import { Upload } from "lucide-react";
 
-const PersonalInfoSection = ({ formData, handleChange }) => {
+const PersonalInfoSection = ({ formData, handleChange, showRequiredMark }) => {
   return (
     <div className="bg-white border border-[#E2E8F0] rounded-xl p-6 shadow-sm mb-6">
       <div className="flex items-center gap-3 mb-6">
@@ -53,7 +53,7 @@ const PersonalInfoSection = ({ formData, handleChange }) => {
         {/* Full Name */}
         <div>
           <label className="block font-semibold text-slate-700 mb-1">
-            Full Name <span className="text-rose-500">*</span>
+            Full Name {showRequiredMark?.("fullName") && <span className="text-rose-500">*</span>}
           </label>
           <input
             type="text"
@@ -68,7 +68,7 @@ const PersonalInfoSection = ({ formData, handleChange }) => {
         {/* Date of Birth */}
         <div>
           <label className="block font-semibold text-slate-700 mb-1">
-            Date of Birth <span className="text-rose-500">*</span>
+            Date of Birth {showRequiredMark?.("dob") && <span className="text-rose-500">*</span>}
           </label>
           <input
             type="date"
@@ -97,7 +97,7 @@ const PersonalInfoSection = ({ formData, handleChange }) => {
         {/* Gender */}
         <div>
           <label className="block font-semibold text-slate-700 mb-1">
-            Gender <span className="text-rose-500">*</span>
+            Gender {showRequiredMark?.("gender") && <span className="text-rose-500">*</span>}
           </label>
           <select
             name="gender"
@@ -115,7 +115,7 @@ const PersonalInfoSection = ({ formData, handleChange }) => {
         {/* Blood Group */}
         <div>
           <label className="block font-semibold text-slate-700 mb-1">
-            Blood Group <span className="text-rose-500">*</span>
+            Blood Group {showRequiredMark?.("bloodGroup") && <span className="text-rose-500">*</span>}
           </label>
           <select
             name="bloodGroup"

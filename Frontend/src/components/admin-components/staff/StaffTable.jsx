@@ -15,6 +15,19 @@ const StaffTable = ({ staffList = mockStaff, onView, onEdit }) => {
   const [openMenuId, setOpenMenuId] = useState(null);
   const [staffToDelete, setStaffToDelete] = useState(null);
 
+  const getStaffName = (staff) =>
+    staff?.fullName || staff?.name || "Staff Member";
+
+  const getStaffInitials = (staff) =>
+    staff?.initials ||
+    getStaffName(staff)
+      .split(" ")
+      .filter(Boolean)
+      .map((part) => part[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase();
+
   const handleView = (staff) => {
     if (onView) return onView(staff);
     setOpenMenuId(null);
@@ -65,7 +78,6 @@ const StaffTable = ({ staffList = mockStaff, onView, onEdit }) => {
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="bg-[#F8FAFC] border-b border-slate-200 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                <th className="py-3 px-4">STAFF ID</th>
                 <th className="py-3 px-4">STAFF MEMBER</th>
                 <th className="py-3 px-4">CONTACT INFO</th>
                 <th className="py-3 px-4">ROLE</th>
@@ -84,20 +96,17 @@ const StaffTable = ({ staffList = mockStaff, onView, onEdit }) => {
                     key={staff.id}
                     className="hover:bg-slate-50/50 transition"
                   >
-                    <td className="py-3.5 px-4 font-bold text-slate-800">
-                      {staff.id}
-                    </td>
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-[#E0F2FE] text-[#0284C7] font-bold text-xs flex items-center justify-center shrink-0">
-                          {staff.initials}
+                          {getStaffInitials(staff)}
                         </div>
                         <div>
                           <p className="font-bold text-slate-800 leading-tight">
-                            {staff.name}
+                            {getStaffName(staff)}
                           </p>
                           <p className="text-[11px] text-slate-400 mt-0.5">
-                            {staff.age} years , {staff.gender}
+                            {staff.department || "Staff member"}
                           </p>
                         </div>
                       </div>
@@ -140,7 +149,7 @@ const StaffTable = ({ staffList = mockStaff, onView, onEdit }) => {
                             )
                           }
                           className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition"
-                          aria-label={`Open actions for ${staff.name}`}
+                          aria-label={`Open actions for ${getStaffName(staff)}`}
                         >
                           <MoreVertical size={18} />
                         </button>
@@ -223,7 +232,7 @@ const StaffTable = ({ staffList = mockStaff, onView, onEdit }) => {
               Delete Staff
             </p>
             <h3 className="mt-2 text-xl font-bold text-slate-900">
-              Delete {staffToDelete.name}?
+              Delete {getStaffName(staffToDelete)}?
             </h3>
             <p className="mt-2 text-sm text-slate-500">
               This will remove the staff profile from the list. This action can

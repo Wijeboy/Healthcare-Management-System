@@ -97,7 +97,8 @@ const PatientDetails = () => {
       const data = await patientApi.getById(normalizedPatientId);
       setPatient(data);
     } catch (err) {
-      setError(err.message);
+      console.error("Failed to load patient details:", err);
+      setError("We could not load the patient profile. Please try again.");
     } finally {
       setLoading(false);
     }

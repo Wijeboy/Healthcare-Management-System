@@ -20,6 +20,9 @@ const PatientsTable = ({
 }) => {
   const [openMenuId, setOpenMenuId] = useState(null);
   const menuRefs = useRef({});
+  const menuButtonRefs = useRef({});
+  const menuPanelRefs = useRef({});
+  const [menuPlacement, setMenuPlacement] = useState("bottom");
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -33,13 +36,43 @@ const PatientsTable = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [openMenuId]);
 
+  useEffect(() => {
+    if (!openMenuId) return;
+
+    const button = menuButtonRefs.current[openMenuId];
+    const panel = menuPanelRefs.current[openMenuId];
+    if (!button || !panel) return;
+
+    const updatePlacement = () => {
+      const buttonRect = button.getBoundingClientRect();
+      const panelRect = panel.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - buttonRect.bottom;
+      const spaceAbove = buttonRect.top;
+
+      if (spaceBelow < panelRect.height + 12 && spaceAbove > panelRect.height + 12) {
+        setMenuPlacement("top");
+      } else {
+        setMenuPlacement("bottom");
+      }
+    };
+
+    updatePlacement();
+    window.addEventListener("resize", updatePlacement);
+    window.addEventListener("scroll", updatePlacement, true);
+
+    return () => {
+      window.removeEventListener("resize", updatePlacement);
+      window.removeEventListener("scroll", updatePlacement, true);
+    };
+  }, [openMenuId]);
+
   const handleDelete = (patient) => {
     onDeletePatient?.(patient);
     setOpenMenuId(null);
   };
 
   return (
-    <div className="bg-white border border-[#E2E8F0] rounded-xl shadow-sm mb-6 overflow-hidden">
+    <div className="bg-white border border-[#E2E8F0] rounded-xl shadow-sm mb-6 overflow-visible">
       {/* Table Header Controls */}
       <div className="p-4 border-b border-slate-100 flex items-center justify-between">
         <div>
@@ -67,8 +100,7 @@ const PatientsTable = ({
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-[#F8FAFC] border-b border-slate-200 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-              <th className="py-3 px-4">PATIENT ID</th>
-              <th className="py-3 px-4">PATIENT</th>
+              <th className="py-3 px-4">NAME</th>
               <th className="py-3 px-4">CONTACT INFORMATION</th>
               <th className="py-3 px-4 text-center">BLOOD GROUP</th>
               <th className="py-3 px-4">MEDICAL SUMMARY</th>
@@ -78,28 +110,21 @@ const PatientsTable = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 text-xs">
-            {patients.map((patient, index) => {
-              const openUpward = index >= patients.length - 2;
-
+            {patients.map((patient) => {
               return (
               <tr key={patient.id} className="hover:bg-slate-50/70 transition">
-                {/* ID */}
-                <td className="py-3.5 px-4 font-bold text-slate-900">
-                  {patient.id}
-                </td>
-
                 {/* Patient Profile */}
                 <td className="py-3.5 px-4">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-[#E0F2FE] text-[#0284C7] font-bold text-xs flex items-center justify-center shrink-0">
-                      {patient.initials}
+                      {patient.initials || ((patient.fullName || patient.name || "PT").split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase())}
                     </div>
                     <div>
                       <p className="font-bold text-slate-900 leading-tight">
-                        {patient.name}
+                        {patient.fullName || patient.name || "Patient Record"}
                       </p>
                       <p className="text-[11px] text-slate-400 mt-0.5">
-                        {patient.age} years · {patient.gender}
+                        {patient.age ? `${patient.age} yrs` : ""} {patient.gender ? `· ${patient.gender}` : ""}
                       </p>
                     </div>
                   </div>
@@ -108,10 +133,10 @@ const PatientsTable = ({
                 {/* Contact Information */}
                 <td className="py-3.5 px-4">
                   <p className="font-semibold text-slate-800 leading-tight">
-                    {patient.phone}
+                    {patient.phone || patient.contact || "N/A"}
                   </p>
                   <p className="text-[11px] text-slate-400 mt-0.5">
-                    {patient.email}
+                    {patient.email || patient.user?.email || "No email"}
                   </p>
                 </td>
 
@@ -187,6 +212,11 @@ const PatientsTable = ({
                   >
                     <button
                       type="button"
+                      ref={(node) => {
+                        if (node) {
+                          menuButtonRefs.current[patient.id] = node;
+                        }
+                      }}
                       onClick={() =>
                         setOpenMenuId((current) =>
                           current === patient.id ? null : patient.id
@@ -199,8 +229,13 @@ const PatientsTable = ({
 
                     {openMenuId === patient.id && (
                       <div
+                        ref={(node) => {
+                          if (node) {
+                            menuPanelRefs.current[patient.id] = node;
+                          }
+                        }}
                         className={`absolute right-0 w-40 rounded-xl border border-slate-200 bg-white shadow-lg z-20 overflow-hidden ${
-                          openUpward ? "bottom-full mb-2" : "top-full mt-2"
+                          menuPlacement === "top" ? "bottom-full mb-2" : "top-full mt-2"
                         }`}
                       >
                         <button

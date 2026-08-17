@@ -94,7 +94,8 @@ const EditStaff = () => {
       await staffApi.update(staffId, payload);
       navigate("/admin/staff");
     } catch (err) {
-      setSubmitError(err.message || "Failed to update staff record.");
+      console.error("Failed to update staff:", err);
+      setSubmitError("We could not update the staff record. Please try again.");
     } finally {
       setSubmitting(false);
     }

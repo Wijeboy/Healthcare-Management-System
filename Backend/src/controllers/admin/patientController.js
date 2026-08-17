@@ -1,4 +1,5 @@
 import prisma from '../../config/prisma.js';
+import { getDb, ObjectId } from '../../config/mongo.js';
 
 // GET all patients — pagination, search, filter by gender/bloodGroup/status
 export const getPatients = async (req, res) => {
@@ -59,7 +60,13 @@ export const getPatientById = async (req, res) => {
   try {
     const patient = await prisma.patient.findUnique({
       where: { id: req.params.id },
-      include: { user: { select: { email: true, status: true, createdAt: true } } }
+      include: {
+        user: { select: { email: true, status: true, createdAt: true } },
+        appointments: true,
+        medicalRecords: true,
+        prescriptions: true,
+        payments: true,
+      }
     });
     if (!patient) return res.status(404).json({ error: 'Patient not found' });
     res.json(patient);
@@ -79,38 +86,58 @@ export const createPatient = async (req, res) => {
       status
     } = req.body;
 
-    const newPatient = await prisma.$transaction(async (tx) => {
-      const user = await tx.user.create({
-        data: { email, password, role: 'Patient', status: status || 'Active' }
-      });
-      return tx.patient.create({
-        data: {
-          userId: user.id,
-          fullName,
-          phone,
-          dob,
-          bloodGroup,
-          age: age ? parseInt(age) : null,
-          gender,
-          address,
-          allergies,
-          existingConditions,
-          currentMedications,
-          medicalNotes,
-          emergencyName,
-          emergencyRelationship,
-          emergencyPhone,
-          emergencyEmail,
-          status: status || 'Active',
-        }
-      });
-    });
+    const db = await getDb();
 
-    res.status(201).json(newPatient);
-  } catch (error) {
-    if (error.code === 'P2002') {
-      return res.status(409).json({ error: 'A patient with this email already exists' });
+    if (email) {
+      const existingUser = await db.collection("User").findOne({ email });
+      if (existingUser) {
+        return res.status(409).json({ error: 'A patient with this email already exists' });
+      }
     }
+
+    const userId = new ObjectId();
+    const patientId = new ObjectId();
+    const now = new Date();
+
+    const userDoc = {
+      _id: userId,
+      email: email || `patient_${patientId.toString().slice(-6)}@medimate.com`,
+      password: password || "Patient@123456",
+      role: 'Patient',
+      status: status || 'Active',
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    const patientDoc = {
+      _id: patientId,
+      userId: userId,
+      fullName: fullName || "New Patient",
+      phone: phone || "",
+      dob: dob || null,
+      bloodGroup: bloodGroup || null,
+      age: age ? parseInt(age) : null,
+      gender: gender || null,
+      address: address || null,
+      allergies: allergies || null,
+      existingConditions: existingConditions || null,
+      currentMedications: currentMedications || null,
+      medicalNotes: medicalNotes || null,
+      emergencyName: emergencyName || null,
+      emergencyRelationship: emergencyRelationship || null,
+      emergencyPhone: emergencyPhone || null,
+      emergencyEmail: emergencyEmail || null,
+      status: status || 'Active',
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    await db.collection("User").insertOne(userDoc);
+    await db.collection("Patient").insertOne(patientDoc);
+
+    const created = { id: patientId.toString(), userId: userId.toString(), ...patientDoc };
+    res.status(201).json(created);
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -121,24 +148,46 @@ export const updatePatient = async (req, res) => {
     const {
       fullName, phone, dob, bloodGroup, age, gender, address, allergies,
       existingConditions, currentMedications, medicalNotes,
-      emergencyName, emergencyRelationship, emergencyPhone, emergencyEmail
+      emergencyName, emergencyRelationship, emergencyPhone, emergencyEmail,
+      status
     } = req.body;
 
-    const updated = await prisma.patient.update({
-      where: { id: req.params.id },
-      data: {
-        fullName, phone, dob, bloodGroup,
-        age: age ? parseInt(age) : undefined,
-        gender, address, allergies,
-        existingConditions, currentMedications, medicalNotes,
-        emergencyName, emergencyRelationship, emergencyPhone, emergencyEmail
-      }
-    });
-    res.json(updated);
-  } catch (error) {
-    if (error.code === 'P2025') {
+    const db = await getDb();
+    const patientId = new ObjectId(req.params.id);
+
+    const updateFields = {
+      ...(fullName !== undefined && { fullName }),
+      ...(phone !== undefined && { phone }),
+      ...(dob !== undefined && { dob }),
+      ...(bloodGroup !== undefined && { bloodGroup }),
+      ...(age !== undefined && { age: age ? parseInt(age) : null }),
+      ...(gender !== undefined && { gender }),
+      ...(address !== undefined && { address }),
+      ...(allergies !== undefined && { allergies }),
+      ...(existingConditions !== undefined && { existingConditions }),
+      ...(currentMedications !== undefined && { currentMedications }),
+      ...(medicalNotes !== undefined && { medicalNotes }),
+      ...(emergencyName !== undefined && { emergencyName }),
+      ...(emergencyRelationship !== undefined && { emergencyRelationship }),
+      ...(emergencyPhone !== undefined && { emergencyPhone }),
+      ...(emergencyEmail !== undefined && { emergencyEmail }),
+      ...(status !== undefined && { status }),
+      updatedAt: new Date(),
+    };
+
+    const result = await db.collection("Patient").findOneAndUpdate(
+      { _id: patientId },
+      { $set: updateFields },
+      { returnDocument: 'after' }
+    );
+
+    if (!result) {
       return res.status(404).json({ error: 'Patient not found' });
     }
+
+    const updated = { id: result._id.toString(), userId: result.userId?.toString(), ...result };
+    res.json(updated);
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -151,22 +200,28 @@ export const updatePatientStatus = async (req, res) => {
       return res.status(400).json({ error: 'Status must be Active or Inactive' });
     }
 
-    const [patient] = await prisma.$transaction([
-      prisma.patient.update({
-        where: { id: req.params.id },
-        data: { status }
-      }),
-      prisma.user.updateMany({
-        where: { patient: { id: req.params.id } },
-        data: { status }
-      })
-    ]);
+    const db = await getDb();
+    const patientId = new ObjectId(req.params.id);
+
+    const patient = await db.collection("Patient").findOneAndUpdate(
+      { _id: patientId },
+      { $set: { status, updatedAt: new Date() } },
+      { returnDocument: 'after' }
+    );
+
+    if (!patient) {
+      return res.status(404).json({ error: 'Patient not found' });
+    }
+
+    if (patient.userId) {
+      await db.collection("User").updateOne(
+        { _id: patient.userId },
+        { $set: { status, updatedAt: new Date() } }
+      );
+    }
 
     res.json({ message: `Patient ${status === 'Active' ? 'activated' : 'deactivated'} successfully`, patient });
   } catch (error) {
-    if (error.code === 'P2025') {
-      return res.status(404).json({ error: 'Patient not found' });
-    }
     res.status(500).json({ error: error.message });
   }
 };
@@ -174,13 +229,16 @@ export const updatePatientStatus = async (req, res) => {
 // DELETE — hard delete patient
 export const deletePatient = async (req, res) => {
   try {
-    const patient = await prisma.patient.findUnique({ where: { id: req.params.id } });
+    const db = await getDb();
+    const patientId = new ObjectId(req.params.id);
+
+    const patient = await db.collection("Patient").findOne({ _id: patientId });
     if (!patient) return res.status(404).json({ error: 'Patient not found' });
 
-    await prisma.$transaction([
-      prisma.patient.delete({ where: { id: req.params.id } }),
-      prisma.user.delete({ where: { id: patient.userId } })
-    ]);
+    await db.collection("Patient").deleteOne({ _id: patientId });
+    if (patient.userId) {
+      await db.collection("User").deleteOne({ _id: patient.userId });
+    }
 
     res.json({ message: 'Patient deleted successfully' });
   } catch (error) {

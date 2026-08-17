@@ -7,6 +7,8 @@ import StaffFilterBar from "../../../components/admin-components/staff/StaffFilt
 import StaffTable from "../../../components/admin-components/staff/StaffTable";
 import StaffComplianceWidgets from "../../../components/admin-components/staff/StaffComplianceWidgets";
 import ConfirmationModal from "../../../components/common/ConfirmationModal";
+import toast from "react-hot-toast";
+import { getFriendlyErrorMessage } from "../../../utils/userMessages";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -44,7 +46,8 @@ const StaffManagement = () => {
       setTotal(res.total || 0);
       setTotalPages(res.totalPages || 1);
     } catch (err) {
-      setError(err.message);
+      console.error("Failed to load staff:", err);
+      setError("We could not load the staff list. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -63,9 +66,11 @@ const StaffManagement = () => {
     try {
       await staffApi.delete(staffToDelete.id);
       setStaffToDelete(null);
+      toast.success("Staff member deleted successfully");
       fetchStaff();
     } catch (err) {
-      alert(`Failed to delete staff: ${err.message}`);
+      console.error("Failed to delete staff member:", err);
+      toast.error(getFriendlyErrorMessage(err, "We could not delete the staff member. Please try again."));
     } finally {
       setDeleting(false);
     }
@@ -165,6 +170,7 @@ const StaffManagement = () => {
         cancelText="Cancel"
         onConfirm={confirmDeleteStaff}
         onCancel={() => setStaffToDelete(null)}
+        loading={deleting}
       />
     </div>
   );

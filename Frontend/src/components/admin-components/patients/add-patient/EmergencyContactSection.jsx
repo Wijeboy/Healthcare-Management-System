@@ -1,6 +1,6 @@
 import React from "react";
 
-const EmergencyContactSection = ({ formData, handleChange }) => {
+const EmergencyContactSection = ({ formData, handleChange, showRequiredMark }) => {
   return (
     <div className="bg-white border border-[#E2E8F0] rounded-xl p-6 shadow-sm mb-6">
       <div className="flex items-center gap-3 mb-6">
@@ -21,7 +21,7 @@ const EmergencyContactSection = ({ formData, handleChange }) => {
         {/* Contact Name */}
         <div>
           <label className="block font-semibold text-slate-700 mb-1">
-            Contact Name <span className="text-rose-500">*</span>
+            Contact Name {showRequiredMark?.("emergencyName") && <span className="text-rose-500">*</span>}
           </label>
           <input
             type="text"
@@ -36,7 +36,7 @@ const EmergencyContactSection = ({ formData, handleChange }) => {
         {/* Relationship */}
         <div>
           <label className="block font-semibold text-slate-700 mb-1">
-            Relationship <span className="text-rose-500">*</span>
+            Relationship {showRequiredMark?.("emergencyRelationship") && <span className="text-rose-500">*</span>}
           </label>
           <select
             name="emergencyRelationship"
@@ -57,7 +57,7 @@ const EmergencyContactSection = ({ formData, handleChange }) => {
         {/* Contact Phone */}
         <div>
           <label className="block font-semibold text-slate-700 mb-1">
-            Contact Phone <span className="text-rose-500">*</span>
+            Contact Phone {showRequiredMark?.("emergencyPhone") && <span className="text-rose-500">*</span>}
           </label>
           <input
             type="text"

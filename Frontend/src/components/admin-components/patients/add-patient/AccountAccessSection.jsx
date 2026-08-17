@@ -5,6 +5,7 @@ const AccountAccessSection = ({
   handleChange,
   handleToggle,
   onGeneratePassword,
+  showRequiredMark,
 }) => {
   return (
     <div className="bg-white border border-[#E2E8F0] rounded-xl p-6 shadow-sm mb-6">
@@ -39,7 +40,7 @@ const AccountAccessSection = ({
         {/* Account Status */}
         <div>
           <label className="block font-semibold text-slate-700 mb-1">
-            Account Status <span className="text-rose-500">*</span>
+            Account Status {showRequiredMark?.("accountStatus") && <span className="text-rose-500">*</span>}
           </label>
           <select
             name="accountStatus"
@@ -56,7 +57,7 @@ const AccountAccessSection = ({
         {/* Temporary Password */}
         <div>
           <label className="block font-semibold text-slate-700 mb-1">
-            Temporary Password <span className="text-rose-500">*</span>
+            Temporary Password {showRequiredMark?.("tempPassword") && <span className="text-rose-500">*</span>}
           </label>
           <div className="flex items-center gap-2">
             <input

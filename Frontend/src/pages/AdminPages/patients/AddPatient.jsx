@@ -7,6 +7,9 @@ import MedicalInfoSection from "../../../components/admin-components/patients/ad
 import EmergencyContactSection from "../../../components/admin-components/patients/add-patient/EmergencyContactSection";
 import AccountAccessSection from "../../../components/admin-components/patients/add-patient/AccountAccessSection";
 import { patientApi } from "../../../services/api";
+import toast from "react-hot-toast";
+import { Loader2 } from "lucide-react";
+import { getFriendlyErrorMessage } from "../../../utils/userMessages";
 
 const AddPatient = () => {
   const navigate = useNavigate();
@@ -39,6 +42,32 @@ const AddPatient = () => {
 
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [submitAttempted, setSubmitAttempted] = useState(false);
+
+  const requiredFields = [
+    "fullName",
+    "dob",
+    "gender",
+    "bloodGroup",
+    "email",
+    "phone",
+    "address",
+    "allergies",
+    "emergencyName",
+    "emergencyRelationship",
+    "emergencyPhone",
+    "accountStatus",
+    "tempPassword",
+  ];
+
+  const isMissing = (field) => !String(formData[field] ?? "").trim();
+  const showRequiredMark = (field) => {
+    if (!requiredFields.includes(field)) return false;
+    return isMissing(field);
+  };
+
+  const validateForm = () =>
+    requiredFields.filter((field) => isMissing(field));
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -60,6 +89,16 @@ const AddPatient = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitError("");
+    setSubmitAttempted(true);
+
+    const missingFields = validateForm();
+    if (missingFields.length > 0) {
+      const message = "Please complete all required fields before registering the patient.";
+      setSubmitError(message);
+      toast.error(message);
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -85,9 +124,16 @@ const AddPatient = () => {
       };
 
       await patientApi.create(payload);
+      toast.success("Patient created successfully");
       navigate("/admin/patients");
     } catch (err) {
-      setSubmitError(err.message);
+      console.error("Failed to create patient:", err);
+      const friendlyMessage = getFriendlyErrorMessage(
+        err,
+        "We could not register the patient. Please try again."
+      );
+      setSubmitError(friendlyMessage);
+      toast.error(friendlyMessage);
     } finally {
       setLoading(false);
     }
@@ -130,19 +176,30 @@ const AddPatient = () => {
           <PersonalInfoSection
             formData={formData}
             handleChange={handleChange}
+            showRequiredMark={showRequiredMark}
           />
-          <ContactInfoSection formData={formData} handleChange={handleChange} />
+          <ContactInfoSection
+            formData={formData}
+            handleChange={handleChange}
+            showRequiredMark={showRequiredMark}
+          />
 
-          <MedicalInfoSection formData={formData} handleChange={handleChange} />
+          <MedicalInfoSection
+            formData={formData}
+            handleChange={handleChange}
+            showRequiredMark={showRequiredMark}
+          />
           <EmergencyContactSection
             formData={formData}
             handleChange={handleChange}
+            showRequiredMark={showRequiredMark}
           />
           <AccountAccessSection
             formData={formData}
             handleChange={handleChange}
             handleToggle={handleToggleInvitation}
             onGeneratePassword={handleGeneratePassword}
+            showRequiredMark={showRequiredMark}
           />
 
           {/* Action Buttons */}
@@ -167,7 +224,7 @@ const AddPatient = () => {
               disabled={loading}
               className="px-5 py-2 bg-[#0256CA] hover:bg-blue-700 text-white font-bold text-xs rounded-lg flex items-center gap-1.5 shadow-sm transition disabled:opacity-50"
             >
-              <Plus size={15} />
+              {loading ? <Loader2 size={15} className="animate-spin" /> : <Plus size={15} />}
               {loading ? "Registering..." : "Register Patient"}
             </button>
           </div>

@@ -7,7 +7,9 @@ import EditEmergencyContactSection from "../../../components/admin-components/pa
 import EditAccountAccessSection from "../../../components/admin-components/patients/edit-patient/EditAccountAccessSection";
 import EditPersonalInfoSection from "../../../components/admin-components/patients/edit-patient/EditPersonalInfoSection";
 import { patientApi } from "../../../services/api";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
+import toast from "react-hot-toast";
+import { getFriendlyErrorMessage } from "../../../utils/userMessages";
 
 const buildFormDataFromPatient = (patientId, p) => {
   if (!p) {
@@ -96,6 +98,7 @@ const EditPatient = () => {
       const p = await patientApi.getById(patientId);
       setFormData(buildFormDataFromPatient(patientId, p));
     } catch (err) {
+      console.error("Failed to load patient details:", err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -150,9 +153,12 @@ const EditPatient = () => {
       };
 
       await patientApi.update(patientId, payload);
+      toast.success("Patient updated successfully");
       navigate(`/admin/patients/details?id=${encodeURIComponent(patientId)}`);
     } catch (err) {
-      setSubmitError(err.message);
+      console.error("Failed to update patient:", err);
+      setSubmitError(getFriendlyErrorMessage(err, "We could not update the patient. Please try again."));
+      toast.error(getFriendlyErrorMessage(err, "We could not update the patient. Please try again."));
     } finally {
       setSaving(false);
     }
@@ -283,8 +289,9 @@ const EditPatient = () => {
             <button
               type="submit"
               disabled={saving}
-              className="px-5 py-2 bg-[#0256CA] hover:bg-blue-700 text-white font-bold text-xs rounded-lg shadow-sm transition disabled:opacity-50"
+              className="px-5 py-2 bg-[#0256CA] hover:bg-blue-700 text-white font-bold text-xs rounded-lg shadow-sm transition disabled:opacity-50 flex items-center gap-1.5"
             >
+              {saving ? <Loader2 size={15} className="animate-spin" /> : null}
               {saving ? "Saving..." : "Save Changes"}
             </button>
           </div>

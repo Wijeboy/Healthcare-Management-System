@@ -9,6 +9,8 @@ import DoctorsStatCard from "../../../components/admin-components/doctors/Doctor
 import DoctorsFilterBar from "../../../components/admin-components/doctors/DoctorsFilterBar";
 import DoctorCard from "../../../components/admin-components/doctors/DoctorCard";
 import ConfirmationModal from "../../../components/common/ConfirmationModal";
+import toast from "react-hot-toast";
+import { getFriendlyErrorMessage } from "../../../utils/userMessages";
 
 const ITEMS_PER_PAGE = 9;
 
@@ -47,7 +49,8 @@ const DoctorsManagement = () => {
       setTotal(res.total || 0);
       setTotalPages(res.totalPages || 1);
     } catch (err) {
-      setError(err.message);
+      console.error("Failed to load doctors:", err);
+      setError("We could not load the doctors list. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -74,9 +77,11 @@ const DoctorsManagement = () => {
     try {
       await doctorApi.delete(doctorToDelete.id);
       setDoctorToDelete(null);
+      toast.success("Doctor deleted successfully");
       fetchDoctors();
     } catch (err) {
-      alert(`Failed to delete doctor: ${err.message}`);
+      console.error("Failed to delete doctor:", err);
+      toast.error(getFriendlyErrorMessage(err, "We could not delete the doctor. Please try again."));
     } finally {
       setDeleting(false);
     }
@@ -238,6 +243,7 @@ const DoctorsManagement = () => {
         cancelText="Cancel"
         onConfirm={confirmDeleteDoctor}
         onCancel={() => setDoctorToDelete(null)}
+        loading={deleting}
       />
     </div>
   );

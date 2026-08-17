@@ -106,7 +106,8 @@ const DoctorDetails = () => {
       const data = await doctorApi.getById(doctorId);
       setDoctor(mapApiDoctorToUiDoctor(data));
     } catch (err) {
-      setError(err.message);
+      console.error("Failed to load doctor details:", err);
+      setError("We could not load the doctor profile. Please try again.");
     } finally {
       setLoading(false);
     }
