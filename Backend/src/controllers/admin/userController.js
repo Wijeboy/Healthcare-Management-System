@@ -1,3 +1,4 @@
+import bcrypt from 'bcrypt';
 import prisma from '../../config/prisma.js';
 
 // GET all users — pagination, search, filter by role/status
@@ -61,6 +62,63 @@ export const createUser = async (req, res) => {
   }
 };
 
+// POST â€” create a new admin account with admin profile
+export const createAdmin = async (req, res) => {
+  try {
+    const { email, password, fullName, phone, status = 'Active' } = req.body;
+    const tempPassword = password || `Adm@${Math.random().toString(36).slice(2, 8).toUpperCase()}${Date.now().toString(36).slice(-4).toUpperCase()}`;
+
+    if (!email || !fullName || !phone) {
+      return res.status(400).json({ error: 'Email, full name, and phone are required' });
+    }
+
+    const existingUser = await prisma.user.findUnique({
+      where: { email }
+    });
+
+    if (existingUser) {
+      return res.status(409).json({ error: 'Email already exists' });
+    }
+
+    const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
+    const createdAdmin = await prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          email,
+          password: hashedPassword,
+          role: 'Admin',
+          status,
+        }
+      });
+
+      const admin = await tx.admin.create({
+        data: {
+          userId: user.id,
+          fullName,
+          phone,
+        }
+      });
+
+      return {
+        ...user,
+        admin,
+      };
+    });
+
+    const { password: _, ...safeUser } = createdAdmin;
+    res.status(201).json({
+      ...safeUser,
+      tempPassword,
+    });
+  } catch (error) {
+    if (error.code === 'P2002') {
+      return res.status(409).json({ error: 'Email already exists' });
+    }
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // PUT — update user email / status
 export const updateUser = async (req, res) => {
   try {
@@ -100,7 +158,36 @@ export const assignRole = async (req, res) => {
 // DELETE — delete user account
 export const deleteUser = async (req, res) => {
   try {
-    await prisma.user.delete({ where: { id: req.params.id } });
+    const user = await prisma.user.findUnique({
+      where: { id: req.params.id },
+      include: {
+        admin: true,
+        doctor: true,
+        patient: true,
+        staff: true,
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    await prisma.$transaction(async (tx) => {
+      if (user.admin) {
+        await tx.admin.delete({ where: { id: user.admin.id } });
+      }
+      if (user.doctor) {
+        await tx.doctor.delete({ where: { id: user.doctor.id } });
+      }
+      if (user.patient) {
+        await tx.patient.delete({ where: { id: user.patient.id } });
+      }
+      if (user.staff) {
+        await tx.staff.delete({ where: { id: user.staff.id } });
+      }
+      await tx.user.delete({ where: { id: req.params.id } });
+    });
+
     res.json({ message: 'User deleted successfully' });
   } catch (error) {
     if (error.code === 'P2025') return res.status(404).json({ error: 'User not found' });

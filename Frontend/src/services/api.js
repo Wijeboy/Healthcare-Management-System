@@ -69,6 +69,7 @@ export const userApi = {
     return request('GET', `/admin/users${query ? `?${query}` : ''}`);
   },
   create:     (data)     => request('POST',  `/admin/users`, data),
+  createAdmin:(data)     => request('POST',  `/admin/users/admin`, data),
   update:     (id, data) => request('PUT',   `/admin/users/${id}`, data),
   assignRole: (id, role) => request('PATCH', `/admin/users/${id}/role`, { role }),
   delete:     (id)       => request('DELETE', `/admin/users/${id}`),
@@ -104,3 +105,8 @@ export const reportApi = {
   },
 };
 
+// ── SETTINGS ───────────────────────────────────────────────────────────────
+export const settingsApi = {
+  getAdminProfile: (email) => request('GET', `/admin/settings/profile?email=${encodeURIComponent(email)}`),
+  updateAdminProfile: (email, data) => request('PUT', `/admin/settings/profile?email=${encodeURIComponent(email)}`, data),
+};

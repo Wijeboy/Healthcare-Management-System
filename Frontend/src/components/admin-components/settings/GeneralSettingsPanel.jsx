@@ -1,143 +1,261 @@
-import React from "react";
-import {
-  BellRing,
-  CalendarDays,
-  Globe,
-  LockKeyhole,
-  MonitorCog,
-  ServerCog,
-  Smartphone,
-} from "lucide-react";
-import ToggleSwitch from "./ToggleSwitch";
-
-const settings = [
-  {
-    icon: Globe,
-    title: "Hospital timezone",
-    description: "Set the default timezone used for appointments, reports, and logs.",
-    value: "Asia/Colombo",
-  },
-  {
-    icon: CalendarDays,
-    title: "Date and time format",
-    description: "Standardize how dates are displayed across the admin portal.",
-    value: "DD/MM/YYYY | 24-hour",
-  },
-  {
-    icon: BellRing,
-    title: "Alert channels",
-    description: "Choose how system alerts and reminders are delivered to staff.",
-    value: "Email + In-app notifications",
-  },
-  {
-    icon: Smartphone,
-    title: "Mobile access",
-    description: "Allow staff to view operational updates from mobile devices.",
-    value: "Enabled",
-  },
-  {
-    icon: LockKeyhole,
-    title: "Session timeout",
-    description: "Automatically sign out inactive users for better security.",
-    value: "30 minutes",
-  },
-  {
-    icon: MonitorCog,
-    title: "Maintenance mode",
-    description: "Temporarily pause non-essential portal features during updates.",
-    value: "Disabled",
-  },
-  {
-    icon: ServerCog,
-    title: "Data backup",
-    description: "Run secure backups for patient, staff, and financial records.",
-    value: "Daily at 1:00 AM",
-  },
-];
+import React, { useEffect, useState } from "react";
+import { Loader2, LockKeyhole, Mail, Phone, ShieldCheck, User } from "lucide-react";
+import { settingsApi } from "../../../services/api";
+import toast from "react-hot-toast";
+import { getFriendlyErrorMessage } from "../../../utils/userMessages";
 
 const GeneralSettingsPanel = () => {
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [profile, setProfile] = useState(null);
+  const [formData, setFormData] = useState({
+    fullName: "",
+    phone: "",
+    email: "",
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      const email = localStorage.getItem("hmsEmail");
+      if (!email) {
+        setError("No admin session email was found. Please log in again.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const data = await settingsApi.getAdminProfile(email);
+        setProfile(data);
+        setFormData({
+          fullName: data.profile?.fullName || "",
+          phone: data.profile?.phone || "",
+          email: data.email || "",
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+      } catch (err) {
+        console.error("Failed to load admin profile:", err);
+        setError(getFriendlyErrorMessage(err, "We could not load your profile. Please try again."));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProfile();
+  }, []);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    if (!formData.fullName.trim() || !formData.phone.trim() || !formData.email.trim()) {
+      setError("Full name, phone, and email are required.");
+      return;
+    }
+
+    if (formData.newPassword || formData.confirmPassword || formData.currentPassword) {
+      if (!formData.currentPassword || !formData.newPassword) {
+        setError("Current password and new password are required to change the password.");
+        return;
+      }
+      if (formData.newPassword !== formData.confirmPassword) {
+        setError("New password and confirmation do not match.");
+        return;
+      }
+    }
+
+    setSaving(true);
+    try {
+      const updated = await settingsApi.updateAdminProfile(profile.email, {
+        fullName: formData.fullName.trim(),
+        phone: formData.phone.trim(),
+        newEmail: formData.email.trim(),
+        currentPassword: formData.currentPassword,
+        newPassword: formData.newPassword,
+      });
+
+      localStorage.setItem("hmsEmail", updated.email);
+      setProfile(updated);
+      setFormData((prev) => ({
+        ...prev,
+        email: updated.email,
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      }));
+      toast.success("Profile updated successfully");
+    } catch (err) {
+      console.error("Failed to update admin profile:", err);
+      const message = getFriendlyErrorMessage(err, "We could not update your profile. Please try again.");
+      setError(message);
+      toast.error(message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="rounded-2xl border border-slate-200 bg-white p-10 shadow-sm">
+        <div className="flex items-center justify-center gap-3 text-slate-500">
+          <Loader2 className="animate-spin" size={18} />
+          <span className="text-sm">Loading your admin profile...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h2 className="text-lg font-bold text-slate-900">General System Settings</h2>
-          <p className="text-xs text-slate-500 mt-1">
-            Configure defaults for scheduling, notifications, access, and backups.
+          <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-[#2563EB]">General Settings</p>
+          <h2 className="text-xl font-bold text-slate-900">Admin Profile & Password</h2>
+          <p className="text-sm text-slate-500 mt-1">
+            Update your own profile details and rotate your password securely.
           </p>
         </div>
-        <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-              System status
-            </p>
-            <p className="text-sm font-semibold text-slate-900">Operational</p>
-          </div>
-          <ToggleSwitch checked={true} onChange={() => {}} />
+        <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Signed in as</p>
+          <p className="mt-1 text-sm font-semibold text-slate-900">{profile?.email || formData.email}</p>
         </div>
       </div>
 
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-        {settings.map((item) => {
-          const Icon = item.icon;
-          return (
-            <div
-              key={item.title}
-              className="rounded-2xl border border-slate-200 bg-slate-50/70 p-5 hover:bg-slate-50 transition-colors"
-            >
-              <div className="flex items-start gap-4">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-[#1E3A8A] shadow-sm">
-                  <Icon size={18} />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-slate-900">{item.title}</p>
-                  <p className="mt-1 text-xs leading-6 text-slate-500">
-                    {item.description}
-                  </p>
-                  <div className="mt-3 inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-700 shadow-sm">
-                    {item.value}
-                  </div>
-                </div>
-              </div>
+      {error && (
+        <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="mt-6 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <label className="space-y-2">
+            <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Full Name</span>
+            <div className="relative">
+              <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                name="fullName"
+                value={formData.fullName}
+                onChange={handleChange}
+                className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/15"
+                placeholder="Your full name"
+              />
             </div>
-          );
-        })}
-      </div>
+          </label>
 
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <label className="space-y-2">
+            <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Phone</span>
+            <div className="relative">
+              <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/15"
+                placeholder="Phone number"
+              />
+            </div>
+          </label>
+
+          <label className="space-y-2">
+            <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Email</span>
+            <div className="relative">
+              <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/15"
+                placeholder="Email address"
+              />
+            </div>
+          </label>
+
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Account role</p>
+            <div className="mt-2 flex items-center gap-2 text-sm font-semibold text-slate-900">
+              <ShieldCheck size={16} className="text-[#2563EB]" />
+              Admin
+            </div>
+            <p className="mt-1 text-xs text-slate-500">
+              Role is fixed and managed by the system.
+            </p>
+          </div>
+        </div>
+
         <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-            Backup location
-          </p>
-          <p className="mt-2 text-sm font-semibold text-slate-900">
-            Encrypted cloud storage
-          </p>
-          <p className="mt-1 text-xs text-slate-500">
-            Patient, staff, and billing data are backed up automatically.
+          <div className="flex items-center gap-2">
+            <LockKeyhole size={16} className="text-[#2563EB]" />
+            <h3 className="text-sm font-bold text-slate-900">Change Password</h3>
+          </div>
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <input
+              type="password"
+              name="currentPassword"
+              value={formData.currentPassword}
+              onChange={handleChange}
+              placeholder="Current password"
+              className="rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/15"
+            />
+            <input
+              type="password"
+              name="newPassword"
+              value={formData.newPassword}
+              onChange={handleChange}
+              placeholder="New password"
+              className="rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/15"
+            />
+            <input
+              type="password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              placeholder="Confirm new password"
+              className="rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/15"
+            />
+          </div>
+          <p className="mt-3 text-xs text-slate-500">
+            Leave the password fields blank if you only want to update your profile details.
           </p>
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-            Default locale
-          </p>
-          <p className="mt-2 text-sm font-semibold text-slate-900">
-            Sri Lanka medical portal format
-          </p>
-          <p className="mt-1 text-xs text-slate-500">
-            Used across appointments, reports, and audit logs.
-          </p>
+
+        <div className="flex items-center justify-end gap-3">
+          <button
+            type="button"
+            onClick={() => setFormData((prev) => ({
+              ...prev,
+              fullName: profile?.profile?.fullName || "",
+              phone: profile?.profile?.phone || "",
+              email: profile?.email || "",
+              currentPassword: "",
+              newPassword: "",
+              confirmPassword: "",
+            }))}
+            className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            Reset
+          </button>
+          <button
+            type="submit"
+            disabled={saving}
+            className="inline-flex items-center gap-2 rounded-xl bg-[#1E3A8A] px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-900 disabled:opacity-60"
+          >
+            {saving ? <Loader2 size={16} className="animate-spin" /> : null}
+            {saving ? "Saving..." : "Save Changes"}
+          </button>
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-            Access policy
-          </p>
-          <p className="mt-2 text-sm font-semibold text-slate-900">
-            Role-based permissions
-          </p>
-          <p className="mt-1 text-xs text-slate-500">
-            Users only see the modules assigned to their role.
-          </p>
-        </div>
-      </div>
+      </form>
     </div>
   );
 };

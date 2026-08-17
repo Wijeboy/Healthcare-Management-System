@@ -91,6 +91,7 @@ export default function LoginPage() {
     // (Auth validation will be enforced once backend is connected)
     const role = ROLES.find((r) => r.key === selectedRole);
     localStorage.setItem("hmsRole", selectedRole);
+    localStorage.setItem("hmsEmail", email.trim());
     navigate(role.dashboard);
   };
 

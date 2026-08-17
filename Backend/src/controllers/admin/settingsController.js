@@ -1,46 +1,107 @@
+import bcrypt from 'bcrypt';
 import prisma from '../../config/prisma.js';
 
-export const getSettings = async (req, res) => {
+export const getAdminProfile = async (req, res) => {
   try {
-    const settings = await prisma.systemSetting.findMany();
-    // Convert array to an object map for easier frontend usage
-    const settingsMap = settings.reduce((acc, setting) => {
-      acc[setting.key] = setting.value;
-      return acc;
-    }, {});
-    
-    res.json(settingsMap);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
+    const { email } = req.query;
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
 
-export const updateSettings = async (req, res) => {
-  try {
-    const updates = req.body; // Expecting an object of key-value pairs
-    
-    // Update or create each setting
-    const promises = Object.keys(updates).map(key => {
-      return prisma.systemSetting.upsert({
-        where: { key },
-        update: { value: updates[key].toString() },
-        create: { key, value: updates[key].toString() }
-      });
+    const user = await prisma.user.findUnique({
+      where: { email },
+      include: {
+        admin: {
+          select: {
+            id: true,
+            fullName: true,
+            phone: true,
+          }
+        }
+      }
     });
 
-    await Promise.all(promises);
-    res.json({ message: 'Settings updated successfully' });
+    if (!user || user.role !== 'Admin') {
+      return res.status(404).json({ error: 'Admin profile not found' });
+    }
+
+    const { password: _, ...safeUser } = user;
+    res.json({
+      ...safeUser,
+      profile: user.admin,
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-export const getConfig = async (req, res) => {
+export const updateAdminProfile = async (req, res) => {
   try {
-    // Similar to getSettings but might return only public/client-facing settings
-    const settings = await prisma.systemSetting.findMany();
-    res.json(settings);
+    const { email } = req.query;
+    const { fullName, phone, newEmail, currentPassword, newPassword } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email },
+      include: { admin: true }
+    });
+
+    if (!user || user.role !== 'Admin') {
+      return res.status(404).json({ error: 'Admin profile not found' });
+    }
+
+    if (newPassword && !currentPassword) {
+      return res.status(400).json({ error: 'Current password is required to change the password' });
+    }
+
+    if (newPassword) {
+      const validPassword = await bcrypt.compare(currentPassword, user.password);
+      if (!validPassword) {
+        return res.status(400).json({ error: 'Current password is incorrect' });
+      }
+    }
+
+    const updatedUser = await prisma.$transaction(async (tx) => {
+      const userUpdate = await tx.user.update({
+        where: { id: user.id },
+        data: {
+          ...(newEmail && { email: newEmail }),
+          ...(newPassword && { password: await bcrypt.hash(newPassword, 10) }),
+        }
+      });
+
+      const adminUpdate = await tx.admin.update({
+        where: { id: user.admin.id },
+        data: {
+          ...(fullName !== undefined && { fullName }),
+          ...(phone !== undefined && { phone }),
+        }
+      });
+
+      return { userUpdate, adminUpdate };
+    });
+
+    const refreshed = await prisma.user.findUnique({
+      where: { id: updatedUser.userUpdate.id },
+      include: {
+        admin: {
+          select: { id: true, fullName: true, phone: true }
+        }
+      }
+    });
+
+    const { password: _, ...safeUser } = refreshed;
+    res.json({
+      ...safeUser,
+      profile: refreshed.admin,
+    });
   } catch (error) {
+    if (error.code === 'P2002') {
+      return res.status(409).json({ error: 'Email already exists' });
+    }
     res.status(500).json({ error: error.message });
   }
 };

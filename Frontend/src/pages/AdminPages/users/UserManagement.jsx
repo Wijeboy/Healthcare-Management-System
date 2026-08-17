@@ -4,10 +4,12 @@ import {
   Search, Plus, Trash2, Edit2, AlertCircle,
   ChevronLeft, ChevronRight, X, Check,
 } from "lucide-react";
-import { userApi } from "../../services/api";
-import ConfirmationModal from "../../components/common/ConfirmationModal";
+import { userApi } from "../../../services/api";
+import ConfirmationModal from "../../../components/common/ConfirmationModal";
+import AddAdminModal from "../../../components/admin-components/users/add-admin/AddAdminModal";
+import EditRoleModal from "../../../components/admin-components/users/EditRoleModal";
 import toast from "react-hot-toast";
-import { getFriendlyErrorMessage } from "../../utils/userMessages";
+import { getFriendlyErrorMessage } from "../../../utils/userMessages";
 
 const ROLE_COLORS = {
   Admin:   "bg-purple-100 text-purple-700",
@@ -21,78 +23,6 @@ const STATUS_COLORS = {
 };
 const ROLES = ["Patient", "Doctor", "Admin", "Staff"];
 const ITEMS_PER_PAGE = 12;
-
-// ── Inline Edit Role Modal ───────────────────────────────────────────────────
-function EditRoleModal({ user, onClose, onSave }) {
-  const [role, setRole] = useState(user.role);
-  const [saving, setSaving] = useState(false);
-
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      await userApi.assignRole(user.id, role);
-      toast.success("User role updated successfully");
-      onSave();
-      onClose();
-    } catch (err) {
-      console.error("Failed to update user role:", err);
-      toast.error(getFriendlyErrorMessage(err, "We could not update the role. Please try again."));
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg font-bold text-slate-800">Change Role</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 cursor-pointer">
-            <X size={20} />
-          </button>
-        </div>
-        <p className="text-sm text-slate-500 mb-4">
-          Changing role for: <span className="font-semibold text-slate-700">{user.email}</span>
-        </p>
-        <div className="grid grid-cols-2 gap-2 mb-6">
-          {ROLES.map((r) => (
-            <button
-              key={r}
-              onClick={() => setRole(r)}
-              className={`py-2.5 px-3 rounded-xl border-2 text-sm font-semibold transition ${
-                role === r
-                  ? "border-[#1E3A8A] bg-[#EFF6FF] text-[#1E3A8A]"
-                  : "border-slate-200 text-slate-600 hover:border-slate-300"
-              }`}
-            >
-              {r}
-            </button>
-          ))}
-        </div>
-        <div className="flex gap-3">
-          <button
-            onClick={onClose}
-            className="flex-1 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="flex-1 py-2.5 bg-[#1E3A8A] hover:bg-blue-900 text-white rounded-xl text-sm font-semibold disabled:opacity-60 flex items-center justify-center gap-2 cursor-pointer"
-          >
-            {saving ? (
-              <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Saving...</>
-            ) : (
-              <><Check size={16} />Save Role</>
-            )}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ── Main Component ───────────────────────────────────────────────────────────
 const UserManagement = () => {
   const [users, setUsers]             = useState([]);
@@ -106,6 +36,7 @@ const UserManagement = () => {
   const [statusFilter, setStatusFilter] = useState("All");
   const [userToDelete, setUserToDelete] = useState(null);
   const [userToEdit, setUserToEdit]   = useState(null);
+  const [showAddAdmin, setShowAddAdmin] = useState(false);
   const [deleting, setDeleting]       = useState(false);
 
   // ── Fetch ────────────────────────────────────────────────────────────────
@@ -160,8 +91,9 @@ const UserManagement = () => {
   };
 
   // ── Stats ────────────────────────────────────────────────────────────────
-  const activeCount = users.filter((u) => u.status === "Active").length;
   const adminCount  = users.filter((u) => u.role === "Admin").length;
+  const doctorCount = users.filter((u) => u.role === "Doctor").length;
+  const patientCount = users.filter((u) => u.role === "Patient").length;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-[#1E293B] font-sans">
@@ -175,21 +107,31 @@ const UserManagement = () => {
               Manage all system accounts — Admins, Doctors, Patients, and Staff — with role and status control.
             </p>
           </div>
-          <button
-            onClick={fetchUsers}
-            className="p-2.5 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 transition cursor-pointer"
-            title="Refresh"
-          >
-            <RefreshCw size={16} />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={fetchUsers}
+              className="p-2.5 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 transition cursor-pointer"
+              title="Refresh"
+            >
+              <RefreshCw size={16} />
+            </button>
+            <button
+              onClick={() => setShowAddAdmin(true)}
+              className="px-4 py-2.5 bg-[#1E3A8A] hover:bg-blue-900 text-white font-bold text-xs rounded-lg flex items-center gap-1.5 shadow-sm transition cursor-pointer"
+            >
+              <Plus size={16} />
+              Add Admin
+            </button>
+          </div>
         </div>
 
         {/* Stat Cards */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           {[
-            { label: "Total Users",   value: total,       icon: Users,       color: "bg-blue-50 text-blue-600" },
-            { label: "Active Users",  value: activeCount, icon: ShieldCheck, color: "bg-emerald-50 text-emerald-600" },
-            { label: "Admin Users",   value: adminCount,  icon: UserX,       color: "bg-purple-50 text-purple-600" },
+            { label: "Total Users",   value: total,         icon: Users,       color: "bg-blue-50 text-blue-600" },
+            { label: "Admin Users",   value: adminCount,   icon: UserX,       color: "bg-purple-50 text-purple-600" },
+            { label: "Doctor Users",  value: doctorCount,  icon: ShieldCheck, color: "bg-blue-50 text-blue-600" },
+            { label: "Active Users",  value: users.filter((u) => u.status === "Active").length, icon: Users, color: "bg-emerald-50 text-emerald-600" },
           ].map(({ label, value, icon: Icon, color }) => (
             <div key={label} className="bg-white border border-slate-200 rounded-xl p-5 flex items-center gap-4">
               <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${color}`}>
@@ -282,10 +224,10 @@ const UserManagement = () => {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Profile</th>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Email</th>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Role</th>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Profile</th>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Created</th>
                     <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">Actions</th>
                   </tr>
@@ -296,6 +238,7 @@ const UserManagement = () => {
                     const profileName = profile?.fullName || "—";
                     return (
                       <tr key={user.id} className="hover:bg-slate-50 transition-colors">
+                        <td className="px-6 py-4 text-slate-600">{profileName}</td>
                         <td className="px-6 py-4 font-medium text-slate-800">{user.email}</td>
                         <td className="px-6 py-4">
                           <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${ROLE_COLORS[user.role] || "bg-slate-100 text-slate-600"}`}>
@@ -307,7 +250,6 @@ const UserManagement = () => {
                             {user.status}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-slate-600">{profileName}</td>
                         <td className="px-6 py-4 text-slate-400 text-xs">
                           {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "—"}
                         </td>
@@ -393,12 +335,15 @@ const UserManagement = () => {
         onCancel={() => setUserToDelete(null)}
         loading={deleting}
       />
+
+      {showAddAdmin && (
+        <AddAdminModal
+          onClose={() => setShowAddAdmin(false)}
+          onCreated={fetchUsers}
+        />
+      )}
     </div>
   );
 };
 
 export default UserManagement;
-
-
-
-
