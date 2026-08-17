@@ -36,10 +36,13 @@ export default function Sidebar() {
     navigate("/login", { replace: true });
   };
   const isDoctor = location.pathname.startsWith("/doctor");
+  const isPatient = location.pathname.startsWith("/patient");
+  const currentPortalLabel = isDoctor ? "doctor" : isPatient ? "patient" : "admin";
+  const currentPortalTitle = isDoctor ? "Doctor Portal" : isPatient ? "Patient Portal" : "Admin Portal";
 
   const navItems = isDoctor ? DOCTOR_NAV_ITEMS : ADMIN_NAV_ITEMS;
   const rootPath = isDoctor ? "/doctor" : "/admin";
-  const brandLabel = isDoctor ? "Doctor Portal" : "Admin Portal";
+  const brandLabel = currentPortalTitle;
 
   const bottomItems = isDoctor
     ? [
@@ -110,7 +113,7 @@ export default function Sidebar() {
       <ConfirmationModal
         open={showLogoutConfirm}
         title="Log Out"
-        message="Are you sure you want to log out of the admin dashboard?"
+        message={`Are you sure you want to log out of the ${currentPortalLabel} dashboard?`}
         confirmText="Log Out"
         cancelText="Cancel"
         onConfirm={handleLogout}
