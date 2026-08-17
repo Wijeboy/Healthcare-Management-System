@@ -1,14 +1,14 @@
 import React, { useMemo, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Edit, MoreHorizontal, ArrowLeft } from "lucide-react";
-import { mockPatients } from "../../data/mockData";
-import PatientHeaderCard from "../../components/patients/patient-details/PatientHeaderCard";
-import PatientNavigationTabs from "../../components/patients/patient-details/PatientNavigationTabs";
-import PersonalInfoCard from "../../components/patients/patient-details/PersonalInfoCard";
-import ContactInfoCard from "../../components/patients/patient-details/ContactInfoCard";
-import MedicalSummaryCard from "../../components/patients/patient-details/MedicalSummaryCard";
-import AccountAccessCard from "../../components/patients/patient-details/AccountAccessCard";
-import UpcomingAppointmentsCard from "../../components/patients/patient-details/UpcomingAppointmentsCard";
+import { mockPatients } from "../../../data/mockData";
+import PatientHeaderCard from "../../../components/admin-components/patients/patient-details/PatientHeaderCard";
+import PatientNavigationTabs from "../../../components/admin-components/patients/patient-details/PatientNavigationTabs";
+import PersonalInfoCard from "../../../components/admin-components/patients/patient-details/PersonalInfoCard";
+import ContactInfoCard from "../../../components/admin-components/patients/patient-details/ContactInfoCard";
+import MedicalSummaryCard from "../../../components/admin-components/patients/patient-details/MedicalSummaryCard";
+import AccountAccessCard from "../../../components/admin-components/patients/patient-details/AccountAccessCard";
+import UpcomingAppointmentsCard from "../../../components/admin-components/patients/patient-details/UpcomingAppointmentsCard";
 
 const buildPatientDetails = (patient) => {
   if (!patient) return null;
@@ -68,7 +68,8 @@ const buildPatientDetails = (patient) => {
       systemRole: "Patient",
       accountStatus: patient.status ?? "ACTIVE",
       userId,
-      username: patient.username ?? (patient.email ? patient.email.split("@")[0] : ""),
+      username:
+        patient.username ?? (patient.email ? patient.email.split("@")[0] : ""),
       lastLogin: "Not available",
       profileCreated: "Not available",
     },
@@ -123,9 +124,12 @@ const PatientDetails = () => {
   }
 
   const handleEdit = () => {
-    navigate(`/dashboard/patients-management/edit-patient?id=${encodeURIComponent(selectedPatient.id)}`, {
-      state: { patient: selectedPatient },
-    });
+    navigate(
+      `/dashboard/patients-management/edit-patient?id=${encodeURIComponent(selectedPatient.id)}`,
+      {
+        state: { patient: selectedPatient },
+      },
+    );
   };
 
   return (

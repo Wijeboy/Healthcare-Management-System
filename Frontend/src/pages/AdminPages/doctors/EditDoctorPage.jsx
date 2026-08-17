@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import EditDoctorHeaderBanner from "../../components/doctors/edit-doctor/EditDoctorHeaderBanner";
-import EditPersonalInfoSection from "../../components/doctors/edit-doctor/EditPersonalInfoSection";
-import EditProfessionalInfoSection from "../../components/doctors/edit-doctor/EditProfessionalInfoSection";
-import EditAvailabilitySection from "../../components/doctors/edit-doctor/EditAvailabilitySection";
-import EditAccountAccessSection from "../../components/doctors/edit-doctor/EditAccountAccessSection";
-import { mockDoctors } from "../../data/mockData";
+import EditDoctorHeaderBanner from "../../../components/admin-components/doctors/edit-doctor/EditDoctorHeaderBanner";
+import EditPersonalInfoSection from "../../../components/admin-components/doctors/edit-doctor/EditPersonalInfoSection";
+import EditProfessionalInfoSection from "../../../components/admin-components/doctors/edit-doctor/EditProfessionalInfoSection";
+import EditAvailabilitySection from "../../../components/admin-components/doctors/edit-doctor/EditAvailabilitySection";
+import EditAccountAccessSection from "../../../components/admin-components/doctors/edit-doctor/EditAccountAccessSection";
+import { mockDoctors } from "../../../data/mockData";
 
 const buildFormDataFromDoctor = (doctorId, doctorProfile) => {
   if (!doctorProfile) {
@@ -64,7 +64,7 @@ const buildFormDataFromDoctor = (doctorId, doctorProfile) => {
     availabilityStatus:
       doctorProfile.availabilityText === "Available"
         ? "Available"
-        : doctorProfile.availabilityText ?? "Available",
+        : (doctorProfile.availabilityText ?? "Available"),
     systemRole: doctorProfile.account?.systemRole ?? "Doctor",
     accountStatus: doctorProfile.account?.accountStatus ?? "Active",
     tempPassword: "",
@@ -200,7 +200,8 @@ const EditDoctorPage = () => {
                 selectedDoctor?.specialty ||
                 formData.department,
               accountStatus:
-                selectedDoctor?.account?.accountStatus || formData.accountStatus,
+                selectedDoctor?.account?.accountStatus ||
+                formData.accountStatus,
               lastUpdated: formData.lastUpdated,
               updatedBy: formData.updatedBy,
             }}

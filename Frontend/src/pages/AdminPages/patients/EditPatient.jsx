@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import EditPatientHeaderBanner from "../../components/patients/edit-patient/EditPatientHeaderBanner";
-import EditContactInfoSection from "../../components/patients/edit-patient/EditContactInfoSection";
-import EditMedicalInfoSection from "../../components/patients/edit-patient/EditMedicalInfoSection";
-import EditEmergencyContactSection from "../../components/patients/edit-patient/EditEmergencyContactSection";
-import EditAccountAccessSection from "../../components/patients/edit-patient/EditAccountAccessSection";
-import EditPersonalInfoSection from "../../components/patients/edit-patient/EditPersonalInfoSection";
-import { mockPatients } from "../../data/mockData";
+import EditPatientHeaderBanner from "../../../components/admin-components/patients/edit-patient/EditPatientHeaderBanner";
+import EditContactInfoSection from "../../../components/admin-components/patients/edit-patient/EditContactInfoSection";
+import EditMedicalInfoSection from "../../../components/admin-components/patients/edit-patient/EditMedicalInfoSection";
+import EditEmergencyContactSection from "../../../components/admin-components/patients/edit-patient/EditEmergencyContactSection";
+import EditAccountAccessSection from "../../../components/admin-components/patients/edit-patient/EditAccountAccessSection";
+import EditPersonalInfoSection from "../../../components/admin-components/patients/edit-patient/EditPersonalInfoSection";
+import { mockPatients } from "../../../data/mockData";
 
 const buildFormDataFromPatient = (patientId, patientProfile) => {
   if (!patientProfile) {
@@ -64,10 +64,14 @@ const buildFormDataFromPatient = (patientId, patientProfile) => {
     email: patientProfile.email ?? "",
     phone: patientProfile.phone ?? "",
     address: patientProfile.address ?? "",
-    allergies: patientProfile.allergies ?? patientProfile.medicalSummaryTitle ?? "",
+    allergies:
+      patientProfile.allergies ?? patientProfile.medicalSummaryTitle ?? "",
     existingConditions: patientProfile.existingConditions ?? "",
     currentMedications: patientProfile.currentMedications ?? "",
-    medicalNotes: patientProfile.medicalNotes ?? patientProfile.medicalSummarySubtitle ?? "",
+    medicalNotes:
+      patientProfile.medicalNotes ??
+      patientProfile.medicalSummarySubtitle ??
+      "",
     emergencyName: patientProfile.emergencyName ?? "",
     emergencyRelationship: patientProfile.emergencyRelationship ?? "",
     emergencyPhone: patientProfile.emergencyPhone ?? "",
@@ -95,7 +99,7 @@ const EditPatient = () => {
   const patientNotFound = Boolean(patientId) && !selectedPatient;
 
   const [formData, setFormData] = useState(() =>
-    buildFormDataFromPatient(patientId, selectedPatient)
+    buildFormDataFromPatient(patientId, selectedPatient),
   );
 
   useEffect(() => {
@@ -135,7 +139,8 @@ const EditPatient = () => {
               Patient not found
             </h1>
             <p className="mt-2 text-sm text-amber-800">
-              We could not find a patient record for id <span className="font-semibold">{patientId}</span>.
+              We could not find a patient record for id{" "}
+              <span className="font-semibold">{patientId}</span>.
             </p>
             <button
               type="button"
@@ -147,73 +152,77 @@ const EditPatient = () => {
           </div>
         ) : (
           <>
-        <div className="mb-5">
-          <nav className="text-xs font-medium text-slate-500 mb-1 flex items-center gap-1.5">
-            <button type="button" onClick={() => navigate("/dashboard/patients-management")} className="text-[#2563EB] hover:underline font-semibold">
-              Patients Management
-            </button>
-            <span>&gt;</span>
-            <span className="text-slate-400">Edit Patient</span>
-          </nav>
+            <div className="mb-5">
+              <nav className="text-xs font-medium text-slate-500 mb-1 flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => navigate("/dashboard/patients-management")}
+                  className="text-[#2563EB] hover:underline font-semibold"
+                >
+                  Patients Management
+                </button>
+                <span>&gt;</span>
+                <span className="text-slate-400">Edit Patient</span>
+              </nav>
 
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            Edit Patient
-          </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Review and update the patient's personal details, medical information,
-            emergency contact, and account access.
-          </p>
-        </div>
+              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                Edit Patient
+              </h1>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Review and update the patient's personal details, medical
+                information, emergency contact, and account access.
+              </p>
+            </div>
 
-        <EditPatientHeaderBanner patient={formData} />
+            <EditPatientHeaderBanner patient={formData} />
 
-        <form onSubmit={handleSubmit}>
-          <EditPersonalInfoSection
-            formData={formData}
-            handleChange={handleChange}
-          />
-          <EditContactInfoSection
-            formData={formData}
-            handleChange={handleChange}
-          />
-          <EditMedicalInfoSection
-            formData={formData}
-            handleChange={handleChange}
-          />
-          <EditEmergencyContactSection
-            formData={formData}
-            handleChange={handleChange}
-          />
-          <EditAccountAccessSection
-            formData={formData}
-            handleChange={handleChange}
-            handleToggle={handleToggleInvitation}
-            onGeneratePassword={handleGeneratePassword}
-          />
+            <form onSubmit={handleSubmit}>
+              <EditPersonalInfoSection
+                formData={formData}
+                handleChange={handleChange}
+              />
+              <EditContactInfoSection
+                formData={formData}
+                handleChange={handleChange}
+              />
+              <EditMedicalInfoSection
+                formData={formData}
+                handleChange={handleChange}
+              />
+              <EditEmergencyContactSection
+                formData={formData}
+                handleChange={handleChange}
+              />
+              <EditAccountAccessSection
+                formData={formData}
+                handleChange={handleChange}
+                handleToggle={handleToggleInvitation}
+                onGeneratePassword={handleGeneratePassword}
+              />
 
-          <div className="flex items-center justify-end gap-3 mt-8">
-            <button
-              type="button"
-              onClick={() => navigate("/dashboard/patients-management")}
-              className="px-4 py-2 border border-[#CBD5E1] bg-white text-slate-700 font-bold text-xs rounded-lg hover:bg-slate-50 transition"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={handleReset}
-              className="px-4 py-2 border border-[#CBD5E1] bg-white text-slate-700 font-bold text-xs rounded-lg hover:bg-slate-50 transition"
-            >
-              Reset Changes
-            </button>
-            <button
-              type="submit"
-              className="px-5 py-2 bg-[#0256CA] hover:bg-blue-700 text-white font-bold text-xs rounded-lg shadow-sm transition"
-            >
-              Save Changes
-            </button>
-          </div>
-        </form>
+              <div className="flex items-center justify-end gap-3 mt-8">
+                <button
+                  type="button"
+                  onClick={() => navigate("/dashboard/patients-management")}
+                  className="px-4 py-2 border border-[#CBD5E1] bg-white text-slate-700 font-bold text-xs rounded-lg hover:bg-slate-50 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="px-4 py-2 border border-[#CBD5E1] bg-white text-slate-700 font-bold text-xs rounded-lg hover:bg-slate-50 transition"
+                >
+                  Reset Changes
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-[#0256CA] hover:bg-blue-700 text-white font-bold text-xs rounded-lg shadow-sm transition"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
           </>
         )}
       </div>

@@ -9,11 +9,11 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { mockDoctors } from "../../data/mockData";
-import DoctorsStatCard from "../../components/doctors/DoctorsStatCard";
-import DoctorsFilterBar from "../../components/doctors/DoctorsFilterBar";
-import DoctorCard from "../../components/doctors/DoctorCard";
-import ConfirmationModal from "../../components/common/ConfirmationModal";
+import { mockDoctors } from "../../../data/mockData";
+import DoctorsStatCard from "../../../components/admin-components/doctors/DoctorsStatCard";
+import DoctorsFilterBar from "../../../components/admin-components/doctors/DoctorsFilterBar";
+import DoctorCard from "../../../components/admin-components/doctors/DoctorCard";
+import ConfirmationModal from "../../../components/common/ConfirmationModal";
 
 const DoctorsManagement = () => {
   const navigate = useNavigate();
@@ -67,7 +67,9 @@ const DoctorsManagement = () => {
             </div>
             <button
               type="button"
-              onClick={() => navigate("/dashboard/doctors-management/add-doctor")}
+              onClick={() =>
+                navigate("/dashboard/doctors-management/add-doctor")
+              }
               className="flex items-center gap-2 bg-[#1E3A8A] hover:bg-blue-900 text-white px-4 py-2.5 rounded-lg font-medium text-sm transition shadow-sm"
             >
               <Plus size={16} />

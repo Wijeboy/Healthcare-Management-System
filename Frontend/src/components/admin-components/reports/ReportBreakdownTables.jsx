@@ -1,11 +1,13 @@
 import React from "react";
-import { reportData } from "../../data/reportData";
+import { reportData } from "../../../data/reportData";
 
 const ReportBreakdownTables = () => {
   return (
     <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h3 className="text-lg font-bold text-slate-900">Appointment Summary</h3>
+        <h3 className="text-lg font-bold text-slate-900">
+          Appointment Summary
+        </h3>
         <p className="text-xs text-slate-500 mt-1">
           Total, approved, cancelled, and pending appointments.
         </p>
@@ -15,8 +17,12 @@ const ReportBreakdownTables = () => {
               key={item.label}
               className="flex items-center justify-between rounded-lg bg-slate-50 px-4 py-3"
             >
-              <span className="text-sm font-medium text-slate-700">{item.label}</span>
-              <span className="text-sm font-bold text-slate-900">{item.value}</span>
+              <span className="text-sm font-medium text-slate-700">
+                {item.label}
+              </span>
+              <span className="text-sm font-bold text-slate-900">
+                {item.value}
+              </span>
             </div>
           ))}
         </div>
@@ -39,8 +45,12 @@ const ReportBreakdownTables = () => {
             <tbody className="divide-y divide-slate-100">
               {reportData.tables.doctors.map((doctor) => (
                 <tr key={doctor.name} className="hover:bg-slate-50/70">
-                  <td className="px-4 py-3 font-medium text-slate-800">{doctor.name}</td>
-                  <td className="px-4 py-3 text-slate-500">{doctor.department}</td>
+                  <td className="px-4 py-3 font-medium text-slate-800">
+                    {doctor.name}
+                  </td>
+                  <td className="px-4 py-3 text-slate-500">
+                    {doctor.department}
+                  </td>
                   <td className="px-4 py-3 text-right font-bold text-slate-900">
                     {doctor.appointments}
                   </td>
@@ -59,7 +69,9 @@ const ReportBreakdownTables = () => {
         <div className="mt-5 space-y-3">
           {reportData.tables.patientRegistrations.map((item) => (
             <div key={item.period} className="flex items-center gap-3">
-              <div className="w-10 text-xs font-bold text-slate-500">{item.period}</div>
+              <div className="w-10 text-xs font-bold text-slate-500">
+                {item.period}
+              </div>
               <div className="flex-1 rounded-full bg-slate-100 h-3 overflow-hidden">
                 <div
                   className="h-full rounded-full bg-[#1E3A8A]"
@@ -101,7 +113,9 @@ const ReportBreakdownTables = () => {
                   <td className="px-4 py-3 font-semibold text-slate-800">
                     {row.title}
                   </td>
-                  <td className="px-4 py-3 text-slate-500">{row.description}</td>
+                  <td className="px-4 py-3 text-slate-500">
+                    {row.description}
+                  </td>
                   <td className="px-4 py-3 text-right font-bold text-slate-900">
                     {row.value}
                   </td>

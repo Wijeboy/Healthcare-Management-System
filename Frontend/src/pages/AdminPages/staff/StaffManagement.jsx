@@ -1,11 +1,11 @@
 import React, { useMemo, useState } from "react";
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import StaffStatCards from "../../components/staff/StaffStatCards";
-import StaffFilterBar from "../../components/staff/StaffFilterBar";
-import StaffTable from "../../components/staff/StaffTable";
-import StaffComplianceWidgets from "../../components/staff/StaffComplianceWidgets";
-import { mockStaff } from "../../data/mockData";
+import StaffStatCards from "../../../components/admin-components/staff/StaffStatCards";
+import StaffFilterBar from "../../../components/admin-components/staff/StaffFilterBar";
+import StaffTable from "../../../components/admin-components/staff/StaffTable";
+import StaffComplianceWidgets from "../../../components/admin-components/staff/StaffComplianceWidgets";
+import { mockStaff } from "../../../data/mockData";
 
 const MONTHS = {
   jan: 0,
@@ -59,7 +59,14 @@ const StaffManagement = () => {
     return mockStaff.filter((staff) => {
       const matchesSearch =
         !query ||
-        [staff.id, staff.name, staff.email, staff.phone, staff.role, staff.department]
+        [
+          staff.id,
+          staff.name,
+          staff.email,
+          staff.phone,
+          staff.role,
+          staff.department,
+        ]
           .filter(Boolean)
           .some((value) => value.toLowerCase().includes(query));
 
@@ -116,7 +123,9 @@ const StaffManagement = () => {
             <div className="flex items-center gap-2">
               <button
                 className="px-4 py-2.5 bg-[#1E3A8A] hover:bg-blue-900 text-white font-bold text-xs rounded-lg flex items-center gap-1.5 shadow-sm transition"
-                onClick={() => navigate("/dashboard/staff-management/add-staff")}
+                onClick={() =>
+                  navigate("/dashboard/staff-management/add-staff")
+                }
               >
                 <Plus size={16} />
                 Add New Staff

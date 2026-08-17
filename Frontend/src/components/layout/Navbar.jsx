@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link } from "react-router-dom"
-import NotificationPanel from '../dashboard/NotificationPanel'
+import NotificationPanel from '../admin-components/dashboard/NotificationPanel'
 
 export default function Navbar() {
   const [showNotifications, setShowNotifications] = useState(false)

@@ -13,7 +13,7 @@ import {
   Filler,
 } from "chart.js";
 import { Bar, Doughnut, Line } from "react-chartjs-2";
-import { reportData } from "../../data/reportData";
+import { reportData } from "../../../data/reportData";
 
 ChartJS.register(
   CategoryScale,
@@ -25,7 +25,7 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  Filler
+  Filler,
 );
 
 const lineData = {
@@ -154,7 +154,9 @@ const ReportAnalyticsCharts = () => {
       <div className="xl:col-span-3 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex items-center justify-between gap-4 mb-5">
           <div>
-            <h3 className="text-lg font-bold text-slate-900">Appointment Trends</h3>
+            <h3 className="text-lg font-bold text-slate-900">
+              Appointment Trends
+            </h3>
             <p className="text-xs text-slate-500 mt-1">
               Appointments by day of week.
             </p>
