@@ -6,37 +6,117 @@ import { getDb, ObjectId, checkUniqueNic } from '../../config/mongo.js';
 export const getPatients = async (req, res) => {
   try {
     const { page = 1, limit = 10, search, status } = req.query;
-    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const pageNum = parseInt(page) || 1;
+    const limitNum = parseInt(limit) || 10;
+    const skip = (pageNum - 1) * limitNum;
 
-    const where = {
-      ...(search && {
-        OR: [
-          { fullName: { contains: search, mode: 'insensitive' } },
-          { phone:    { contains: search, mode: 'insensitive' } },
-          { user: { email: { contains: search, mode: 'insensitive' } } }
-        ]
-      }),
-      ...(status && status !== 'All' && { status })
-    };
+    try {
+      const where = {
+        ...(search && {
+          OR: [
+            { fullName: { contains: search, mode: 'insensitive' } },
+            { phone:    { contains: search, mode: 'insensitive' } },
+            { user: { email: { contains: search, mode: 'insensitive' } } }
+          ]
+        }),
+        ...(status && status !== 'All' && { status })
+      };
 
-    const [patients, total] = await Promise.all([
-      prisma.patient.findMany({
-        where,
-        skip,
-        take: parseInt(limit),
-        orderBy: { createdAt: 'desc' },
-        include: { user: { select: { email: true, status: true } } }
-      }),
-      prisma.patient.count({ where })
-    ]);
+      const [patients, total] = await Promise.all([
+        prisma.patient.findMany({
+          where,
+          skip,
+          take: limitNum,
+          orderBy: { createdAt: 'desc' },
+          include: { user: { select: { email: true, status: true } } }
+        }),
+        prisma.patient.count({ where })
+      ]);
 
-    res.json({
-      data: patients,
-      total,
-      page: parseInt(page),
-      limit: parseInt(limit),
-      totalPages: Math.ceil(total / parseInt(limit))
-    });
+      return res.json({
+        data: patients,
+        total,
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(total / limitNum)
+      });
+    } catch (prismaErr) {
+      const db = await getDb();
+      const matchFilter = {
+        ...(status && status !== 'All' && { status })
+      };
+
+      if (search) {
+        const searchRegex = new RegExp(search, 'i');
+        matchFilter.$or = [
+          { fullName: searchRegex },
+          { phone: searchRegex },
+          { email: searchRegex },
+          { nationalId: searchRegex }
+        ];
+      }
+
+      const [patients, total] = await Promise.all([
+        db.collection("Patient")
+          .find(matchFilter)
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(limitNum)
+          .toArray(),
+        db.collection("Patient").countDocuments(matchFilter)
+      ]);
+
+      const formattedData = await Promise.all(
+        patients.map(async (p) => {
+          let userDoc = null;
+          if (p.userId) {
+            try {
+              const userObjId = typeof p.userId === 'string' ? new ObjectId(p.userId) : p.userId;
+              userDoc = await db.collection("User").findOne({ _id: userObjId });
+            } catch (e) {
+              userDoc = null;
+            }
+          }
+
+          return {
+            id: p._id.toString(),
+            _id: p._id.toString(),
+            userId: p.userId ? p.userId.toString() : null,
+            fullName: p.fullName || "Unnamed Patient",
+            phone: p.phone || "",
+            dob: p.dob || null,
+            bloodGroup: p.bloodGroup || null,
+            age: p.age || null,
+            gender: p.gender || null,
+            nationalId: p.nationalId || null,
+            address: p.address || null,
+            allergies: p.allergies || null,
+            existingConditions: p.existingConditions || null,
+            currentMedications: p.currentMedications || null,
+            medicalNotes: p.medicalNotes || null,
+            emergencyName: p.emergencyName || null,
+            emergencyRelationship: p.emergencyRelationship || null,
+            emergencyPhone: p.emergencyPhone || null,
+            emergencyEmail: p.emergencyEmail || null,
+            status: p.status || 'Active',
+            createdAt: p.createdAt,
+            updatedAt: p.updatedAt,
+            user: {
+              email: p.email || userDoc?.email || `patient_${p._id.toString().slice(-6)}@medimate.com`,
+              status: p.status || userDoc?.status || 'Active',
+            }
+          };
+        })
+      );
+
+      return res.json({
+        data: formattedData,
+        total,
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(total / limitNum)
+      });
+    }
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -45,18 +125,59 @@ export const getPatients = async (req, res) => {
 // GET single patient by ID
 export const getPatientById = async (req, res) => {
   try {
-    const patient = await prisma.patient.findUnique({
-      where: { id: req.params.id },
-      include: {
-        user: { select: { email: true, status: true, createdAt: true } },
-        appointments: true,
-        medicalRecords: true,
-        prescriptions: true,
-      }
-    });
+    try {
+      const patient = await prisma.patient.findUnique({
+        where: { id: req.params.id },
+        include: {
+          user: { select: { email: true, status: true, createdAt: true } },
+          appointments: true,
+          medicalRecords: true,
+          prescriptions: true,
+        }
+      });
 
+      if (patient) return res.json(patient);
+    } catch (prismaErr) {}
+
+    const db = await getDb();
+    let patientId;
+    try {
+      patientId = new ObjectId(req.params.id);
+    } catch (e) {
+      return res.status(404).json({ error: 'Invalid Patient ID' });
+    }
+
+    const patient = await db.collection("Patient").findOne({ _id: patientId });
     if (!patient) return res.status(404).json({ error: 'Patient not found' });
-    res.json(patient);
+
+    let userDoc = null;
+    if (patient.userId) {
+      try {
+        const userObjId = typeof patient.userId === 'string' ? new ObjectId(patient.userId) : patient.userId;
+        userDoc = await db.collection("User").findOne({ _id: userObjId });
+      } catch (e) {
+        userDoc = null;
+      }
+    }
+
+    const appointments = await db.collection("Appointment").find({ patientId: patient._id }).toArray();
+    const medicalRecords = await db.collection("MedicalRecord").find({ patientId: patient._id }).toArray();
+    const prescriptions = await db.collection("Prescription").find({ patientId: patient._id }).toArray();
+
+    res.json({
+      id: patient._id.toString(),
+      _id: patient._id.toString(),
+      userId: patient.userId ? patient.userId.toString() : null,
+      ...patient,
+      user: {
+        email: patient.email || userDoc?.email || 'N/A',
+        status: patient.status || userDoc?.status || 'Active',
+        createdAt: userDoc?.createdAt || patient.createdAt,
+      },
+      appointments,
+      medicalRecords,
+      prescriptions,
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
