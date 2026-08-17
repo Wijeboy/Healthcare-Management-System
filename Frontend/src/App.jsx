@@ -18,6 +18,10 @@ import AddStaff from "./pages/staff/AddStaff";
 import EditStaff from "./pages/staff/EditStaff";
 import StaffDetails from "./pages/staff/StaffDetails";
 import ReportsAnalytics from "./pages/reports/ReportsAnalytics";
+import DoctorDashboard from "./pages/DoctorDashboard";
+import PatientDashboard from "./pages/PatientDashboard";
+
+
 
 
 function App() {
@@ -46,6 +50,10 @@ function App() {
         <Route path="reports-analytics" element={<ReportsAnalytics />} />
         <Route path="system-settings" element={<SystemSettingsPage />} />
       </Route>
+
+      {/* Role-specific dashboards */}
+      <Route path="/dashboard/doctor" element={<DoctorDashboard />} />
+      <Route path="/dashboard/patient" element={<PatientDashboard />} />
 
       {/* Default redirect */}
       <Route path="*" element={<Navigate to="/login" replace />} />
