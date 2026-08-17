@@ -76,19 +76,22 @@ const GeneralSettingsPanel = () => {
 
     setSaving(true);
     try {
-      const updated = await settingsApi.updateAdminProfile(profile.email, {
+      const currentEmail = profile?.email || localStorage.getItem("hmsEmail");
+      const updated = await settingsApi.updateAdminProfile(currentEmail, {
         fullName: formData.fullName.trim(),
         phone: formData.phone.trim(),
-        newEmail: formData.email.trim(),
         currentPassword: formData.currentPassword,
         newPassword: formData.newPassword,
       });
 
-      localStorage.setItem("hmsEmail", updated.email);
+      const updatedEmail = updated.email || updated.user?.email || formData.email.trim();
+      localStorage.setItem("hmsEmail", updatedEmail);
       setProfile(updated);
       setFormData((prev) => ({
         ...prev,
-        email: updated.email,
+        fullName: updated.profile?.fullName || formData.fullName.trim(),
+        phone: updated.profile?.phone || formData.phone.trim(),
+        email: updatedEmail,
         currentPassword: "",
         newPassword: "",
         confirmPassword: "",
@@ -175,11 +178,13 @@ const GeneralSettingsPanel = () => {
                 name="email"
                 type="email"
                 value={formData.email}
-                onChange={handleChange}
-                className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/15"
+                readOnly
+                disabled
+                className="w-full rounded-xl border border-slate-200 bg-slate-100 py-3 pl-10 pr-4 text-sm text-slate-500 cursor-not-allowed outline-none"
                 placeholder="Email address"
               />
             </div>
+            <p className="text-[11px] text-slate-400">Email address is fixed and cannot be changed.</p>
           </label>
 
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">

@@ -1,4 +1,5 @@
 import prisma from '../../config/prisma.js';
+import bcrypt from 'bcrypt';
 import { getDb, ObjectId, checkUniqueNic } from '../../config/mongo.js';
 
 // GET all staff — pagination, search, filter by department/status
@@ -67,7 +68,7 @@ const calcAgeFromDob = (dobStr) => {
   return calculated > 0 ? calculated : null;
 };
 
-// POST — create new staff member
+// POST — create new staff member (creates User record with userId, but staff cannot log in)
 export const createStaff = async (req, res) => {
   try {
     const {
@@ -98,11 +99,13 @@ export const createStaff = async (req, res) => {
     const staffId = new ObjectId();
     const now = new Date();
     const computedAge = age ? parseInt(age) : calcAgeFromDob(dob);
+    const rawPassword = password || "Staff@123456";
+    const hashedPassword = await bcrypt.hash(rawPassword, 10);
 
     const userDoc = {
       _id: userId,
       email: email || `staff_${staffId.toString().slice(-6)}@medimate.com`,
-      password: password || "Staff@123456",
+      password: hashedPassword,
       role: 'Staff',
       status: employeeStatus || 'Active',
       createdAt: now,

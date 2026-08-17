@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import prisma from '../../config/prisma.js';
+import { getDb, ObjectId } from '../../config/mongo.js';
 
 export const getAdminProfile = async (req, res) => {
   try {
@@ -8,8 +9,11 @@ export const getAdminProfile = async (req, res) => {
       return res.status(400).json({ error: 'Email is required' });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email },
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // 1. Check Prisma User
+    const prismaUser = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
       include: {
         admin: {
           select: {
@@ -21,14 +25,61 @@ export const getAdminProfile = async (req, res) => {
       }
     });
 
-    if (!user || user.role !== 'Admin') {
+    let safeUser = null;
+    let adminProfile = null;
+
+    if (prismaUser && prismaUser.role === 'Admin') {
+      const { password: _, ...rest } = prismaUser;
+      safeUser = rest;
+      if (prismaUser.admin) {
+        adminProfile = prismaUser.admin;
+      }
+    }
+
+    // 2. Check MongoDB for User/Admin if needed
+    const db = await getDb();
+    const mongoUser = await db.collection("User").findOne({ email: normalizedEmail });
+
+    if (mongoUser && mongoUser.role === 'Admin') {
+      if (!safeUser) {
+        safeUser = {
+          id: mongoUser._id.toString(),
+          email: mongoUser.email,
+          role: mongoUser.role,
+          status: mongoUser.status,
+          createdAt: mongoUser.createdAt,
+          updatedAt: mongoUser.updatedAt,
+        };
+      }
+
+      if (!adminProfile) {
+        const userIdStr = mongoUser._id.toString();
+        const foundAdmin = await db.collection("Admin").findOne({
+          $or: [
+            { userId: userIdStr },
+            { userId: mongoUser._id },
+            { userId: new ObjectId(mongoUser._id) }
+          ]
+        });
+
+        if (foundAdmin) {
+          adminProfile = {
+            id: foundAdmin._id.toString(),
+            fullName: foundAdmin.fullName || "System Admin",
+            phone: foundAdmin.phone || "",
+          };
+        }
+      }
+    }
+
+    if (!safeUser) {
       return res.status(404).json({ error: 'Admin profile not found' });
     }
 
-    const { password: _, ...safeUser } = user;
-    res.json({
+    return res.json({
       ...safeUser,
-      profile: user.admin,
+      email: safeUser.email || normalizedEmail,
+      profile: adminProfile || { fullName: "System Admin", phone: "" },
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -44,64 +95,102 @@ export const updateAdminProfile = async (req, res) => {
       return res.status(400).json({ error: 'Email is required' });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email },
-      include: { admin: true }
-    });
+    const normalizedEmail = email.trim().toLowerCase();
+    const targetEmail = newEmail ? newEmail.trim().toLowerCase() : normalizedEmail;
 
-    if (!user || user.role !== 'Admin') {
-      return res.status(404).json({ error: 'Admin profile not found' });
+    const db = await getDb();
+
+    // 1. Fetch User from MongoDB
+    let mongoUser = await db.collection("User").findOne({ email: normalizedEmail });
+
+    if (!mongoUser) {
+      return res.status(404).json({ error: 'Admin user not found' });
     }
 
+    // 2. Collision check if email is changing
+    if (newEmail && targetEmail !== normalizedEmail) {
+      const existingUser = await db.collection("User").findOne({ email: targetEmail });
+      if (existingUser) {
+        return res.status(409).json({ error: 'An account with this email already exists' });
+      }
+    }
+
+    // 3. Password verification & hashing
     if (newPassword && !currentPassword) {
       return res.status(400).json({ error: 'Current password is required to change the password' });
     }
 
-    if (newPassword) {
-      const validPassword = await bcrypt.compare(currentPassword, user.password);
+    if (newPassword && mongoUser.password) {
+      const validPassword = await bcrypt.compare(currentPassword, mongoUser.password);
       if (!validPassword) {
         return res.status(400).json({ error: 'Current password is incorrect' });
       }
     }
 
-    const updatedUser = await prisma.$transaction(async (tx) => {
-      const userUpdate = await tx.user.update({
-        where: { id: user.id },
-        data: {
-          ...(newEmail && { email: newEmail }),
-          ...(newPassword && { password: await bcrypt.hash(newPassword, 10) }),
-        }
-      });
+    let hashedNewPassword = null;
+    if (newPassword) {
+      hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    }
 
-      const adminUpdate = await tx.admin.update({
-        where: { id: user.admin.id },
-        data: {
-          ...(fullName !== undefined && { fullName }),
-          ...(phone !== undefined && { phone }),
-        }
-      });
+    // 4. Update User record in MongoDB
+    const userUpdateFields = {
+      ...(newEmail && { email: targetEmail }),
+      ...(hashedNewPassword && { password: hashedNewPassword }),
+      updatedAt: new Date(),
+    };
 
-      return { userUpdate, adminUpdate };
+    await db.collection("User").updateOne(
+      { _id: mongoUser._id },
+      { $set: userUpdateFields }
+    );
+
+    // 5. Update Admin profile record in MongoDB
+    const userIdStr = mongoUser._id.toString();
+    const adminUpdateFields = {
+      ...(fullName !== undefined && { fullName: fullName.trim() }),
+      ...(phone !== undefined && { phone: phone.trim() }),
+      updatedAt: new Date(),
+    };
+
+    await db.collection("Admin").updateOne(
+      {
+        $or: [
+          { userId: userIdStr },
+          { userId: mongoUser._id },
+          { userId: new ObjectId(mongoUser._id) }
+        ]
+      },
+      {
+        $set: {
+          userId: userIdStr,
+          ...adminUpdateFields
+        }
+      },
+      { upsert: true }
+    );
+
+    const updatedAdminDoc = await db.collection("Admin").findOne({
+      $or: [
+        { userId: userIdStr },
+        { userId: mongoUser._id },
+        { userId: new ObjectId(mongoUser._id) }
+      ]
     });
 
-    const refreshed = await prisma.user.findUnique({
-      where: { id: updatedUser.userUpdate.id },
-      include: {
-        admin: {
-          select: { id: true, fullName: true, phone: true }
-        }
+    return res.json({
+      user: {
+        id: userIdStr,
+        email: targetEmail,
+        role: 'Admin',
+      },
+      email: targetEmail,
+      profile: {
+        id: updatedAdminDoc?._id?.toString(),
+        fullName: fullName !== undefined ? fullName.trim() : (updatedAdminDoc?.fullName || "System Admin"),
+        phone: phone !== undefined ? phone.trim() : (updatedAdminDoc?.phone || ""),
       }
     });
-
-    const { password: _, ...safeUser } = refreshed;
-    res.json({
-      ...safeUser,
-      profile: refreshed.admin,
-    });
   } catch (error) {
-    if (error.code === 'P2002') {
-      return res.status(409).json({ error: 'Email already exists' });
-    }
     res.status(500).json({ error: error.message });
   }
 };

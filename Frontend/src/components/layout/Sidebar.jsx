@@ -1,4 +1,6 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { useState } from "react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import ConfirmationModal from "../common/ConfirmationModal";
 
 const ADMIN_NAV_ITEMS = [
   { icon: "dashboard",       label: "Dashboard",          path: "/admin" },
@@ -24,6 +26,15 @@ const DOCTOR_NAV_ITEMS = [
 
 export default function Sidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+  const handleLogout = () => {
+    localStorage.removeItem("hmsRole");
+    localStorage.removeItem("hmsEmail");
+    setShowLogoutConfirm(false);
+    navigate("/login", { replace: true });
+  };
   const isDoctor = location.pathname.startsWith("/doctor");
 
   const navItems = isDoctor ? DOCTOR_NAV_ITEMS : ADMIN_NAV_ITEMS;
@@ -78,16 +89,35 @@ export default function Sidebar() {
       {/* Bottom Section */}
       <div className="mt-auto space-y-1 border-t border-outline-variant pt-6">
         {bottomItems.map((item) => (
-          <NavLink
+          <button
             key={item.label}
-            to={item.path}
-            className="flex items-center gap-4 px-4 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all rounded-lg text-xs font-semibold tracking-widest uppercase"
+            type="button"
+            onClick={() => {
+              if (item.label === "Logout") {
+                setShowLogoutConfirm(true);
+                return;
+              }
+              navigate(item.path);
+            }}
+            className="w-full flex items-center gap-4 px-4 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all rounded-lg text-xs font-semibold tracking-widest uppercase text-left"
           >
             <span className="material-symbols-outlined">{item.icon}</span>
             <span>{item.label}</span>
-          </NavLink>
+          </button>
         ))}
       </div>
+
+      <ConfirmationModal
+        open={showLogoutConfirm}
+        title="Log Out"
+        message="Are you sure you want to log out of the admin dashboard?"
+        confirmText="Log Out"
+        cancelText="Cancel"
+        onConfirm={handleLogout}
+        onCancel={() => setShowLogoutConfirm(false)}
+        loading={false}
+        destructive={true}
+      />
     </aside>
   );
 }

@@ -1,4 +1,5 @@
 import prisma from '../../config/prisma.js';
+import bcrypt from 'bcrypt';
 import { getDb, ObjectId, checkUniqueNic } from '../../config/mongo.js';
 
 // GET all patients — pagination, search, filter
@@ -104,11 +105,13 @@ export const createPatient = async (req, res) => {
     const patientId = new ObjectId();
     const now = new Date();
     const computedAge = age ? parseInt(age) : calcAgeFromDob(dob);
+    const rawPassword = password || "Patient@123456";
+    const hashedPassword = await bcrypt.hash(rawPassword, 10);
 
     const userDoc = {
       _id: userId,
       email: email || `patient_${patientId.toString().slice(-6)}@medimate.com`,
-      password: password || "Patient@123456",
+      password: hashedPassword,
       role: 'Patient',
       status: status || 'Active',
       createdAt: now,

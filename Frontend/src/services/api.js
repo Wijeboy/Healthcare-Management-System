@@ -110,3 +110,8 @@ export const settingsApi = {
   getAdminProfile: (email) => request('GET', `/admin/settings/profile?email=${encodeURIComponent(email)}`),
   updateAdminProfile: (email, data) => request('PUT', `/admin/settings/profile?email=${encodeURIComponent(email)}`, data),
 };
+
+// â”€â”€â”€ AUTH â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+export const authApi = {
+  login: (data) => request('POST', '/auth/login', data),
+};

@@ -49,8 +49,10 @@ export const getUsers = async (req, res) => {
 export const createUser = async (req, res) => {
   try {
     const { email, password, role, status } = req.body;
+    const rawPassword = password || "User@123456";
+    const hashedPassword = await bcrypt.hash(rawPassword, 10);
     const user = await prisma.user.create({
-      data: { email, password, role, status: status || 'Active' }
+      data: { email, password: hashedPassword, role, status: status || 'Active' }
     });
     const { password: _, ...safeUser } = user;
     res.status(201).json(safeUser);
