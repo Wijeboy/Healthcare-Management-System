@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { Plus } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import PersonalInfoSection from "../../components/patients/add-patient/PersonalInfoSection";
-import ContactInfoSection from "../../components/patients/add-patient/ContactInfoSection";
-import MedicalInfoSection from "../../components/patients/add-patient/MedicalInfoSection";
-import EmergencyContactSection from "../../components/patients/add-patient/EmergencyContactSection";
-import AccountAccessSection from "../../components/patients/add-patient/AccountAccessSection";
+import PersonalInfoSection from "../../../components/patients/add-patient/PersonalInfoSection";
+import ContactInfoSection from "../../../components/patients/add-patient/ContactInfoSection";
+import MedicalInfoSection from "../../../components/patients/add-patient/MedicalInfoSection";
+import EmergencyContactSection from "../../../components/patients/add-patient/EmergencyContactSection";
+import AccountAccessSection from "../../../components/patients/add-patient/AccountAccessSection";
 
 const AddPatient = () => {
   const navigate = useNavigate();

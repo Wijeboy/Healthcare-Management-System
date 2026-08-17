@@ -1,13 +1,13 @@
 import React, { useMemo, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Edit, MoreHorizontal, ArrowLeft } from "lucide-react";
-import { mockDoctors } from "../../data/mockData";
-import DoctorProfileHeaderCard from "../../components/doctors/doctor-details/DoctorProfileHeaderCard";
-import PersonalInfoCard from "../../components/doctors/doctor-details/PersonalInfoCard";
-import ProfessionalInfoCard from "../../components/doctors/doctor-details/ProfessionalInfoCard";
-import CurrentAvailabilityCard from "../../components/doctors/doctor-details/CurrentAvailabilityCard";
-import AccountAccessCard from "../../components/doctors/doctor-details/AccountAccessCard";
-import UpcomingAppointmentsTable from "../../components/doctors/doctor-details/UpcomingAppointmentsTable";
+import { mockDoctors } from "../../../data/mockData";
+import DoctorProfileHeaderCard from "../../../components/doctors/doctor-details/DoctorProfileHeaderCard";
+import PersonalInfoCard from "../../../components/doctors/doctor-details/PersonalInfoCard";
+import ProfessionalInfoCard from "../../../components/doctors/doctor-details/ProfessionalInfoCard";
+import CurrentAvailabilityCard from "../../../components/doctors/doctor-details/CurrentAvailabilityCard";
+import AccountAccessCard from "../../../components/doctors/doctor-details/AccountAccessCard";
+import UpcomingAppointmentsTable from "../../../components/doctors/doctor-details/UpcomingAppointmentsTable";
 
 const DoctorDetails = () => {
   const navigate = useNavigate();
