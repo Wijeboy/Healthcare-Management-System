@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { mockStaff } from "../../data/mockData";
-import EditStaffHeaderBanner from "../../components/staff/edit-staff/EditStaffHeaderBanner";
-import PersonalInfoSection from "../../components/staff/add-staff/PersonalInfoSection";
-import ContactInfoSection from "../../components/staff/add-staff/ContactInfoSection";
-import WorkInfoSection from "../../components/staff/add-staff/WorkInfoSection";
-import ReviewSection from "../../components/staff/add-staff/ReviewSection";
+import { mockStaff } from "../../../data/mockData";
+import EditStaffHeaderBanner from "../../../components/staff/edit-staff/EditStaffHeaderBanner";
+import PersonalInfoSection from "../../../components/staff/add-staff/PersonalInfoSection";
+import ContactInfoSection from "../../../components/staff/add-staff/ContactInfoSection";
+import WorkInfoSection from "../../../components/staff/add-staff/WorkInfoSection";
+import ReviewSection from "../../../components/staff/add-staff/ReviewSection";
 
 const buildFormData = (staff) => ({
   fullName: staff?.name ?? "",
