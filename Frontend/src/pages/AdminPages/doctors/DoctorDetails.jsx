@@ -2,12 +2,12 @@ import React, { useMemo, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Edit, MoreHorizontal, ArrowLeft } from "lucide-react";
 import { mockDoctors } from "../../../data/mockData";
-import DoctorProfileHeaderCard from "../../../components/doctors/doctor-details/DoctorProfileHeaderCard";
-import PersonalInfoCard from "../../../components/doctors/doctor-details/PersonalInfoCard";
-import ProfessionalInfoCard from "../../../components/doctors/doctor-details/ProfessionalInfoCard";
-import CurrentAvailabilityCard from "../../../components/doctors/doctor-details/CurrentAvailabilityCard";
-import AccountAccessCard from "../../../components/doctors/doctor-details/AccountAccessCard";
-import UpcomingAppointmentsTable from "../../../components/doctors/doctor-details/UpcomingAppointmentsTable";
+import DoctorProfileHeaderCard from "../../../components/admin-components/doctors/doctor-details/DoctorProfileHeaderCard";
+import PersonalInfoCard from "../../../components/admin-components/doctors/doctor-details/PersonalInfoCard";
+import ProfessionalInfoCard from "../../../components/admin-components/doctors/doctor-details/ProfessionalInfoCard";
+import CurrentAvailabilityCard from "../../../components/admin-components/doctors/doctor-details/CurrentAvailabilityCard";
+import AccountAccessCard from "../../../components/admin-components/doctors/doctor-details/AccountAccessCard";
+import UpcomingAppointmentsTable from "../../../components/admin-components/doctors/doctor-details/UpcomingAppointmentsTable";
 
 const DoctorDetails = () => {
   const navigate = useNavigate();
@@ -88,7 +88,9 @@ const DoctorDetails = () => {
               <button
                 type="button"
                 onClick={() =>
-                  navigate(`/dashboard/doctors-management/edit-doctor?id=${doctor.id}`)
+                  navigate(
+                    `/dashboard/doctors-management/edit-doctor?id=${doctor.id}`,
+                  )
                 }
                 className="px-4 py-2 border border-[#CBD5E1] bg-white text-slate-700 font-bold text-xs rounded-lg hover:bg-slate-50 flex items-center gap-2 shadow-sm transition"
               >
@@ -130,7 +132,9 @@ const DoctorDetails = () => {
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <CurrentAvailabilityCard schedule={doctor.scheduleDetails || []} />
+                <CurrentAvailabilityCard
+                  schedule={doctor.scheduleDetails || []}
+                />
                 <AccountAccessCard account={doctor.account} />
               </div>
 

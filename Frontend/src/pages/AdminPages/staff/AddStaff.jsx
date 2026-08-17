@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import FormSectionHeader from "../../components/staff/add-staff/FormSectionHeader";
-import PersonalInfoSection from "../../components/staff/add-staff/PersonalInfoSection";
-import ContactInfoSection from "../../components/staff/add-staff/ContactInfoSection";
-import WorkInfoSection from "../../components/staff/add-staff/WorkInfoSection";
-import ReviewSection from "../../components/staff/add-staff/ReviewSection";
+import FormSectionHeader from "../../../components/admin-components/staff/add-staff/FormSectionHeader";
+import PersonalInfoSection from "../../../components/admin-components/staff/add-staff/PersonalInfoSection";
+import ContactInfoSection from "../../../components/admin-components/staff/add-staff/ContactInfoSection";
+import WorkInfoSection from "../../../components/admin-components/staff/add-staff/WorkInfoSection";
+import ReviewSection from "../../../components/admin-components/staff/add-staff/ReviewSection";
 
 const AddStaff = () => {
   const navigate = useNavigate();

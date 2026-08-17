@@ -1,12 +1,12 @@
 import React, { useMemo } from "react";
 import { ArrowLeft, Edit, MoreHorizontal } from "lucide-react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { mockStaff } from "../../data/mockData";
-import StaffHeaderCard from "../../components/staff/staff-details/StaffHeaderCard";
-import StaffPersonalInfoCard from "../../components/staff/staff-details/StaffPersonalInfoCard";
-import StaffWorkInfoCard from "../../components/staff/staff-details/StaffWorkInfoCard";
-import StaffContactInfoCard from "../../components/staff/staff-details/StaffContactInfoCard";
-import StaffAccountCard from "../../components/staff/staff-details/StaffAccountCard";
+import { mockStaff } from "../../../data/mockData";
+import StaffHeaderCard from "../../../components/admin-components/staff/staff-details/StaffHeaderCard";
+import StaffPersonalInfoCard from "../../../components/admin-components/staff/staff-details/StaffPersonalInfoCard";
+import StaffWorkInfoCard from "../../../components/admin-components/staff/staff-details/StaffWorkInfoCard";
+import StaffContactInfoCard from "../../../components/admin-components/staff/staff-details/StaffContactInfoCard";
+import StaffAccountCard from "../../../components/admin-components/staff/staff-details/StaffAccountCard";
 
 const StaffDetails = () => {
   const navigate = useNavigate();
@@ -15,7 +15,9 @@ const StaffDetails = () => {
   const staffId = searchParams.get("id");
 
   const staff = useMemo(() => {
-    return location.state?.staff || mockStaff.find((item) => item.id === staffId);
+    return (
+      location.state?.staff || mockStaff.find((item) => item.id === staffId)
+    );
   }, [location.state?.staff, staffId]);
 
   if (!staffId || !staff) {
@@ -80,7 +82,7 @@ const StaffDetails = () => {
                 onClick={() =>
                   navigate(
                     `/dashboard/staff-management/edit-staff?id=${encodeURIComponent(staff.id)}`,
-                    { state: { staff } }
+                    { state: { staff } },
                   )
                 }
                 className="px-4 py-2 bg-[#1E3A8A] hover:bg-blue-950 text-white text-xs font-bold rounded-lg flex items-center gap-1.5"

@@ -1,8 +1,8 @@
 import React from "react";
 import { Download, Filter, PieChart, TrendingUp } from "lucide-react";
-import ReportOverviewCards from "../../../components/reports/ReportOverviewCards";
-import ReportAnalyticsCharts from "../../../components/reports/ReportAnalyticsCharts";
-import ReportBreakdownTables from "../../../components/reports/ReportBreakdownTables";
+import ReportOverviewCards from "../../../components/admin-components/reports/ReportOverviewCards";
+import ReportAnalyticsCharts from "../../../components/admin-components/reports/ReportAnalyticsCharts";
+import ReportBreakdownTables from "../../../components/admin-components/reports/ReportBreakdownTables";
 import { reportData } from "../../../data/reportData";
 
 const ReportsAnalytics = () => {

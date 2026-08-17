@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
-import PatientStatCards from "../../components/patients/PatientStatCards";
-import PatientFilterBar from "../../components/patients/PatientFilterBar";
-import PatientsTable from "../../components/patients/PatientsTable";
-import PatientComplianceWidgets from "../../components/patients/PatientComplianceWidgets";
-import ConfirmationModal from "../../components/common/ConfirmationModal";
-import { mockPatients } from "../../data/mockData";
+import PatientStatCards from "../../../components/admin-components/patients/PatientStatCards";
+import PatientFilterBar from "../../../components/admin-components/patients/PatientFilterBar";
+import PatientsTable from "../../../components/admin-components/patients/PatientsTable";
+import PatientComplianceWidgets from "../../../components/admin-components/patients/PatientComplianceWidgets";
+import ConfirmationModal from "../../../components/common/ConfirmationModal";
+import { mockPatients } from "../../../data/mockData";
 
 const PatientsManagement = () => {
   const navigate = useNavigate();
@@ -40,8 +40,8 @@ const PatientsManagement = () => {
     navigate(
       `/dashboard/patients-management/details?id=${encodeURIComponent(patient.id)}`,
       {
-      state: { patient },
-      }
+        state: { patient },
+      },
     );
   };
 
@@ -69,7 +69,9 @@ const PatientsManagement = () => {
 
             <button
               className="px-4 py-2.5 bg-[#0256CA] hover:bg-blue-700 text-white font-bold text-xs rounded-xl flex items-center gap-2 shadow-sm transition cursor-pointer"
-              onClick={() => navigate("/dashboard/patients-management/add-patient")}
+              onClick={() =>
+                navigate("/dashboard/patients-management/add-patient")
+              }
             >
               <Plus size={16} />
               Register New Patient
@@ -105,7 +107,7 @@ const PatientsManagement = () => {
                 `/dashboard/patients-management/edit-patient?id=${encodeURIComponent(patient.id)}`,
                 {
                   state: { patient },
-                }
+                },
               )
             }
             onDeletePatient={handleDeletePatient}

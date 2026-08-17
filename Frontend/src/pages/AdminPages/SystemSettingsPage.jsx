@@ -1,10 +1,9 @@
 import React, { useState } from "react";
-import RolesPermissionsMatrix from "../components/settings/RolesPermissionsMatrix";
-import SecurityMetricsCards from "../components/settings/SecurityMetricsCards";
-import SettingsSidebarNav from "../components/settings/SettingsSidebarNav";
-import GeneralSettingsPanel from "../components/settings/GeneralSettingsPanel";
-import AuditLogsPanel from "../components/settings/AuditLogsPanel";
-
+import RolesPermissionsMatrix from "../../components/admin-components/settings/RolesPermissionsMatrix";
+import SecurityMetricsCards from "../../components/admin-components/settings/SecurityMetricsCards";
+import SettingsSidebarNav from "../../components/admin-components/settings/SettingsSidebarNav";
+import GeneralSettingsPanel from "../../components/admin-components/settings/GeneralSettingsPanel";
+import AuditLogsPanel from "../../components/admin-components/settings/AuditLogsPanel";
 
 const SystemSettingsPage = () => {
   const [activeTab, setActiveTab] = useState("roles");

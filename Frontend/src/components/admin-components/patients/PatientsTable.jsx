@@ -3,10 +3,10 @@ import {
   Upload,
   ChevronLeft,
   ChevronRight,
-  MoreHorizontal,
   PencilLine,
   Trash2,
   Eye,
+  MoreVertical,
 } from "lucide-react";
 
 const PatientsTable = ({
@@ -194,7 +194,7 @@ const PatientsTable = ({
                       }
                       className="p-1 text-slate-400 hover:text-slate-600 transition rounded-md hover:bg-slate-100"
                     >
-                      <MoreHorizontal size={16} />
+                      <MoreVertical size={16} />
                     </button>
 
                     {openMenuId === patient.id && (
