@@ -18,6 +18,7 @@ import AddStaff from "./pages/AdminPages/staff/AddStaff";
 import EditStaff from "./pages/AdminPages/staff/EditStaff";
 import StaffDetails from "./pages/AdminPages/staff/StaffDetails";
 import ReportsAnalytics from "./pages/AdminPages/reports/ReportsAnalytics";
+import UserManagement from "./pages/AdminPages/UserManagement";
 import DoctorDashboard from "./pages/DoctorDashboard";
 import PatientDashboard from "./pages/PatientDashboard";
 
@@ -31,11 +32,9 @@ function RequireRole({ role, children }) {
   }
 
   if (currentRole !== role) {
-    if (currentRole === "Admin") return <Navigate to="/dashboard" replace />;
-    if (currentRole === "Doctor")
-      return <Navigate to="/dashboard/doctor" replace />;
-    if (currentRole === "Patient")
-      return <Navigate to="/dashboard/patient" replace />;
+    if (currentRole === "Admin") return <Navigate to="/admin" replace />;
+    if (currentRole === "Doctor") return <Navigate to="/doctor" replace />;
+    if (currentRole === "Patient") return <Navigate to="/patient" replace />;
     return <Navigate to="/login" replace />;
   }
 
@@ -46,13 +45,14 @@ function App() {
   return (
     <Routes>
       {/* Public Routes */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
-      {/* Protected Routes (wrapped in DashboardLayout) */}
+      {/* Admin Role Routes */}
       <Route
-        path="/dashboard"
+        path="/admin"
         element={
           <RequireRole role="Admin">
             <DashboardLayout />
@@ -60,54 +60,58 @@ function App() {
         }
       >
         <Route index element={<AdminDashboard />} />
-        <Route path="doctors-management" element={<DoctorsManagement />} />
-        <Route path="doctors-management/details" element={<DoctorDetails />} />
-        <Route
-          path="doctors-management/add-doctor"
-          element={<AddDoctorPage />}
-        />
-        <Route
-          path="doctors-management/edit-doctor"
-          element={<EditDoctorPage />}
-        />
-        <Route path="patients-management" element={<PatientsManagement />} />
-        <Route
-          path="patients-management/details"
-          element={<PatientDetails />}
-        />
-        <Route
-          path="patients-management/add-patient"
-          element={<AddPatient />}
-        />
-        <Route
-          path="patients-management/edit-patient"
-          element={<EditPatient />}
-        />
-        <Route path="staff-management" element={<StaffManagement />} />
-        <Route path="staff-management/add-staff" element={<AddStaff />} />
-        <Route path="staff-management/edit-staff" element={<EditStaff />} />
-        <Route path="staff-management/details" element={<StaffDetails />} />
-        <Route path="reports-analytics" element={<ReportsAnalytics />} />
-        <Route path="system-settings" element={<SystemSettingsPage />} />
+        <Route path="dashboard" element={<AdminDashboard />} />
+        <Route path="doctors" element={<DoctorsManagement />} />
+        <Route path="doctors/details" element={<DoctorDetails />} />
+        <Route path="doctors/add" element={<AddDoctorPage />} />
+        <Route path="doctors/edit" element={<EditDoctorPage />} />
+
+        <Route path="patients" element={<PatientsManagement />} />
+        <Route path="patients/details" element={<PatientDetails />} />
+        <Route path="patients/add" element={<AddPatient />} />
+        <Route path="patients/edit" element={<EditPatient />} />
+
+        <Route path="staff" element={<StaffManagement />} />
+        <Route path="staff/add" element={<AddStaff />} />
+        <Route path="staff/edit" element={<EditStaff />} />
+        <Route path="staff/details" element={<StaffDetails />} />
+
+        <Route path="reports" element={<ReportsAnalytics />} />
+        <Route path="settings" element={<SystemSettingsPage />} />
+        <Route path="users" element={<UserManagement />} />
       </Route>
 
-      {/* Role-specific dashboards */}
+      {/* Doctor Role Routes */}
       <Route
-        path="/dashboard/doctor"
+        path="/doctor"
         element={
           <RequireRole role="Doctor">
             <DoctorDashboard />
           </RequireRole>
         }
       />
+
+      {/* Patient Role Routes */}
       <Route
-        path="/dashboard/patient"
+        path="/patient"
         element={
           <RequireRole role="Patient">
             <PatientDashboard />
           </RequireRole>
         }
       />
+
+      {/* Legacy /dashboard redirects for backward compatibility */}
+      <Route path="/dashboard" element={<Navigate to="/admin" replace />} />
+      <Route path="/dashboard/admin" element={<Navigate to="/admin" replace />} />
+      <Route path="/dashboard/doctor" element={<Navigate to="/doctor" replace />} />
+      <Route path="/dashboard/patient" element={<Navigate to="/patient" replace />} />
+      <Route path="/dashboard/doctors-management" element={<Navigate to="/admin/doctors" replace />} />
+      <Route path="/dashboard/patients-management" element={<Navigate to="/admin/patients" replace />} />
+      <Route path="/dashboard/staff-management" element={<Navigate to="/admin/staff" replace />} />
+      <Route path="/dashboard/user-management" element={<Navigate to="/admin/users" replace />} />
+      <Route path="/dashboard/system-settings" element={<Navigate to="/admin/settings" replace />} />
+      <Route path="/dashboard/reports-analytics" element={<Navigate to="/admin/reports" replace />} />
 
       {/* Default redirect */}
       <Route path="*" element={<Navigate to="/login" replace />} />

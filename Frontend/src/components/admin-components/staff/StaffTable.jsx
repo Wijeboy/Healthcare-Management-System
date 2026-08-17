@@ -10,23 +10,25 @@ import {
 import { useNavigate } from "react-router-dom";
 import { mockStaff } from "../../../data/mockData";
 
-const StaffTable = ({ staffList = mockStaff }) => {
+const StaffTable = ({ staffList = mockStaff, onView, onEdit }) => {
   const navigate = useNavigate();
   const [openMenuId, setOpenMenuId] = useState(null);
   const [staffToDelete, setStaffToDelete] = useState(null);
 
   const handleView = (staff) => {
+    if (onView) return onView(staff);
     setOpenMenuId(null);
     navigate(
-      `/dashboard/staff-management/details?id=${encodeURIComponent(staff.id)}`,
+      `/admin/staff/details?id=${encodeURIComponent(staff.id)}`,
       { state: { staff } },
     );
   };
 
   const handleEdit = (staff) => {
+    if (onEdit) return onEdit(staff);
     setOpenMenuId(null);
     navigate(
-      `/dashboard/staff-management/edit-staff?id=${encodeURIComponent(staff.id)}`,
+      `/admin/staff/edit?id=${encodeURIComponent(staff.id)}`,
       { state: { staff } },
     );
   };

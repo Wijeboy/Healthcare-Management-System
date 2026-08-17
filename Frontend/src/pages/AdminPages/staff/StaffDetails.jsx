@@ -1,12 +1,37 @@
-import React, { useMemo } from "react";
-import { ArrowLeft, Edit, MoreHorizontal } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { ArrowLeft, Edit, MoreHorizontal, Loader2 } from "lucide-react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { mockStaff } from "../../../data/mockData";
 import StaffHeaderCard from "../../../components/admin-components/staff/staff-details/StaffHeaderCard";
 import StaffPersonalInfoCard from "../../../components/admin-components/staff/staff-details/StaffPersonalInfoCard";
 import StaffWorkInfoCard from "../../../components/admin-components/staff/staff-details/StaffWorkInfoCard";
 import StaffContactInfoCard from "../../../components/admin-components/staff/staff-details/StaffContactInfoCard";
 import StaffAccountCard from "../../../components/admin-components/staff/staff-details/StaffAccountCard";
+import { staffApi } from "../../../services/api";
+
+const mapApiStaffToUiStaff = (data) => {
+  if (!data) return null;
+  return {
+    id: data.id || data._id,
+    staffId: data.staffId || data.id,
+    name: data.fullName || "N/A",
+    role: data.role || "Staff Member",
+    department: data.department || "General",
+    status: data.employeeStatus || data.status || "ACTIVE",
+    email: data.email || "",
+    phone: data.phone || "",
+    age: data.age != null ? String(data.age) : "N/A",
+    gender: data.gender || "N/A",
+    dob: data.dob || "N/A",
+    nationalId: data.nationalId || "N/A",
+    address: data.address || "N/A",
+    shift: data.shift || "Day Shift",
+    accessLevel: data.accessLevel || "Standard",
+    joiningDate: data.joiningDate ? new Date(data.joiningDate).toLocaleDateString() : "N/A",
+    lastLogin: data.updatedAt ? new Date(data.updatedAt).toLocaleDateString() : "Recently",
+    createdAt: data.createdAt ? new Date(data.createdAt).toLocaleDateString() : "N/A",
+    raw: data,
+  };
+};
 
 const StaffDetails = () => {
   const navigate = useNavigate();
@@ -14,13 +39,44 @@ const StaffDetails = () => {
   const [searchParams] = useSearchParams();
   const staffId = searchParams.get("id");
 
-  const staff = useMemo(() => {
-    return (
-      location.state?.staff || mockStaff.find((item) => item.id === staffId)
-    );
-  }, [location.state?.staff, staffId]);
+  const [staff, setStaff] = useState(() => mapApiStaffToUiStaff(location.state?.staff));
+  const [loading, setLoading] = useState(!location.state?.staff);
+  const [error, setError] = useState("");
 
-  if (!staffId || !staff) {
+  useEffect(() => {
+    const fetchStaffDetails = async () => {
+      if (!staffId) {
+        setLoading(false);
+        return;
+      }
+      try {
+        setLoading(true);
+        const res = await staffApi.getById(staffId);
+        const data = res.data || res;
+        setStaff(mapApiStaffToUiStaff(data));
+      } catch (err) {
+        console.error("Failed to load staff details:", err);
+        setError("Failed to load staff profile from server.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStaffDetails();
+  }, [staffId]);
+
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-[#F8FAFC]">
+        <div className="flex items-center gap-3 text-slate-500">
+          <Loader2 className="w-6 h-6 animate-spin text-[#1E3A8A]" />
+          <span>Loading staff profile...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!staffId || !staff || error) {
     return (
       <div className="flex h-screen items-center justify-center bg-[#F8FAFC] p-8">
         <div className="max-w-md rounded-xl border border-slate-200 bg-white p-6 text-center shadow-sm">
@@ -28,11 +84,11 @@ const StaffDetails = () => {
             Staff profile not found
           </h1>
           <p className="mt-2 text-sm text-slate-500">
-            We could not load a staff profile for this link.
+            {error || "We could not load a staff profile for this link."}
           </p>
           <button
             type="button"
-            onClick={() => navigate("/dashboard/staff-management")}
+            onClick={() => navigate("/admin/staff")}
             className="mt-5 inline-flex items-center gap-2 rounded-lg bg-[#1E3A8A] px-4 py-2.5 text-sm font-semibold text-white"
           >
             <ArrowLeft size={16} />
@@ -44,12 +100,12 @@ const StaffDetails = () => {
   }
 
   const account = {
-    systemRole: "Staff",
+    systemRole: staff.role || "Staff",
     accountStatus: staff.status,
-    userId: staff.id,
+    userId: staff.staffId,
     username: staff.email?.split("@")[0] || "staff.user",
     lastLogin: staff.lastLogin,
-    profileCreated: "Not available",
+    profileCreated: staff.createdAt,
   };
 
   return (
@@ -61,7 +117,7 @@ const StaffDetails = () => {
               <nav className="text-xs font-medium text-slate-500 mb-1 flex items-center gap-1.5">
                 <button
                   type="button"
-                  onClick={() => navigate("/dashboard/staff-management")}
+                  onClick={() => navigate("/admin/staff")}
                   className="text-[#2563EB] hover:underline font-semibold"
                 >
                   Staff Management
@@ -81,8 +137,8 @@ const StaffDetails = () => {
                 type="button"
                 onClick={() =>
                   navigate(
-                    `/dashboard/staff-management/edit-staff?id=${encodeURIComponent(staff.id)}`,
-                    { state: { staff } },
+                    `/admin/staff/edit?id=${encodeURIComponent(staff.id)}`,
+                    { state: { staff: staff.raw || staff } }
                   )
                 }
                 className="px-4 py-2 bg-[#1E3A8A] hover:bg-blue-950 text-white text-xs font-bold rounded-lg flex items-center gap-1.5"
@@ -90,7 +146,7 @@ const StaffDetails = () => {
                 <Edit size={14} />
                 Edit Staff
               </button>
-              <button className="p-2 border border-[#CBD5E1] bg-white text-slate-600 rounded-lg">
+              <button className="p-2 border border-[#CBD5E1] bg-[#FFFFFF] text-slate-600 rounded-lg">
                 <MoreHorizontal size={16} />
               </button>
             </div>
@@ -99,7 +155,7 @@ const StaffDetails = () => {
           <StaffHeaderCard
             staff={{
               ...staff,
-              accessLevel: "Standard",
+              accessLevel: staff.accessLevel || "Standard",
             }}
           />
 
@@ -107,12 +163,12 @@ const StaffDetails = () => {
             <StaffPersonalInfoCard
               personal={{
                 fullName: staff.name,
-                dob: "Not available",
-                age: String(staff.age ?? ""),
+                dob: staff.dob,
+                age: staff.age,
                 gender: staff.gender,
-                staffId: staff.id,
-                nationalId: "Not available",
-                address: "Not available",
+                staffId: staff.staffId,
+                nationalId: staff.nationalId,
+                address: staff.address,
               }}
             />
             <StaffWorkInfoCard
@@ -120,9 +176,9 @@ const StaffDetails = () => {
                 department: staff.department,
                 role: staff.role,
                 staffType: "User",
-                shift: "Day Shift",
-                accessLevel: "Standard",
-                joiningDate: "Not available",
+                shift: staff.shift,
+                accessLevel: staff.accessLevel,
+                joiningDate: staff.joiningDate,
               }}
             />
           </div>
@@ -132,7 +188,7 @@ const StaffDetails = () => {
               contact={{
                 email: staff.email,
                 phone: staff.phone,
-                address: "Not available",
+                address: staff.address,
               }}
             />
             <StaffAccountCard account={account} />

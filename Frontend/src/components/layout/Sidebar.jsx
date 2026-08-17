@@ -1,57 +1,21 @@
-import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 
 const navItems = [
-  {
-    icon: "dashboard",
-    label: "Dashboard",
-    path: "/dashboard",
-  },
-  {
-    icon: "calendar_today",
-    label: "Appointments",
-    path: "/dashboard/appointments",
-  },
-  {
-    icon: "folder_shared",
-    label: "Records",
-    path: "/dashboard/records",
-  },
-  {
-    icon: "medical_services",
-    label: "Prescriptions",
-    path: "/dashboard/prescriptions",
-  },
-  {
-    icon: "payments",
-    label: "Payments",
-    path: "/dashboard/payments",
-  },
-  {
-    icon: "query_stats",
-    label: "Reports & Analytics",
-    path: "/dashboard/reports-analytics",
-  },
-  {
-    icon: "people",
-    label: "Doctor Management",
-    path: "/dashboard/doctors-management",
-  },
-  {
-    icon: "people_alt",
-    label: "Staff Management",
-    path: "/dashboard/staff-management",
-  },
-  {
-    icon: "person",
-    label: "Patient Management",
-    path: "/dashboard/patients-management",
-  },
+  { icon: "dashboard",       label: "Dashboard",          path: "/admin" },
+  { icon: "calendar_today",  label: "Appointments",        path: "/admin/appointments" },
+  { icon: "folder_shared",   label: "Records",             path: "/admin/records" },
+  { icon: "medical_services",label: "Prescriptions",       path: "/admin/prescriptions" },
+  { icon: "payments",        label: "Payments",            path: "/admin/payments" },
+  { icon: "query_stats",     label: "Reports & Analytics", path: "/admin/reports" },
+  { icon: "people",          label: "Doctor Management",   path: "/admin/doctors" },
+  { icon: "people_alt",      label: "Staff Management",    path: "/admin/staff" },
+  { icon: "person",          label: "Patient Management",  path: "/admin/patients" },
+  { icon: "manage_accounts", label: "User Management",     path: "/admin/users" },
 ];
 
 const bottomItems = [
-  { icon: "help", label: "Support", path: "#" },
-  { icon: "logout", label: "Logout", path: "/login" },
+  { icon: "help",   label: "Support", path: "#" },
+  { icon: "logout", label: "Logout",  path: "/login" },
 ];
 
 export default function Sidebar() {
@@ -71,8 +35,9 @@ export default function Sidebar() {
       <nav className="flex-1 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
           const isActive =
-            location.pathname === item.path ||
-            (item.path === "/dashboard" && location.pathname === "/dashboard");
+            item.path === "/admin"
+              ? location.pathname === "/admin" || location.pathname === "/admin/dashboard"
+              : location.pathname.startsWith(item.path);
 
           return (
             <NavLink

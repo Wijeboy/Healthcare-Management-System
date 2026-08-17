@@ -34,53 +34,86 @@ model Admin {
 }
 
 model Staff {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId      String   @unique @db.ObjectId
-  fullName    String
-  phone       String
-  permissions String[] // Array of strings indicating permissions
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId         String   @unique @db.ObjectId
+  fullName       String
+  phone          String
+  email          String?
+  dob            String?
+  age            Int?
+  gender         String?
+  nationalId     String?
+  address        String?
+  department     String?
+  role           String?  // Job title e.g. Nurse, Receptionist
+  employeeStatus String   @default("Active")
+  accessLevel    String   @default("Standard")
+  shift          String?
+  joiningDate    String?
+  permissions    String[]
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  user        User     @relation(fields: [userId], references: [id])
+  user           User     @relation(fields: [userId], references: [id])
 }
 
 model Doctor {
-  id             String          @id @default(auto()) @map("_id") @db.ObjectId
-  userId         String          @unique @db.ObjectId
-  fullName       String
-  phone          String
-  department     String
-  specialization String
-  experience     String
-  availability   String
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  id                   String          @id @default(auto()) @map("_id") @db.ObjectId
+  userId               String          @unique @db.ObjectId
+  fullName             String
+  phone                String
+  dob                  String?
+  gender               String?
+  address              String?
+  licenceNumber        String?
+  department           String
+  specialization       String
+  qualification        String?
+  experience           String
+  bio                  String?
+  startTime            String?
+  endTime              String?
+  workingDays          String[]
+  consultationDuration String?
+  availability         String          @default("Available")
+  status               String          @default("Active")
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
 
-  user           User            @relation(fields: [userId], references: [id])
-  appointments   Appointment[]
-  medicalRecords MedicalRecord[]
-  prescriptions  Prescription[]
+  user                 User            @relation(fields: [userId], references: [id])
+  appointments         Appointment[]
+  medicalRecords       MedicalRecord[]
+  prescriptions        Prescription[]
 }
 
 model Patient {
-  id             String          @id @default(auto()) @map("_id") @db.ObjectId
-  userId         String          @unique @db.ObjectId
-  fullName       String
-  phone          String
-  bloodGroup     String?
-  age            Int?
-  gender         String?
-  address        String?
-  allergies      String?
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  id                   String          @id @default(auto()) @map("_id") @db.ObjectId
+  userId               String          @unique @db.ObjectId
+  fullName             String
+  phone                String
+  dob                  String?
+  bloodGroup           String?
+  age                  Int?
+  gender               String?
+  address              String?
+  allergies            String?
+  existingConditions   String?
+  currentMedications   String?
+  medicalNotes         String?
+  emergencyName        String?
+  emergencyRelationship String?
+  emergencyPhone       String?
+  emergencyEmail       String?
+  status               String          @default("Active")
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
 
-  user           User            @relation(fields: [userId], references: [id])
-  appointments   Appointment[]
-  medicalRecords MedicalRecord[]
-  prescriptions  Prescription[]
-  payments       Payment[]
+  user                 User            @relation(fields: [userId], references: [id])
+  appointments         Appointment[]
+  medicalRecords       MedicalRecord[]
+  prescriptions        Prescription[]
+  payments             Payment[]
 }
 
 model Appointment {
