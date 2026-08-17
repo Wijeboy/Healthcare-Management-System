@@ -1,5 +1,5 @@
 import React from "react";
-import { reportData } from "../../data/reportData";
+import { reportData } from "../../../data/reportData";
 
 const ReportOverviewCards = () => {
   return (
