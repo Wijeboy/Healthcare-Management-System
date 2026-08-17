@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { patientApi } from '../services/api'
+import { authApi } from '../services/api'
 import toast from 'react-hot-toast'
 import { getFriendlyErrorMessage } from '../utils/userMessages'
 
@@ -106,7 +106,7 @@ export default function RegisterPage() {
         status: 'Active',
       }
 
-      await patientApi.create(payload)
+      await authApi.register(payload)
       toast.success('Patient registered successfully')
       navigate('/login')
     } catch (err) {

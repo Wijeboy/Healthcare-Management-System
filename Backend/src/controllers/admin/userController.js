@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import prisma from '../../config/prisma.js';
+import { getDb, ObjectId } from '../../config/mongo.js';
 
 // GET all users — pagination, search, filter by role/status
 export const getUsers = async (req, res) => {
@@ -25,12 +26,10 @@ export const getUsers = async (req, res) => {
           patient: { select: { fullName: true } },
           staff:   { select: { fullName: true } },
         },
-        // Never return passwords
       }),
       prisma.user.count({ where })
     ]);
 
-    // Strip passwords before sending
     const safeUsers = users.map(({ password, ...u }) => u);
 
     res.json({
@@ -64,7 +63,7 @@ export const createUser = async (req, res) => {
   }
 };
 
-// POST â€” create a new admin account with admin profile
+// POST — create a new admin account with admin profile
 export const createAdmin = async (req, res) => {
   try {
     const { email, password, fullName, phone, status = 'Active' } = req.body;
@@ -74,49 +73,54 @@ export const createAdmin = async (req, res) => {
       return res.status(400).json({ error: 'Email, full name, and phone are required' });
     }
 
-    const existingUser = await prisma.user.findUnique({
-      where: { email }
-    });
+    const normalizedEmail = email.trim().toLowerCase();
+    const db = await getDb();
 
+    const existingUser = await db.collection("User").findOne({ email: normalizedEmail });
     if (existingUser) {
       return res.status(409).json({ error: 'Email already exists' });
     }
 
     const hashedPassword = await bcrypt.hash(tempPassword, 10);
+    const userId = new ObjectId();
+    const adminId = new ObjectId();
+    const now = new Date();
 
-    const createdAdmin = await prisma.$transaction(async (tx) => {
-      const user = await tx.user.create({
-        data: {
-          email,
-          password: hashedPassword,
-          role: 'Admin',
-          status,
-        }
-      });
+    const userDoc = {
+      _id: userId,
+      email: normalizedEmail,
+      password: hashedPassword,
+      role: 'Admin',
+      status,
+      createdAt: now,
+      updatedAt: now,
+    };
 
-      const admin = await tx.admin.create({
-        data: {
-          userId: user.id,
-          fullName,
-          phone,
-        }
-      });
+    const adminDoc = {
+      _id: adminId,
+      userId: userId.toString(),
+      fullName: fullName.trim(),
+      phone: phone.trim(),
+      createdAt: now,
+      updatedAt: now,
+    };
 
-      return {
-        ...user,
-        admin,
-      };
-    });
+    await db.collection("User").insertOne(userDoc);
+    await db.collection("Admin").insertOne(adminDoc);
 
-    const { password: _, ...safeUser } = createdAdmin;
     res.status(201).json({
-      ...safeUser,
+      id: userId.toString(),
+      email: normalizedEmail,
+      role: 'Admin',
+      status,
       tempPassword,
+      admin: {
+        id: adminId.toString(),
+        fullName: fullName.trim(),
+        phone: phone.trim(),
+      }
     });
   } catch (error) {
-    if (error.code === 'P2002') {
-      return res.status(409).json({ error: 'Email already exists' });
-    }
     res.status(500).json({ error: error.message });
   }
 };

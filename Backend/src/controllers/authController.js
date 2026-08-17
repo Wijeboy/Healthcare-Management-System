@@ -1,6 +1,9 @@
 import bcrypt from "bcrypt";
 import prisma from "../config/prisma.js";
 import { getDb, ObjectId } from "../config/mongo.js";
+import { createPatient } from "./admin/patientController.js";
+
+export const registerPatient = createPatient;
 
 const safeUserResponse = (user, profile = null) => {
   const { password: _, ...safeUser } = user;
