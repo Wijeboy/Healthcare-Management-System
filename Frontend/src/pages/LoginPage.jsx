@@ -21,7 +21,7 @@ const ROLES = [
         />
       </svg>
     ),
-    dashboard: "/dashboard/patient",
+    dashboard: "/patient",
   },
   {
     key: "Doctor",
@@ -42,7 +42,7 @@ const ROLES = [
         />
       </svg>
     ),
-    dashboard: "/dashboard/doctor",
+    dashboard: "/doctor",
   },
   {
     key: "Admin",
@@ -63,7 +63,7 @@ const ROLES = [
         />
       </svg>
     ),
-    dashboard: "/dashboard",
+    dashboard: "/admin",
   },
 ];
 

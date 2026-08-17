@@ -1,7 +1,7 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { Edit, MoreHorizontal, ArrowLeft } from "lucide-react";
-import { mockPatients } from "../../../data/mockData";
+import { Edit, MoreHorizontal, ArrowLeft, AlertCircle } from "lucide-react";
+import { patientApi } from "../../../services/api";
 import PatientHeaderCard from "../../../components/admin-components/patients/patient-details/PatientHeaderCard";
 import PatientNavigationTabs from "../../../components/admin-components/patients/patient-details/PatientNavigationTabs";
 import PersonalInfoCard from "../../../components/admin-components/patients/patient-details/PersonalInfoCard";
@@ -10,68 +10,69 @@ import MedicalSummaryCard from "../../../components/admin-components/patients/pa
 import AccountAccessCard from "../../../components/admin-components/patients/patient-details/AccountAccessCard";
 import UpcomingAppointmentsCard from "../../../components/admin-components/patients/patient-details/UpcomingAppointmentsCard";
 
-const buildPatientDetails = (patient) => {
-  if (!patient) return null;
+const buildPatientDetails = (p) => {
+  if (!p) return null;
 
-  const userId = `USR-${patient.id.replace(/\D/g, "").slice(-5).padStart(5, "0")}`;
+  const initials = p.fullName
+    ? p.fullName
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+    : "";
+
+  const userId = p.userId || `USR-${p.id?.replace(/\D/g, "").slice(-5).padStart(5, "0")}`;
 
   return {
     header: {
-      initials: patient.initials ?? "",
-      name: patient.name ?? "",
-      status: patient.status ?? "ACTIVE",
-      id: patient.id?.replace("#", "") ?? "",
+      initials,
+      name: p.fullName ?? "",
+      status: p.status ?? "Active",
+      id: p.id ?? "",
       userId,
-      bloodGroup: patient.bloodGroup ?? "",
-      age: String(patient.age ?? ""),
-      gender: (patient.gender ?? "").toUpperCase(),
-      summaryNote:
-        patient.medicalNotes ||
-        patient.medicalSummarySubtitle ||
-        patient.medicalSummaryTitle ||
-        "",
-      lastVisit: patient.lastVisitDate ?? "",
+      bloodGroup: p.bloodGroup ?? "",
+      age: String(p.age ?? ""),
+      gender: (p.gender ?? "").toUpperCase(),
+      summaryNote: p.medicalNotes ?? "",
+      lastVisit: "Not available",
       upcomingAppointment: "No upcoming appointment",
       medicalRecordsCount: "0",
-      riskAlerts: patient.allergies || "No Critical Alert",
+      riskAlerts: p.allergies || "No Critical Alert",
     },
     personal: {
-      fullName: patient.name ?? "",
-      dob: patient.dob ?? "",
-      age: String(patient.age ?? ""),
-      gender: patient.gender ?? "",
-      bloodGroup: patient.bloodGroup ?? "",
-      patientId: patient.id?.replace("#", "") ?? "",
-      address: patient.address ?? "",
+      fullName: p.fullName ?? "",
+      dob: p.dob ?? "",
+      age: String(p.age ?? ""),
+      gender: p.gender ?? "",
+      bloodGroup: p.bloodGroup ?? "",
+      patientId: p.id ?? "",
+      address: p.address ?? "",
     },
     contact: {
-      email: patient.email ?? "",
-      phone: patient.phone ?? "",
-      emergencyContact: patient.emergencyName ?? "",
-      relationship: patient.emergencyRelationship ?? "",
-      emergencyPhone: patient.emergencyPhone ?? "",
-      emergencyEmail: patient.emergencyEmail ?? "",
+      email: p.user?.email ?? "",
+      phone: p.phone ?? "",
+      emergencyContact: p.emergencyName ?? "",
+      relationship: p.emergencyRelationship ?? "",
+      emergencyPhone: p.emergencyPhone ?? "",
+      emergencyEmail: p.emergencyEmail ?? "",
     },
     medical: {
-      allergies: patient.allergies ?? patient.medicalSummaryTitle ?? "",
-      allergiesNote: patient.medicalSummarySubtitle ?? "",
-      existingCondition: patient.existingConditions ?? "",
-      existingConditionNote: patient.medicalNotes ?? "",
-      currentMedication: patient.currentMedications ?? "",
-      currentMedicationNote: patient.medicalNotes ?? "",
-      latestVisitType: patient.lastVisitType ?? "",
-      latestVisitNote: patient.lastVisitDate
-        ? `Completed on ${patient.lastVisitDate}.`
-        : "",
+      allergies: p.allergies ?? "",
+      allergiesNote: "",
+      existingCondition: p.existingConditions ?? "",
+      existingConditionNote: "",
+      currentMedication: p.currentMedications ?? "",
+      currentMedicationNote: "",
+      latestVisitType: "Consultation",
+      latestVisitNote: "",
     },
     account: {
       systemRole: "Patient",
-      accountStatus: patient.status ?? "ACTIVE",
+      accountStatus: p.status ?? "Active",
       userId,
-      username:
-        patient.username ?? (patient.email ? patient.email.split("@")[0] : ""),
+      username: p.user?.email ? p.user.email.split("@")[0] : "",
       lastLogin: "Not available",
-      profileCreated: "Not available",
+      profileCreated: p.createdAt ? new Date(p.createdAt).toLocaleDateString() : "Not available",
     },
     appointments: [],
   };
@@ -79,22 +80,61 @@ const buildPatientDetails = (patient) => {
 
 const PatientDetails = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState("Overview");
 
   const patientId = searchParams.get("id");
   const normalizedPatientId = patientId ? decodeURIComponent(patientId) : "";
-  const selectedPatient =
-    location.state?.patient ||
-    mockPatients.find((patient) => patient.id === normalizedPatientId);
 
-  const patientData = useMemo(
-    () => buildPatientDetails(selectedPatient),
-    [selectedPatient],
-  );
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [patient, setPatient] = useState(null);
 
-  if (!normalizedPatientId || !patientData) {
+  const loadPatient = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await patientApi.getById(normalizedPatientId);
+      setPatient(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (normalizedPatientId) {
+      loadPatient();
+    }
+  }, [normalizedPatientId]);
+
+  const patientData = buildPatientDetails(patient);
+
+  const handleEdit = () => {
+    if (!patient) return;
+    navigate(
+      `/admin/patients/edit?id=${encodeURIComponent(patient.id)}`,
+      {
+        state: { patient },
+      },
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="flex h-screen bg-[#F8FAFC] text-[#1E293B] font-sans antialiased overflow-hidden">
+        <div className="flex-1 flex items-center justify-center p-8">
+          <div className="text-center space-y-3">
+            <div className="w-8 h-8 border-2 border-[#0256CA] border-t-transparent rounded-full animate-spin mx-auto" />
+            <p className="text-sm text-slate-500">Loading patient profile...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !patientData) {
     return (
       <div className="flex h-screen bg-[#F8FAFC] text-[#1E293B] font-sans antialiased overflow-hidden">
         <div className="flex-1 flex items-center justify-center p-8">
@@ -103,34 +143,36 @@ const PatientDetails = () => {
               Patient Details
             </p>
             <h1 className="mt-2 text-xl font-bold text-slate-900">
-              Patient profile not found
+              {error || "Patient profile not found"}
             </h1>
             <p className="mt-2 text-sm text-slate-500">
               We could not load a patient for this link. Please return to the
               patients list and open a profile from there.
             </p>
-            <button
-              type="button"
-              onClick={() => navigate("/dashboard/patients-management")}
-              className="mt-5 inline-flex items-center gap-2 rounded-lg bg-[#1E3A8A] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-950 transition-colors"
-            >
-              <ArrowLeft size={16} />
-              Back to Patients Management
-            </button>
+            <div className="flex justify-center gap-3 mt-5">
+              <button
+                type="button"
+                onClick={() => navigate("/admin/patients")}
+                className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+              >
+                <ArrowLeft size={16} />
+                Back to Patients List
+              </button>
+              {error && (
+                <button
+                  type="button"
+                  onClick={loadPatient}
+                  className="inline-flex items-center gap-2 rounded-lg bg-[#0256CA] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition-colors"
+                >
+                  Try Again
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
     );
   }
-
-  const handleEdit = () => {
-    navigate(
-      `/dashboard/patients-management/edit-patient?id=${encodeURIComponent(selectedPatient.id)}`,
-      {
-        state: { patient: selectedPatient },
-      },
-    );
-  };
 
   return (
     <div className="flex h-screen bg-[#F8FAFC] text-[#1E293B] font-sans antialiased overflow-hidden">
@@ -141,7 +183,7 @@ const PatientDetails = () => {
               <nav className="text-xs font-medium text-slate-500 mb-1 flex items-center gap-1.5">
                 <button
                   type="button"
-                  onClick={() => navigate("/dashboard/patients-management")}
+                  onClick={() => navigate("/admin/patients")}
                   className="text-[#2563EB] hover:underline font-semibold"
                 >
                   Patients Management

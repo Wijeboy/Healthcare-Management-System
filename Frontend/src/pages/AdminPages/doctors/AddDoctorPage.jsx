@@ -4,6 +4,8 @@ import PersonalInfoSection from "../../../components/admin-components/doctors/ad
 import ProfessionalInfoSection from "../../../components/admin-components/doctors/add-doctor/ProfessionalInfoSection";
 import AvailabilitySection from "../../../components/admin-components/doctors/add-doctor/AvailabilitySection";
 import AccountAccessSection from "../../../components/admin-components/doctors/add-doctor/AccountAccessSection";
+import { doctorApi } from "../../../services/api";
+import { AlertCircle } from "lucide-react";
 
 const AddDoctorPage = () => {
   const navigate = useNavigate();
@@ -42,6 +44,8 @@ const AddDoctorPage = () => {
   ]);
 
   const [sendInvitation, setSendInvitation] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const [errors, setErrors] = useState({
     fullName: "Full name is required.",
@@ -79,13 +83,41 @@ const AddDoctorPage = () => {
     setFormData((prev) => ({ ...prev, tempPassword: pwd }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Submitting form:", {
-      formData,
-      workingDays,
-      sendInvitation,
-    });
+    setSubmitError("");
+    setLoading(true);
+
+    try {
+      const payload = {
+        email: formData.email,
+        password: formData.tempPassword || "Medimate@2026",
+        fullName: formData.fullName,
+        phone: formData.phone,
+        dob: formData.dob,
+        gender: formData.gender,
+        address: formData.address,
+        licenceNumber: formData.licenceNumber,
+        department: formData.department,
+        specialization: formData.specialization,
+        qualification: formData.qualification,
+        experience: formData.experience,
+        bio: formData.bio,
+        startTime: formData.startTime,
+        endTime: formData.endTime,
+        workingDays: workingDays,
+        consultationDuration: formData.duration,
+        availability: formData.availabilityStatus || "Available",
+        status: formData.accountStatus || "Active",
+      };
+
+      await doctorApi.create(payload);
+      navigate("/admin/doctors");
+    } catch (err) {
+      setSubmitError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSaveDraft = () => {
@@ -123,6 +155,12 @@ const AddDoctorPage = () => {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
+            {submitError && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-2">
+                <AlertCircle size={16} />
+                {submitError}
+              </div>
+            )}
             <PersonalInfoSection
               formData={formData}
               onChange={handleChange}
@@ -153,23 +191,26 @@ const AddDoctorPage = () => {
             <div className="flex items-center justify-end gap-3 border-t border-slate-200 bg-white px-6 py-4 rounded-xl">
               <button
                 type="button"
-                onClick={() => navigate("/dashboard/doctors-management")}
-                className="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                disabled={loading}
+                onClick={() => navigate("/admin/doctors")}
+                className="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 type="button"
+                disabled={loading}
                 onClick={handleSaveDraft}
-                className="rounded-lg border border-[#2563EB] px-4 py-2.5 text-sm font-semibold text-[#2563EB] hover:bg-blue-50 transition-colors"
+                className="rounded-lg border border-[#2563EB] px-4 py-2.5 text-sm font-semibold text-[#2563EB] hover:bg-blue-50 transition-colors disabled:opacity-50"
               >
                 Save as Draft
               </button>
               <button
                 type="submit"
-                className="rounded-lg bg-[#1E3A8A] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-950 transition-colors"
+                disabled={loading}
+                className="rounded-lg bg-[#1E3A8A] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-950 transition-colors disabled:opacity-50"
               >
-                Add Doctor
+                {loading ? "Adding..." : "Add Doctor"}
               </button>
             </div>
           </form>

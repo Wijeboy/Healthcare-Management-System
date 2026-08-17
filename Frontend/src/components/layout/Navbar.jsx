@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import NotificationPanel from "../admin-components/dashboard/NotificationPanel";
 
 export default function Navbar() {
@@ -7,22 +7,39 @@ export default function Navbar() {
   const [searchFocused, setSearchFocused] = useState(false);
   const [role, setRole] = useState("Admin");
   const notifRef = useRef(null);
+  const location = useLocation();
 
   useEffect(() => {
-    const activeRole = localStorage.getItem("hmsRole") || "Admin";
-    setRole(activeRole);
-  }, []);
+    const savedRole = localStorage.getItem("hmsRole");
+    if (location.pathname.startsWith("/doctor")) {
+      setRole("Doctor");
+    } else if (location.pathname.startsWith("/patient")) {
+      setRole("Patient");
+    } else if (location.pathname.startsWith("/admin") || savedRole === "Admin") {
+      setRole("Admin");
+    } else if (savedRole) {
+      setRole(savedRole);
+    } else {
+      setRole("Admin");
+    }
+  }, [location.pathname]);
 
-  const settingsRouteByRole = {
-    Admin: "/dashboard/system-settings",
-    Doctor: "/dashboard/doctor",
-    Patient: "/dashboard/patient",
-    Staff: "/dashboard",
+  const settingsConfigByRole = {
+    Admin: {
+      route: "/admin/settings",
+      label: "System Settings",
+    },
+    Doctor: {
+      route: "/doctor",
+      label: "Doctor Settings & Profile",
+    },
+    Patient: {
+      route: "/patient",
+      label: "Patient Settings & Profile",
+    },
   };
 
-  const settingsRoute = settingsRouteByRole[role] || "/dashboard";
-  const settingsLabel =
-    role === "Admin" ? "Open system settings" : "Open account settings";
+  const currentSetting = settingsConfigByRole[role] || settingsConfigByRole.Admin;
 
   // Close notification panel on outside click
   useEffect(() => {
@@ -69,15 +86,16 @@ export default function Navbar() {
           </button>
 
           {showNotifications && (
-            <NotificationPanel onClose={() => setShowNotifications(false)} />
+            <NotificationPanel onClose={() => setShowNotifications(false)} role={role} />
           )}
         </div>
 
         {/* Settings */}
         <Link
-          to={settingsRoute}
+          to={currentSetting.route}
+          title={currentSetting.label}
           className="p-2 rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors active:scale-95"
-          aria-label={settingsLabel}
+          aria-label={currentSetting.label}
         >
           <span className="material-symbols-outlined">settings</span>
         </Link>

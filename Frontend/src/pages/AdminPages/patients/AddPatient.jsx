@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, AlertCircle } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import PersonalInfoSection from "../../../components/admin-components/patients/add-patient/PersonalInfoSection";
 import ContactInfoSection from "../../../components/admin-components/patients/add-patient/ContactInfoSection";
 import MedicalInfoSection from "../../../components/admin-components/patients/add-patient/MedicalInfoSection";
 import EmergencyContactSection from "../../../components/admin-components/patients/add-patient/EmergencyContactSection";
 import AccountAccessSection from "../../../components/admin-components/patients/add-patient/AccountAccessSection";
+import { patientApi } from "../../../services/api";
 
 const AddPatient = () => {
   const navigate = useNavigate();
@@ -36,6 +37,9 @@ const AddPatient = () => {
     sendInvitation: true,
   });
 
+  const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -53,11 +57,42 @@ const AddPatient = () => {
     setFormData((prev) => ({ ...prev, tempPassword: randomPass }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Registering Patient:", formData);
-    navigate("/dashboard/patients-management");
+    setSubmitError("");
+    setLoading(true);
+
+    try {
+      const payload = {
+        email: formData.email,
+        password: formData.tempPassword || "Medimate@2026",
+        fullName: formData.fullName,
+        phone: formData.phone,
+        dob: formData.dob,
+        bloodGroup: formData.bloodGroup,
+        age: formData.age,
+        gender: formData.gender,
+        address: formData.address,
+        allergies: formData.allergies,
+        existingConditions: formData.existingConditions,
+        currentMedications: formData.currentMedications,
+        medicalNotes: formData.medicalNotes,
+        emergencyName: formData.emergencyName,
+        emergencyRelationship: formData.emergencyRelationship,
+        emergencyPhone: formData.emergencyPhone,
+        emergencyEmail: formData.emergencyEmail,
+        status: formData.accountStatus || "Active",
+      };
+
+      await patientApi.create(payload);
+      navigate("/admin/patients");
+    } catch (err) {
+      setSubmitError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-[#1E293B] font-sans p-8">
       <div className="max-w-5xl mx-auto">
@@ -66,7 +101,7 @@ const AddPatient = () => {
           <nav className="text-xs font-medium text-slate-500 mb-1 flex items-center gap-1.5">
             <button
               className="text-[#2563EB] hover:underline font-semibold"
-              onClick={() => navigate("/dashboard/patients-management")}
+              onClick={() => navigate("/admin/patients")}
             >
               Patients Management
             </button>
@@ -85,7 +120,13 @@ const AddPatient = () => {
         </div>
 
         {/* Form Wrap */}
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {submitError && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-2 mb-6">
+              <AlertCircle size={16} />
+              {submitError}
+            </div>
+          )}
           <PersonalInfoSection
             formData={formData}
             handleChange={handleChange}
@@ -108,23 +149,26 @@ const AddPatient = () => {
           <div className="flex items-center justify-end gap-3 mt-8">
             <button
               type="button"
-              className="px-4 py-2 border border-[#CBD5E1] bg-white text-slate-700 font-bold text-xs rounded-lg hover:bg-slate-50 transition"
-              onClick={() => navigate("/dashboard/patients-management")}
+              disabled={loading}
+              className="px-4 py-2 border border-[#CBD5E1] bg-white text-slate-700 font-bold text-xs rounded-lg hover:bg-slate-50 transition disabled:opacity-50"
+              onClick={() => navigate("/admin/patients")}
             >
               Cancel
             </button>
             <button
               type="button"
-              className="px-4 py-2 border border-[#CBD5E1] bg-white text-slate-700 font-bold text-xs rounded-lg hover:bg-slate-50 transition"
+              disabled={loading}
+              className="px-4 py-2 border border-[#CBD5E1] bg-white text-slate-700 font-bold text-xs rounded-lg hover:bg-slate-50 transition disabled:opacity-50"
             >
               Save as Draft
             </button>
             <button
               type="submit"
-              className="px-5 py-2 bg-[#0256CA] hover:bg-blue-700 text-white font-bold text-xs rounded-lg flex items-center gap-1.5 shadow-sm transition"
+              disabled={loading}
+              className="px-5 py-2 bg-[#0256CA] hover:bg-blue-700 text-white font-bold text-xs rounded-lg flex items-center gap-1.5 shadow-sm transition disabled:opacity-50"
             >
               <Plus size={15} />
-              Register Patient
+              {loading ? "Registering..." : "Register Patient"}
             </button>
           </div>
         </form>
