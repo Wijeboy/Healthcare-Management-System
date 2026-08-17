@@ -1,0 +1,17 @@
+export const NOTIFICATION_GROUPS = ["Clinical Actions & Reviews", "Patient Management", "System & Records"];
+
+export const BADGE_TINT = {
+  rose: "bg-rose-50 text-rose-600 dark:bg-rose-950/40",
+  blue: "bg-blue-50 text-blue-600 dark:bg-blue-950/40",
+  emerald: "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40",
+  slate: "bg-slate-100 text-slate-500 dark:bg-slate-700",
+};
+
+export const mockNotifications = [
+  { id: "n1", group: "Clinical Actions & Reviews", badge: "Priority Review", badgeTint: "rose", icon: "file-warning", time: "5 mins ago", title: "Medical History Update Pending: Patient #TXN-88285", detail: [{ label: "Patient", value: "Robert Chen" }, { label: "Type", value: "Post-Surgical History" }], actions: [{ label: "Defer" }, { label: "Review & Update", primary: true }], patientId: "p3", read: false },
+  { id: "n2", group: "Clinical Actions & Reviews", badge: "Prescription Renewal", badgeTint: "rose", icon: "pill", time: "25 mins ago", title: "Renewal Request: Metformin 500mg", detail: [{ label: "Patient", value: "Sarah Jenkins" }, { label: "Pharmacy", value: "CVS Health #482" }], actions: [{ label: "Approve & Sign", primary: true, link: true }, { label: "Contact Pharmacist", link: true }], patientId: "p2", read: false },
+  { id: "n3", group: "Patient Management", badge: "New Appointment Request", badgeTint: "blue", icon: "calendar-plus", time: "1 hour ago", title: "Follow-up: Imasha Fernando", detail: [{ label: "Proposed", value: "Tomorrow, 10:30 AM" }], actions: [{ label: "Accept & Add to Calendar", primary: true }, { label: "Reschedule" }], patientId: "p1", read: false },
+  { id: "n4", group: "Patient Management", badge: "Consultation Follow-up", badgeTint: "slate", icon: "user", time: "2 hours ago", title: "Post-Op Review: David Miller", description: "Review surgical recovery notes and schedule 2-week follow-up.", actions: [], patientId: "p4", read: true },
+  { id: "n5", group: "System & Records", badge: "System Notification", badgeTint: "emerald", icon: "check-circle-2", time: "3 hours ago", title: "Lab Result Integration Successful", description: "All pending results from Quest Diagnostics have been synced to patient records.", actions: [], patientId: null, read: true },
+  { id: "n6", group: "System & Records", badge: "System Update", badgeTint: "slate", icon: "clock", time: "Yesterday", title: "Platform Maintenance Complete", description: "New security patches and performance improvements have been applied.", actions: [], patientId: null, read: true },
+];

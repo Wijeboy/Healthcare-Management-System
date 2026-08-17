@@ -19,8 +19,21 @@ import EditStaff from "./pages/AdminPages/staff/EditStaff";
 import StaffDetails from "./pages/AdminPages/staff/StaffDetails";
 import ReportsAnalytics from "./pages/AdminPages/reports/ReportsAnalytics";
 import UserManagement from "./pages/AdminPages/UserManagement";
-import DoctorDashboard from "./pages/DoctorDashboard";
 import PatientDashboard from "./pages/PatientDashboard";
+
+// --- Doctor Portal pages (all doctor-only content lives under DoctorPages/) ---
+import DoctorDashboardPage from "./pages/DoctorPages/Dashboard";
+import DoctorProfilePage from "./pages/DoctorPages/Profile";
+import DoctorSchedulePage from "./pages/DoctorPages/Schedule";
+import TodaysAppointmentsPage from "./pages/DoctorPages/TodaysAppointments";
+import DoctorAppointmentDetailsPage from "./pages/DoctorPages/AppointmentDetails";
+import PatientHistoryPage from "./pages/DoctorPages/PatientHistory";
+import ClinicalNotificationsPage from "./pages/DoctorPages/ClinicalNotifications";
+import DoctorRecordsPage from "./pages/DoctorPages/Records";
+import DoctorPrescriptionsPage from "./pages/DoctorPages/Prescriptions";
+import DoctorPrescriptionFormPage from "./pages/DoctorPages/PrescriptionForm";
+import DoctorPrescriptionViewPage from "./pages/DoctorPages/PrescriptionView";
+import BookAppointmentPage from "./pages/DoctorPages/BookAppointment";
 
 const getCurrentRole = () => localStorage.getItem("hmsRole");
 
@@ -81,15 +94,31 @@ function App() {
         <Route path="users" element={<UserManagement />} />
       </Route>
 
-      {/* Doctor Role Routes */}
+      {/* Doctor Role Routes — same DashboardLayout shell (Sidebar switches to
+          the Doctor nav automatically based on the /doctor path prefix) */}
       <Route
         path="/doctor"
         element={
           <RequireRole role="Doctor">
-            <DoctorDashboard />
+            <DashboardLayout />
           </RequireRole>
         }
-      />
+      >
+        <Route index element={<DoctorDashboardPage />} />
+        <Route path="dashboard" element={<DoctorDashboardPage />} />
+        <Route path="profile" element={<DoctorProfilePage />} />
+        <Route path="schedule" element={<DoctorSchedulePage />} />
+        <Route path="appointments/today" element={<TodaysAppointmentsPage />} />
+        <Route path="appointments/new" element={<BookAppointmentPage />} />
+        <Route path="appointments/:id" element={<DoctorAppointmentDetailsPage />} />
+        <Route path="patients/:patientId" element={<PatientHistoryPage />} />
+        <Route path="notifications" element={<ClinicalNotificationsPage />} />
+        <Route path="records" element={<DoctorRecordsPage />} />
+        <Route path="prescriptions" element={<DoctorPrescriptionsPage />} />
+        <Route path="prescriptions/new" element={<DoctorPrescriptionFormPage />} />
+        <Route path="prescriptions/:id/edit" element={<DoctorPrescriptionFormPage />} />
+        <Route path="prescriptions/:id" element={<DoctorPrescriptionViewPage />} />
+      </Route>
 
       {/* Patient Role Routes */}
       <Route
