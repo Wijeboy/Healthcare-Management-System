@@ -9,6 +9,8 @@ import DoctorsStatCard from "../../../components/admin-components/doctors/Doctor
 import DoctorsFilterBar from "../../../components/admin-components/doctors/DoctorsFilterBar";
 import DoctorCard from "../../../components/admin-components/doctors/DoctorCard";
 import ConfirmationModal from "../../../components/common/ConfirmationModal";
+import toast from "react-hot-toast";
+import { getFriendlyErrorMessage } from "../../../utils/userMessages";
 
 const ITEMS_PER_PAGE = 9;
 
@@ -24,6 +26,7 @@ const DoctorsManagement = () => {
   const [error, setError]             = useState(null);
   const [doctorToDelete, setDoctorToDelete] = useState(null);
   const [deleting, setDeleting]       = useState(false);
+  const [deletingDoctorId, setDeletingDoctorId] = useState(null);
 
   const [searchTerm,     setSearchTerm]     = useState("");
   const [department,     setDepartment]     = useState("All");
@@ -47,7 +50,8 @@ const DoctorsManagement = () => {
       setTotal(res.total || 0);
       setTotalPages(res.totalPages || 1);
     } catch (err) {
-      setError(err.message);
+      console.error("Failed to load doctors:", err);
+      setError("We could not load the doctors list. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -71,14 +75,18 @@ const DoctorsManagement = () => {
   const confirmDeleteDoctor = async () => {
     if (!doctorToDelete) return;
     setDeleting(true);
+    setDeletingDoctorId(doctorToDelete.id);
     try {
       await doctorApi.delete(doctorToDelete.id);
       setDoctorToDelete(null);
+      toast.success("Doctor deleted successfully");
       fetchDoctors();
     } catch (err) {
-      alert(`Failed to delete doctor: ${err.message}`);
+      console.error("Failed to delete doctor:", err);
+      toast.error(getFriendlyErrorMessage(err, "We could not delete the doctor. Please try again."));
     } finally {
       setDeleting(false);
+      setDeletingDoctorId(null);
     }
   };
 
@@ -103,7 +111,7 @@ const DoctorsManagement = () => {
             <div className="flex items-center gap-2">
               <button
                 onClick={fetchDoctors}
-                className="p-2.5 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 transition"
+                className="p-2.5 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 transition cursor-pointer"
                 title="Refresh"
               >
                 <RefreshCw size={16} />
@@ -161,7 +169,7 @@ const DoctorsManagement = () => {
               <div className="p-12 flex flex-col items-center justify-center gap-3 text-red-500">
                 <AlertCircle size={32} />
                 <p className="text-sm font-medium">{error}</p>
-                <button onClick={fetchDoctors} className="text-xs underline text-slate-500">
+                <button onClick={fetchDoctors} className="text-xs underline text-slate-500 cursor-pointer">
                   Try again
                 </button>
               </div>
@@ -183,6 +191,7 @@ const DoctorsManagement = () => {
                   <DoctorCard
                     key={doc.id}
                     doctor={doc}
+                    deleting={deleting && deletingDoctorId === doc.id}
                     onView={(id) => navigate(`/admin/doctors/details?id=${id}`)}
                     onEdit={(id) => navigate(`/admin/doctors/edit?id=${id}`)}
                     onDelete={handleDeleteDoctor}
@@ -238,9 +247,14 @@ const DoctorsManagement = () => {
         cancelText="Cancel"
         onConfirm={confirmDeleteDoctor}
         onCancel={() => setDoctorToDelete(null)}
+        loading={deleting}
       />
     </div>
   );
 };
 
 export default DoctorsManagement;
+
+
+
+

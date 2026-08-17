@@ -97,3 +97,5 @@ const EditMedicalInfoSection = ({ formData, handleChange }) => {
 };
 
 export default EditMedicalInfoSection;
+
+

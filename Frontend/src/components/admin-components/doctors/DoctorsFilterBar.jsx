@@ -81,7 +81,7 @@ const DoctorsFilterBar = ({
         <div className="col-span-1">
           <button
             onClick={onClear}
-            className="w-full px-3 py-2 border border-[#CBD5E1] hover:bg-slate-50 text-slate-700 font-medium text-sm rounded-lg transition text-center"
+            className="w-full px-3 py-2 border border-[#CBD5E1] hover:bg-slate-50 text-slate-700 font-medium text-sm rounded-lg transition text-center cursor-pointer"
           >
             Clear Filters
           </button>
@@ -92,3 +92,5 @@ const DoctorsFilterBar = ({
 };
 
 export default DoctorsFilterBar
+
+

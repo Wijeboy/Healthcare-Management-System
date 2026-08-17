@@ -1,7 +1,7 @@
 import React from "react";
 import { AlertTriangle } from "lucide-react";
 
-const MedicalInfoSection = ({ formData, handleChange }) => {
+const MedicalInfoSection = ({ formData, handleChange, showRequiredMark }) => {
   return (
     <div className="bg-white border border-[#E2E8F0] rounded-xl p-6 shadow-sm mb-6">
       <div className="flex items-center gap-3 mb-6">
@@ -37,7 +37,7 @@ const MedicalInfoSection = ({ formData, handleChange }) => {
         {/* Allergies */}
         <div>
           <label className="block font-semibold text-slate-700 mb-1">
-            Allergies <span className="text-rose-500">*</span>
+            Allergies {showRequiredMark?.("allergies") && <span className="text-rose-500">*</span>}
           </label>
           <input
             type="text"
@@ -105,3 +105,5 @@ const MedicalInfoSection = ({ formData, handleChange }) => {
 };
 
 export default MedicalInfoSection;
+
+

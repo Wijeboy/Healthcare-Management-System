@@ -85,3 +85,4 @@ const DoctorProfileHeaderCard = ({ doctor, onEdit }) => {
 };
 
 export default DoctorProfileHeaderCard
+

@@ -78,3 +78,4 @@ const ProfessionalInfoCard = ({ professional }) => {
 };
 
 export default ProfessionalInfoCard
+

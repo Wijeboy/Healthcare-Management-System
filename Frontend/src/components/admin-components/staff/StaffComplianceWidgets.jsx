@@ -13,7 +13,7 @@ const StaffComplianceWidgets = () => {
             Role-based access should be protected.
           </p>
         </div>
-        <button className="px-3 py-1.5 border border-[#CBD5E1] bg-white text-slate-700 font-bold text-xs rounded-lg hover:bg-slate-50 transition shrink-0 z-10">
+        <button className="px-3 py-1.5 border border-[#CBD5E1] bg-white text-slate-700 font-bold text-xs rounded-lg hover:bg-slate-50 transition shrink-0 z-10 cursor-pointer">
           View Role Logs
         </button>
       </div>
@@ -33,3 +33,6 @@ const StaffComplianceWidgets = () => {
 };
 
 export default StaffComplianceWidgets;
+
+
+

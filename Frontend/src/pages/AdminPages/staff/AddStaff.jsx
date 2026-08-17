@@ -7,6 +7,9 @@ import ContactInfoSection from "../../../components/admin-components/staff/add-s
 import WorkInfoSection from "../../../components/admin-components/staff/add-staff/WorkInfoSection";
 import ReviewSection from "../../../components/admin-components/staff/add-staff/ReviewSection";
 import { staffApi } from "../../../services/api";
+import toast from "react-hot-toast";
+import { Loader2 } from "lucide-react";
+import { getFriendlyErrorMessage } from "../../../utils/userMessages";
 
 const AddStaff = () => {
   const navigate = useNavigate();
@@ -66,9 +69,13 @@ const AddStaff = () => {
       };
 
       await staffApi.create(payload);
+      toast.success("Staff member created successfully");
       navigate("/admin/staff");
     } catch (err) {
-      setSubmitError(err.message);
+      console.error("Failed to add staff:", err);
+      const message = getFriendlyErrorMessage(err, "We could not add the staff member. Please try again.");
+      setSubmitError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -132,16 +139,16 @@ const AddStaff = () => {
                 type="button"
                 onClick={handleSaveDraft}
                 disabled={loading}
-                className="rounded-lg border border-[#2563EB] px-4 py-2.5 text-sm font-semibold text-[#2563EB] hover:bg-blue-50 transition-colors disabled:opacity-50"
+                className="rounded-lg border border-[#2563EB] px-4 py-2.5 text-sm font-semibold text-[#2563EB] hover:bg-blue-50 transition-colors disabled:opacity-50 cursor-pointer"
               >
                 Save as Draft
               </button>
               <button
-                type="submit"
-                disabled={loading}
-                className="rounded-lg bg-[#1E3A8A] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-950 transition-colors inline-flex items-center gap-2 disabled:opacity-50"
-              >
-                <Plus size={15} />
+              type="submit"
+              disabled={loading}
+              className="rounded-lg bg-[#1E3A8A] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-950 transition-colors inline-flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+            >
+                {loading ? <Loader2 size={15} className="animate-spin" /> : <Plus size={15} />}
                 {loading ? "Creating..." : "Create Staff"}
               </button>
             </div>
@@ -153,3 +160,7 @@ const AddStaff = () => {
 };
 
 export default AddStaff;
+
+
+
+

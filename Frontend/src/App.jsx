@@ -18,7 +18,8 @@ import AddStaff from "./pages/AdminPages/staff/AddStaff";
 import EditStaff from "./pages/AdminPages/staff/EditStaff";
 import StaffDetails from "./pages/AdminPages/staff/StaffDetails";
 import ReportsAnalytics from "./pages/AdminPages/reports/ReportsAnalytics";
-import UserManagement from "./pages/AdminPages/UserManagement";
+import UserManagement from "./pages/AdminPages/users/UserManagement";
+import DoctorDashboard from "./pages/DoctorDashboard";
 import PatientDashboard from "./pages/PatientDashboard";
 
 // --- Doctor Portal pages (all doctor-only content lives under DoctorPages/) ---

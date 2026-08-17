@@ -77,3 +77,5 @@ const PersonalInfoCard = ({ personal }) => {
 };
 
 export default PersonalInfoCard;
+
+

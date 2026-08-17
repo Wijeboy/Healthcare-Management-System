@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Plus, RefreshCw, AlertCircle, Users } from "lucide-react";
+import { Plus, RefreshCw, AlertCircle, Users, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { staffApi } from "../../../services/api";
 import StaffStatCards from "../../../components/admin-components/staff/StaffStatCards";
@@ -7,6 +7,8 @@ import StaffFilterBar from "../../../components/admin-components/staff/StaffFilt
 import StaffTable from "../../../components/admin-components/staff/StaffTable";
 import StaffComplianceWidgets from "../../../components/admin-components/staff/StaffComplianceWidgets";
 import ConfirmationModal from "../../../components/common/ConfirmationModal";
+import toast from "react-hot-toast";
+import { getFriendlyErrorMessage } from "../../../utils/userMessages";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -44,7 +46,8 @@ const StaffManagement = () => {
       setTotal(res.total || 0);
       setTotalPages(res.totalPages || 1);
     } catch (err) {
-      setError(err.message);
+      console.error("Failed to load staff:", err);
+      setError("We could not load the staff list. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -63,9 +66,11 @@ const StaffManagement = () => {
     try {
       await staffApi.delete(staffToDelete.id);
       setStaffToDelete(null);
+      toast.success("Staff member deleted successfully");
       fetchStaff();
     } catch (err) {
-      alert(`Failed to delete staff: ${err.message}`);
+      console.error("Failed to delete staff member:", err);
+      toast.error(getFriendlyErrorMessage(err, "We could not delete the staff member. Please try again."));
     } finally {
       setDeleting(false);
     }
@@ -88,13 +93,13 @@ const StaffManagement = () => {
             <div className="flex items-center gap-2">
               <button
                 onClick={fetchStaff}
-                className="p-2.5 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 transition"
+                className="p-2.5 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 transition cursor-pointer"
                 title="Refresh"
               >
                 <RefreshCw size={16} />
               </button>
               <button
-                className="px-4 py-2.5 bg-[#1E3A8A] hover:bg-blue-900 text-white font-bold text-xs rounded-lg flex items-center gap-1.5 shadow-sm transition"
+                className="px-4 py-2.5 bg-[#1E3A8A] hover:bg-blue-900 text-white font-bold text-xs rounded-lg flex items-center gap-1.5 shadow-sm transition cursor-pointer"
                 onClick={() => navigate("/admin/staff/add")}
               >
                 <Plus size={16} />
@@ -126,7 +131,7 @@ const StaffManagement = () => {
             <div className="bg-white rounded-xl border border-red-200 p-12 flex flex-col items-center gap-3 text-red-500">
               <AlertCircle size={32} />
               <p className="text-sm font-medium">{error}</p>
-              <button onClick={fetchStaff} className="text-xs underline text-slate-500">Try again</button>
+              <button onClick={fetchStaff} className="text-xs underline text-slate-500 cursor-pointer">Try again</button>
             </div>
           )}
 
@@ -165,9 +170,13 @@ const StaffManagement = () => {
         cancelText="Cancel"
         onConfirm={confirmDeleteStaff}
         onCancel={() => setStaffToDelete(null)}
+        loading={deleting}
       />
     </div>
   );
 };
 
 export default StaffManagement;
+
+
+

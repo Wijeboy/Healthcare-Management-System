@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { authApi } from "../services/api";
 
 const ROLES = [
   {
@@ -75,6 +76,8 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState("");
 
   const validateEmail = (value) => {
     setEmail(value);
@@ -85,13 +88,28 @@ export default function LoginPage() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Navigate to the dashboard for the selected role
-    // (Auth validation will be enforced once backend is connected)
-    const role = ROLES.find((r) => r.key === selectedRole);
-    localStorage.setItem("hmsRole", selectedRole);
-    navigate(role.dashboard);
+    setFormError("");
+    setLoading(true);
+
+    try {
+      const response = await authApi.login({
+        email: email.trim(),
+        password,
+        role: selectedRole,
+      });
+
+      localStorage.setItem("hmsRole", response.role || selectedRole);
+      localStorage.setItem("hmsEmail", response.user?.email || email.trim());
+
+      const role = ROLES.find((r) => r.key === (response.role || selectedRole));
+      navigate(role?.dashboard || "/login", { replace: true });
+    } catch (err) {
+      setFormError(err.message || "We could not sign you in. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -265,6 +283,12 @@ export default function LoginPage() {
               </div>
             </div>
 
+            {formError && (
+              <p className="text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                {formError}
+              </p>
+            )}
+
             {/* Remember Me */}
             <div className="flex items-center gap-2">
               <input
@@ -284,11 +308,12 @@ export default function LoginPage() {
 
             {/* Submit Button */}
             <button
-              className="w-full py-3.5 px-6 bg-[#1D4ED8] hover:bg-[#1e40af] text-white text-base font-semibold rounded-xl shadow-md active:scale-[0.98] transition-all flex justify-center items-center gap-2 cursor-pointer"
+              className="w-full py-3.5 px-6 bg-[#1D4ED8] hover:bg-[#1e40af] text-white text-base font-semibold rounded-xl shadow-md active:scale-[0.98] transition-all flex justify-center items-center gap-2 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
               type="submit"
               id="login-submit"
+              disabled={loading}
             >
-              Login
+              {loading ? "Signing In..." : "Login"}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="w-5 h-5"
@@ -348,13 +373,19 @@ export default function LoginPage() {
               </button>
             </div>
             <p className="text-sm text-slate-500">
-              Don't have an account?{" "}
-              <Link
-                className="text-[#1D4ED8] font-semibold hover:underline"
-                to="/register"
-              >
-                Register here
-              </Link>
+              {selectedRole === "Patient" ? (
+                <>
+                  Don't have an account?{" "}
+                  <Link
+                    className="text-[#1D4ED8] font-semibold hover:underline"
+                    to="/register"
+                  >
+                    Register here
+                  </Link>
+                </>
+              ) : (
+                `Use your existing ${selectedRole.toLowerCase()} credentials to sign in.`
+              )}
             </p>
           </div>
         </div>

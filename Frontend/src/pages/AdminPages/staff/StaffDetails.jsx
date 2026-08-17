@@ -8,8 +8,20 @@ import StaffContactInfoCard from "../../../components/admin-components/staff/sta
 import StaffAccountCard from "../../../components/admin-components/staff/staff-details/StaffAccountCard";
 import { staffApi } from "../../../services/api";
 
+const calcAge = (dobStr) => {
+  if (!dobStr) return "";
+  const dob = new Date(dobStr);
+  const today = new Date();
+  let age = today.getFullYear() - dob.getFullYear();
+  const m = today.getMonth() - dob.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+  return age > 0 ? String(age) : "";
+};
+
 const mapApiStaffToUiStaff = (data) => {
   if (!data) return null;
+  const computedAge = data.age != null ? String(data.age) : calcAge(data.dob);
+
   return {
     id: data.id || data._id,
     staffId: data.staffId || data.id,
@@ -19,7 +31,7 @@ const mapApiStaffToUiStaff = (data) => {
     status: data.employeeStatus || data.status || "ACTIVE",
     email: data.email || "",
     phone: data.phone || "",
-    age: data.age != null ? String(data.age) : "N/A",
+    age: computedAge || "N/A",
     gender: data.gender || "N/A",
     dob: data.dob || "N/A",
     nationalId: data.nationalId || "N/A",
@@ -146,7 +158,7 @@ const StaffDetails = () => {
                 <Edit size={14} />
                 Edit Staff
               </button>
-              <button className="p-2 border border-[#CBD5E1] bg-[#FFFFFF] text-slate-600 rounded-lg">
+              <button className="p-2 border border-[#CBD5E1] bg-[#FFFFFF] text-slate-600 rounded-lg cursor-pointer">
                 <MoreHorizontal size={16} />
               </button>
             </div>
@@ -200,3 +212,7 @@ const StaffDetails = () => {
 };
 
 export default StaffDetails;
+
+
+
+

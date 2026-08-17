@@ -69,7 +69,50 @@ export const userApi = {
     return request('GET', `/admin/users${query ? `?${query}` : ''}`);
   },
   create:     (data)     => request('POST',  `/admin/users`, data),
+  createAdmin:(data)     => request('POST',  `/admin/users/admin`, data),
   update:     (id, data) => request('PUT',   `/admin/users/${id}`, data),
   assignRole: (id, role) => request('PATCH', `/admin/users/${id}/role`, { role }),
   delete:     (id)       => request('DELETE', `/admin/users/${id}`),
+};
+
+// ─── REPORTS & ANALYTICS ───────────────────────────────────────────────────
+export const reportApi = {
+  getOverview: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request('GET', `/admin/reports/overview${query ? `?${query}` : ''}`);
+  },
+  getAppointments: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request('GET', `/admin/reports/appointments${query ? `?${query}` : ''}`);
+  },
+  getPatients: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request('GET', `/admin/reports/patients${query ? `?${query}` : ''}`);
+  },
+  getDoctors: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request('GET', `/admin/reports/doctors${query ? `?${query}` : ''}`);
+  },
+  getRevenue: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request('GET', `/admin/reports/revenue${query ? `?${query}` : ''}`);
+  },
+  getExportUrl: (type = 'appointments', format = 'pdf', startDate = '', endDate = '') => {
+    const params = new URLSearchParams({ type, format });
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    return `${BASE_URL}/admin/reports/export?${params.toString()}`;
+  },
+};
+
+// ── SETTINGS ───────────────────────────────────────────────────────────────
+export const settingsApi = {
+  getAdminProfile: (email) => request('GET', `/admin/settings/profile?email=${encodeURIComponent(email)}`),
+  updateAdminProfile: (email, data) => request('PUT', `/admin/settings/profile?email=${encodeURIComponent(email)}`, data),
+};
+
+// â”€â”€â”€ AUTH â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+export const authApi = {
+  login: (data) => request('POST', '/auth/login', data),
+  register: (data) => request('POST', '/auth/register', data),
 };

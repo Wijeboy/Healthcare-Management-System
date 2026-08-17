@@ -1,4 +1,6 @@
 import prisma from '../../config/prisma.js';
+import bcrypt from 'bcrypt';
+import { getDb, ObjectId, checkUniqueNic } from '../../config/mongo.js';
 
 // GET all doctors — pagination, search, filter by department/status
 export const getDoctors = async (req, res) => {
@@ -14,9 +16,9 @@ export const getDoctors = async (req, res) => {
           { department: { contains: search, mode: 'insensitive' } },
         ]
       }),
-      ...(department && { department }),
-      ...(status && { status }),
-      ...(availability && { availability }),
+      ...(department && department !== 'All' && { department }),
+      ...(status && status !== 'All' && { status }),
+      ...(availability && availability !== 'All' && { availability }),
     };
 
     const [doctors, total] = await Promise.all([
@@ -47,7 +49,12 @@ export const getDoctorById = async (req, res) => {
   try {
     const doctor = await prisma.doctor.findUnique({
       where: { id: req.params.id },
-      include: { user: { select: { email: true, status: true, createdAt: true } } }
+      include: { 
+        user: { select: { email: true, status: true, createdAt: true } },
+        appointments: true,
+        medicalRecords: true,
+        prescriptions: true,
+      }
     });
     if (!doctor) return res.status(404).json({ error: 'Doctor not found' });
     res.json(doctor);
@@ -61,46 +68,77 @@ export const createDoctor = async (req, res) => {
   try {
     const {
       email, password,
-      fullName, phone, dob, gender, address,
+      fullName, phone, dob, gender, nationalId, nic, address,
       licenceNumber, department, specialization, qualification,
       experience, bio,
       startTime, endTime, workingDays, consultationDuration, availability,
       status
     } = req.body;
 
-    const newDoctor = await prisma.$transaction(async (tx) => {
-      const user = await tx.user.create({
-        data: { email, password, role: 'Doctor', status: status || 'Active' }
-      });
-      return tx.doctor.create({
-        data: {
-          userId: user.id,
-          fullName,
-          phone,
-          dob,
-          gender,
-          address,
-          licenceNumber,
-          department,
-          specialization,
-          qualification,
-          experience,
-          bio,
-          startTime,
-          endTime,
-          workingDays: workingDays || [],
-          consultationDuration,
-          availability: availability || 'Available',
-          status: status || 'Active',
-        }
-      });
-    });
+    const db = await getDb();
+    const effectiveNic = nationalId || nic || null;
 
-    res.status(201).json(newDoctor);
-  } catch (error) {
-    if (error.code === 'P2002') {
-      return res.status(409).json({ error: 'A doctor with this email already exists' });
+    if (email) {
+      const existingUser = await db.collection("User").findOne({ email });
+      if (existingUser) {
+        return res.status(409).json({ error: 'A doctor with this email already exists' });
+      }
     }
+
+    if (effectiveNic) {
+      const existsInRole = await checkUniqueNic(db, effectiveNic);
+      if (existsInRole) {
+        return res.status(409).json({ error: `National ID / NIC '${effectiveNic}' is already registered for a ${existsInRole} in the system.` });
+      }
+    }
+
+    const userId = new ObjectId();
+    const doctorId = new ObjectId();
+    const now = new Date();
+    const rawPassword = password || "Doctor@123456";
+    const hashedPassword = await bcrypt.hash(rawPassword, 10);
+
+    const userDoc = {
+      _id: userId,
+      email: email || `doctor_${doctorId.toString().slice(-6)}@medimate.com`,
+      password: hashedPassword,
+      role: 'Doctor',
+      status: status || 'Active',
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    const doctorDoc = {
+      _id: doctorId,
+      userId: userId,
+      fullName: fullName || "Dr. New Doctor",
+      phone: phone || "",
+      dob: dob || null,
+      gender: gender || null,
+      nationalId: effectiveNic,
+      address: address || null,
+      licenceNumber: licenceNumber || null,
+      department: department || "General",
+      specialization: specialization || "General Medicine",
+      qualification: qualification || null,
+      experience: experience || "1 Year",
+      bio: bio || null,
+      startTime: startTime || "09:00 AM",
+      endTime: endTime || "05:00 PM",
+      workingDays: workingDays || [],
+      consultationDuration: consultationDuration || "15 mins",
+      availability: availability || 'Available',
+      status: status || 'Active',
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    await db.collection("User").insertOne(userDoc);
+    await db.collection("Doctor").insertOne(doctorDoc);
+
+    const created = { id: doctorId.toString(), userId: userId.toString(), ...doctorDoc };
+    res.status(201).json(created);
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -109,28 +147,59 @@ export const createDoctor = async (req, res) => {
 export const updateDoctor = async (req, res) => {
   try {
     const {
-      fullName, phone, dob, gender, address,
+      fullName, phone, dob, gender, nationalId, nic, address,
       licenceNumber, department, specialization, qualification,
       experience, bio,
-      startTime, endTime, workingDays, consultationDuration, availability
+      startTime, endTime, workingDays, consultationDuration, availability,
+      status
     } = req.body;
 
-    const updated = await prisma.doctor.update({
-      where: { id: req.params.id },
-      data: {
-        fullName, phone, dob, gender, address,
-        licenceNumber, department, specialization, qualification,
-        experience, bio,
-        startTime, endTime,
-        workingDays: workingDays || [],
-        consultationDuration, availability
+    const db = await getDb();
+    const doctorId = new ObjectId(req.params.id);
+    const effectiveNic = nationalId || nic || undefined;
+
+    if (effectiveNic) {
+      const existsInRole = await checkUniqueNic(db, effectiveNic, req.params.id);
+      if (existsInRole) {
+        return res.status(409).json({ error: `National ID / NIC '${effectiveNic}' is already registered for a ${existsInRole} in the system.` });
       }
-    });
-    res.json(updated);
-  } catch (error) {
-    if (error.code === 'P2025') {
+    }
+
+    const updateFields = {
+      ...(fullName !== undefined && { fullName }),
+      ...(phone !== undefined && { phone }),
+      ...(dob !== undefined && { dob }),
+      ...(gender !== undefined && { gender }),
+      ...(effectiveNic !== undefined && { nationalId: effectiveNic }),
+      ...(address !== undefined && { address }),
+      ...(licenceNumber !== undefined && { licenceNumber }),
+      ...(department !== undefined && { department }),
+      ...(specialization !== undefined && { specialization }),
+      ...(qualification !== undefined && { qualification }),
+      ...(experience !== undefined && { experience }),
+      ...(bio !== undefined && { bio }),
+      ...(startTime !== undefined && { startTime }),
+      ...(endTime !== undefined && { endTime }),
+      ...(workingDays !== undefined && { workingDays }),
+      ...(consultationDuration !== undefined && { consultationDuration }),
+      ...(availability !== undefined && { availability }),
+      ...(status !== undefined && { status }),
+      updatedAt: new Date(),
+    };
+
+    const result = await db.collection("Doctor").findOneAndUpdate(
+      { _id: doctorId },
+      { $set: updateFields },
+      { returnDocument: 'after' }
+    );
+
+    if (!result) {
       return res.status(404).json({ error: 'Doctor not found' });
     }
+
+    const updated = { id: result._id.toString(), userId: result.userId?.toString(), ...result };
+    res.json(updated);
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -143,22 +212,28 @@ export const updateDoctorStatus = async (req, res) => {
       return res.status(400).json({ error: 'Status must be Active or Inactive' });
     }
 
-    const [doctor, user] = await prisma.$transaction([
-      prisma.doctor.update({
-        where: { id: req.params.id },
-        data: { status }
-      }),
-      prisma.user.updateMany({
-        where: { doctor: { id: req.params.id } },
-        data: { status }
-      })
-    ]);
+    const db = await getDb();
+    const doctorId = new ObjectId(req.params.id);
+
+    const doctor = await db.collection("Doctor").findOneAndUpdate(
+      { _id: doctorId },
+      { $set: { status, updatedAt: new Date() } },
+      { returnDocument: 'after' }
+    );
+
+    if (!doctor) {
+      return res.status(404).json({ error: 'Doctor not found' });
+    }
+
+    if (doctor.userId) {
+      await db.collection("User").updateOne(
+        { _id: doctor.userId },
+        { $set: { status, updatedAt: new Date() } }
+      );
+    }
 
     res.json({ message: `Doctor ${status === 'Active' ? 'activated' : 'deactivated'} successfully`, doctor });
   } catch (error) {
-    if (error.code === 'P2025') {
-      return res.status(404).json({ error: 'Doctor not found' });
-    }
     res.status(500).json({ error: error.message });
   }
 };
@@ -166,13 +241,16 @@ export const updateDoctorStatus = async (req, res) => {
 // DELETE — hard delete doctor
 export const deleteDoctor = async (req, res) => {
   try {
-    const doctor = await prisma.doctor.findUnique({ where: { id: req.params.id } });
+    const db = await getDb();
+    const doctorId = new ObjectId(req.params.id);
+
+    const doctor = await db.collection("Doctor").findOne({ _id: doctorId });
     if (!doctor) return res.status(404).json({ error: 'Doctor not found' });
 
-    await prisma.$transaction([
-      prisma.doctor.delete({ where: { id: req.params.id } }),
-      prisma.user.delete({ where: { id: doctor.userId } })
-    ]);
+    await db.collection("Doctor").deleteOne({ _id: doctorId });
+    if (doctor.userId) {
+      await db.collection("User").deleteOne({ _id: doctor.userId });
+    }
 
     res.json({ message: 'Doctor deleted successfully' });
   } catch (error) {

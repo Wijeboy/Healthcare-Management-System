@@ -7,7 +7,9 @@ import EditEmergencyContactSection from "../../../components/admin-components/pa
 import EditAccountAccessSection from "../../../components/admin-components/patients/edit-patient/EditAccountAccessSection";
 import EditPersonalInfoSection from "../../../components/admin-components/patients/edit-patient/EditPersonalInfoSection";
 import { patientApi } from "../../../services/api";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
+import toast from "react-hot-toast";
+import { getFriendlyErrorMessage } from "../../../utils/userMessages";
 
 const buildFormDataFromPatient = (patientId, p) => {
   if (!p) {
@@ -45,13 +47,23 @@ const buildFormDataFromPatient = (patientId, p) => {
 
   const initials = p.fullName ? p.fullName.split(" ").map(n => n[0]).join("").toUpperCase() : "";
 
+  const calcAge = (dobStr) => {
+    if (!dobStr) return "";
+    const dob = new Date(dobStr);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+    return age > 0 ? String(age) : "";
+  };
+
   return {
     initials: initials || "",
     name: p.fullName || "",
     id: p.id || patientId || "",
     fullName: p.fullName || "",
     dob: p.dob || "",
-    age: p.age != null ? String(p.age) : "",
+    age: p.age != null ? String(p.age) : calcAge(p.dob),
     gender: p.gender || "",
     bloodGroup: p.bloodGroup || "",
     patientId: p.id || patientId || "",
@@ -88,14 +100,18 @@ const EditPatient = () => {
   const [submitError, setSubmitError] = useState("");
 
   const [formData, setFormData] = useState(buildFormDataFromPatient(patientId, null));
+  const [initialPatient, setInitialPatient] = useState(null);
 
   const loadPatient = async () => {
     setLoading(true);
     setError(null);
     try {
       const p = await patientApi.getById(patientId);
-      setFormData(buildFormDataFromPatient(patientId, p));
+      const built = buildFormDataFromPatient(patientId, p);
+      setFormData(built);
+      setInitialPatient(built);
     } catch (err) {
+      console.error("Failed to load patient details:", err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -108,9 +124,23 @@ const EditPatient = () => {
     }
   }, [patientId]);
 
+  const calcAge = (dobStr) => {
+    if (!dobStr) return "";
+    const dob = new Date(dobStr);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+    return age > 0 ? String(age) : "";
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === "dob") {
+      setFormData((prev) => ({ ...prev, dob: value, age: calcAge(value) }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleToggleInvitation = () => {
@@ -150,9 +180,12 @@ const EditPatient = () => {
       };
 
       await patientApi.update(patientId, payload);
+      toast.success("Patient updated successfully");
       navigate(`/admin/patients/details?id=${encodeURIComponent(patientId)}`);
     } catch (err) {
-      setSubmitError(err.message);
+      console.error("Failed to update patient:", err);
+      setSubmitError(getFriendlyErrorMessage(err, "We could not update the patient. Please try again."));
+      toast.error(getFriendlyErrorMessage(err, "We could not update the patient. Please try again."));
     } finally {
       setSaving(false);
     }
@@ -194,7 +227,7 @@ const EditPatient = () => {
               <button
                 type="button"
                 onClick={loadPatient}
-                className="inline-flex items-center gap-2 rounded-lg bg-[#0256CA] px-4 py-2 text-xs font-bold text-white hover:bg-blue-700 transition"
+                className="inline-flex items-center gap-2 rounded-lg bg-[#0256CA] px-4 py-2 text-xs font-bold text-white hover:bg-blue-700 transition cursor-pointer"
               >
                 Try Again
               </button>
@@ -231,7 +264,7 @@ const EditPatient = () => {
           </p>
         </div>
 
-        <EditPatientHeaderBanner patient={formData} />
+        <EditPatientHeaderBanner patient={initialPatient ?? formData} />
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {submitError && (
@@ -276,15 +309,16 @@ const EditPatient = () => {
               type="button"
               disabled={saving}
               onClick={handleReset}
-              className="px-4 py-2 border border-[#CBD5E1] bg-white text-slate-700 font-bold text-xs rounded-lg hover:bg-slate-50 transition disabled:opacity-50"
+              className="px-4 py-2 border border-[#CBD5E1] bg-white text-slate-700 font-bold text-xs rounded-lg hover:bg-slate-50 transition disabled:opacity-50 cursor-pointer"
             >
               Reset Changes
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="px-5 py-2 bg-[#0256CA] hover:bg-blue-700 text-white font-bold text-xs rounded-lg shadow-sm transition disabled:opacity-50"
+              className="px-5 py-2 bg-[#0256CA] hover:bg-blue-700 text-white font-bold text-xs rounded-lg shadow-sm transition disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
             >
+              {saving ? <Loader2 size={15} className="animate-spin" /> : null}
               {saving ? "Saving..." : "Save Changes"}
             </button>
           </div>
@@ -295,3 +329,7 @@ const EditPatient = () => {
 };
 
 export default EditPatient;
+
+
+
+

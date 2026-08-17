@@ -7,6 +7,8 @@ import PatientFilterBar from "../../../components/admin-components/patients/Pati
 import PatientsTable from "../../../components/admin-components/patients/PatientsTable";
 import PatientComplianceWidgets from "../../../components/admin-components/patients/PatientComplianceWidgets";
 import ConfirmationModal from "../../../components/common/ConfirmationModal";
+import toast from "react-hot-toast";
+import { getFriendlyErrorMessage } from "../../../utils/userMessages";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -47,7 +49,8 @@ const PatientsManagement = () => {
       setTotal(res.total || 0);
       setTotalPages(res.totalPages || 1);
     } catch (err) {
-      setError(err.message);
+      console.error("Failed to load patients:", err);
+      setError("We could not load the patients list. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -69,9 +72,11 @@ const PatientsManagement = () => {
     try {
       await patientApi.delete(patientToDelete.id);
       setPatientToDelete(null);
+      toast.success("Patient deleted successfully");
       fetchPatients();
     } catch (err) {
-      alert(`Failed to delete patient: ${err.message}`);
+      console.error("Failed to delete patient:", err);
+      toast.error(getFriendlyErrorMessage(err, "We could not delete the patient. Please try again."));
     } finally {
       setDeleting(false);
     }
@@ -98,7 +103,7 @@ const PatientsManagement = () => {
             <div className="flex items-center gap-2">
               <button
                 onClick={fetchPatients}
-                className="p-2.5 border border-slate-200 rounded-xl text-slate-500 hover:bg-slate-50 transition"
+                className="p-2.5 border border-slate-200 rounded-xl text-slate-500 hover:bg-slate-50 transition cursor-pointer"
                 title="Refresh"
               >
                 <RefreshCw size={16} />
@@ -139,7 +144,7 @@ const PatientsManagement = () => {
             <div className="bg-white rounded-xl border border-red-200 p-12 flex flex-col items-center gap-3 text-red-500">
               <AlertCircle size={32} />
               <p className="text-sm font-medium">{error}</p>
-              <button onClick={fetchPatients} className="text-xs underline text-slate-500">Try again</button>
+              <button onClick={fetchPatients} className="text-xs underline text-slate-500 cursor-pointer">Try again</button>
             </div>
           )}
 
@@ -181,9 +186,13 @@ const PatientsManagement = () => {
         cancelText="Cancel"
         onConfirm={confirmDeletePatient}
         onCancel={() => setPatientToDelete(null)}
+        loading={deleting}
       />
     </div>
   );
 };
 
 export default PatientsManagement;
+
+
+

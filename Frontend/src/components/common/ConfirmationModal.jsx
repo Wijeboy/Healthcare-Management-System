@@ -1,6 +1,6 @@
 import React from 'react'
 import { createPortal } from "react-dom";
-import { AlertTriangle, X } from "lucide-react";
+import { AlertTriangle, Loader2, X } from "lucide-react";
 
 const ConfirmationModal = ({
   open,
@@ -11,6 +11,7 @@ const ConfirmationModal = ({
   onConfirm,
   onCancel,
   destructive = true,
+  loading = false,
 }) => {
   if (!open) return null;
 
@@ -48,12 +49,14 @@ const ConfirmationModal = ({
           <button
             type="button"
             onClick={onConfirm}
+            disabled={loading}
             className={`rounded-lg px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors ${
               destructive
                 ? "bg-rose-600 hover:bg-rose-700"
                 : "bg-blue-900 hover:bg-blue-950"
-            }`}
+            } disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center gap-2`}
           >
+            {loading ? <Loader2 size={16} className="animate-spin" /> : null}
             {confirmText}
           </button>
         </div>

@@ -107,7 +107,7 @@ const StaffFilterBar = ({ filters, onFilterChange, onResetFilters }) => {
           <button
             type="button"
             onClick={onResetFilters}
-            className="w-full py-2 px-1 border border-[#CBD5E1] text-slate-700 font-bold text-xs rounded-lg hover:bg-slate-50 transition text-center truncate"
+            className="w-full py-2 px-1 border border-[#CBD5E1] text-slate-700 font-bold text-xs rounded-lg hover:bg-slate-50 transition text-center truncate cursor-pointer"
           >
             Reset
           </button>
@@ -118,3 +118,6 @@ const StaffFilterBar = ({ filters, onFilterChange, onResetFilters }) => {
 };
 
 export default StaffFilterBar;
+
+
+

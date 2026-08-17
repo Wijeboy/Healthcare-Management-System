@@ -129,7 +129,7 @@ const PatientFilterBar = ({ filters, setFilters, onClear }) => {
           <button
             type="button"
             onClick={onClear}
-            className="w-full py-2 px-2 border border-[#CBD5E1] text-slate-700 font-semibold text-xs rounded-lg hover:bg-slate-50 transition"
+            className="w-full py-2 px-2 border border-[#CBD5E1] text-slate-700 font-semibold text-xs rounded-lg hover:bg-slate-50 transition cursor-pointer"
           >
             Clear Filters
           </button>
@@ -140,3 +140,5 @@ const PatientFilterBar = ({ filters, setFilters, onClear }) => {
 };
 
 export default PatientFilterBar
+
+

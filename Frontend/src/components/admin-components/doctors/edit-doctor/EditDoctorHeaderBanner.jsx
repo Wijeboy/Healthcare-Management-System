@@ -44,3 +44,4 @@ const EditDoctorHeaderBanner = ({ doctor }) => {
 };
 
 export default EditDoctorHeaderBanner
+

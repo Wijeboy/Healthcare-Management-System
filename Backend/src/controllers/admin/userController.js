@@ -1,4 +1,6 @@
+import bcrypt from 'bcrypt';
 import prisma from '../../config/prisma.js';
+import { getDb, ObjectId } from '../../config/mongo.js';
 
 // GET all users — pagination, search, filter by role/status
 export const getUsers = async (req, res) => {
@@ -24,12 +26,10 @@ export const getUsers = async (req, res) => {
           patient: { select: { fullName: true } },
           staff:   { select: { fullName: true } },
         },
-        // Never return passwords
       }),
       prisma.user.count({ where })
     ]);
 
-    // Strip passwords before sending
     const safeUsers = users.map(({ password, ...u }) => u);
 
     res.json({
@@ -48,8 +48,10 @@ export const getUsers = async (req, res) => {
 export const createUser = async (req, res) => {
   try {
     const { email, password, role, status } = req.body;
+    const rawPassword = password || "User@123456";
+    const hashedPassword = await bcrypt.hash(rawPassword, 10);
     const user = await prisma.user.create({
-      data: { email, password, role, status: status || 'Active' }
+      data: { email, password: hashedPassword, role, status: status || 'Active' }
     });
     const { password: _, ...safeUser } = user;
     res.status(201).json(safeUser);
@@ -57,6 +59,68 @@ export const createUser = async (req, res) => {
     if (error.code === 'P2002') {
       return res.status(409).json({ error: 'Email already exists' });
     }
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// POST — create a new admin account with admin profile
+export const createAdmin = async (req, res) => {
+  try {
+    const { email, password, fullName, phone, status = 'Active' } = req.body;
+    const tempPassword = password || `Adm@${Math.random().toString(36).slice(2, 8).toUpperCase()}${Date.now().toString(36).slice(-4).toUpperCase()}`;
+
+    if (!email || !fullName || !phone) {
+      return res.status(400).json({ error: 'Email, full name, and phone are required' });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const db = await getDb();
+
+    const existingUser = await db.collection("User").findOne({ email: normalizedEmail });
+    if (existingUser) {
+      return res.status(409).json({ error: 'Email already exists' });
+    }
+
+    const hashedPassword = await bcrypt.hash(tempPassword, 10);
+    const userId = new ObjectId();
+    const adminId = new ObjectId();
+    const now = new Date();
+
+    const userDoc = {
+      _id: userId,
+      email: normalizedEmail,
+      password: hashedPassword,
+      role: 'Admin',
+      status,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    const adminDoc = {
+      _id: adminId,
+      userId: userId.toString(),
+      fullName: fullName.trim(),
+      phone: phone.trim(),
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    await db.collection("User").insertOne(userDoc);
+    await db.collection("Admin").insertOne(adminDoc);
+
+    res.status(201).json({
+      id: userId.toString(),
+      email: normalizedEmail,
+      role: 'Admin',
+      status,
+      tempPassword,
+      admin: {
+        id: adminId.toString(),
+        fullName: fullName.trim(),
+        phone: phone.trim(),
+      }
+    });
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -100,7 +164,36 @@ export const assignRole = async (req, res) => {
 // DELETE — delete user account
 export const deleteUser = async (req, res) => {
   try {
-    await prisma.user.delete({ where: { id: req.params.id } });
+    const user = await prisma.user.findUnique({
+      where: { id: req.params.id },
+      include: {
+        admin: true,
+        doctor: true,
+        patient: true,
+        staff: true,
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    await prisma.$transaction(async (tx) => {
+      if (user.admin) {
+        await tx.admin.delete({ where: { id: user.admin.id } });
+      }
+      if (user.doctor) {
+        await tx.doctor.delete({ where: { id: user.doctor.id } });
+      }
+      if (user.patient) {
+        await tx.patient.delete({ where: { id: user.patient.id } });
+      }
+      if (user.staff) {
+        await tx.staff.delete({ where: { id: user.staff.id } });
+      }
+      await tx.user.delete({ where: { id: req.params.id } });
+    });
+
     res.json({ message: 'User deleted successfully' });
   } catch (error) {
     if (error.code === 'P2025') return res.status(404).json({ error: 'User not found' });

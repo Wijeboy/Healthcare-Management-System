@@ -1,6 +1,6 @@
 import React from "react";
 
-const ContactInfoSection = ({ formData, handleChange }) => {
+const ContactInfoSection = ({ formData, handleChange, showRequiredMark }) => {
   return (
     <div className="bg-white border border-[#E2E8F0] rounded-xl p-6 shadow-sm mb-6">
       <div className="flex items-center gap-3 mb-6">
@@ -21,7 +21,7 @@ const ContactInfoSection = ({ formData, handleChange }) => {
         {/* Email Address */}
         <div>
           <label className="block font-semibold text-slate-700 mb-1">
-            Email Address <span className="text-rose-500">*</span>
+            Email Address {showRequiredMark?.("email") && <span className="text-rose-500">*</span>}
           </label>
           <input
             type="email"
@@ -36,7 +36,7 @@ const ContactInfoSection = ({ formData, handleChange }) => {
         {/* Phone Number */}
         <div>
           <label className="block font-semibold text-slate-700 mb-1">
-            Phone Number <span className="text-rose-500">*</span>
+            Phone Number {showRequiredMark?.("phone") && <span className="text-rose-500">*</span>}
           </label>
           <input
             type="text"
@@ -51,7 +51,7 @@ const ContactInfoSection = ({ formData, handleChange }) => {
         {/* Address */}
         <div className="md:col-span-2">
           <label className="block font-semibold text-slate-700 mb-1">
-            Address <span className="text-rose-500">*</span>
+            Address {showRequiredMark?.("address") && <span className="text-rose-500">*</span>}
           </label>
           <textarea
             rows={2}
@@ -68,3 +68,5 @@ const ContactInfoSection = ({ formData, handleChange }) => {
 };
 
 export default ContactInfoSection;
+
+

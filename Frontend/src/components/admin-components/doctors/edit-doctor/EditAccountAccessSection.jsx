@@ -6,7 +6,9 @@ const EditAccountAccessSection = ({
   onGeneratePassword,
   sendInvitation,
   setSendInvitation,
+  showRequiredMark,
 }) => {
+  const required = (field) => showRequiredMark ? showRequiredMark(field) : false;
   return (
     <div className="bg-white border border-[#E2E8F0] rounded-xl p-6">
       {/* Section Header */}
@@ -41,7 +43,7 @@ const EditAccountAccessSection = ({
         {/* Account Status */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1">
-            Account Status <span className="text-rose-500">*</span>
+            Account Status {required("accountStatus") && <span className="text-rose-500">*</span>}
           </label>
           <select
             name="accountStatus"
@@ -57,7 +59,7 @@ const EditAccountAccessSection = ({
         {/* Temporary Password */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1">
-            Temporary Password <span className="text-rose-500">*</span>
+            Temporary Password {required("tempPassword") && <span className="text-rose-500">*</span>}
           </label>
           <div className="flex gap-2">
             <input
@@ -70,7 +72,7 @@ const EditAccountAccessSection = ({
             <button
               type="button"
               onClick={onGeneratePassword}
-              className="px-3.5 py-2 border border-[#2563EB] text-[#2563EB] font-bold text-xs rounded-lg hover:bg-blue-50 transition shrink-0"
+              className="px-3.5 py-2 border border-[#2563EB] text-[#2563EB] font-bold text-xs rounded-lg hover:bg-blue-50 transition shrink-0 cursor-pointer"
             >
               Generate
             </button>
@@ -128,3 +130,7 @@ const EditAccountAccessSection = ({
 };
 
 export default EditAccountAccessSection
+
+
+
+

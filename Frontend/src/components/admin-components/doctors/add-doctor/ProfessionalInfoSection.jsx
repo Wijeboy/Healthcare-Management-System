@@ -1,7 +1,8 @@
 import React from 'react'
 import FormSectionHeader from './FormSectionHeader';
 
-const ProfessionalInfoSection = ({ formData, onChange, errors }) => {
+const ProfessionalInfoSection = ({ formData, onChange, errors, showRequiredMark }) => {
+  const required = (field) => showRequiredMark ? showRequiredMark(field) : false;
   return (
     <div className="bg-white border border-[#E2E8F0] rounded-xl p-6">
       <FormSectionHeader
@@ -30,7 +31,7 @@ const ProfessionalInfoSection = ({ formData, onChange, errors }) => {
         {/* Medical Licence Number */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1">
-            Medical Licence Number <span className="text-rose-500">*</span>
+            Medical Licence Number {required("licenceNumber") && <span className="text-rose-500">*</span>}
           </label>
           <input
             type="text"
@@ -54,7 +55,7 @@ const ProfessionalInfoSection = ({ formData, onChange, errors }) => {
         {/* Department */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1">
-            Department <span className="text-rose-500">*</span>
+            Department {required("department") && <span className="text-rose-500">*</span>}
           </label>
           <select
             name="department"
@@ -83,7 +84,7 @@ const ProfessionalInfoSection = ({ formData, onChange, errors }) => {
         {/* Specialization */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1">
-            Specialization <span className="text-rose-500">*</span>
+            Specialization {required("specialization") && <span className="text-rose-500">*</span>}
           </label>
           <input
             type="text"
@@ -122,7 +123,7 @@ const ProfessionalInfoSection = ({ formData, onChange, errors }) => {
         {/* Years of Experience */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1">
-            Years of Experience <span className="text-rose-500">*</span>
+            Years of Experience {required("experience") && <span className="text-rose-500">*</span>}
           </label>
           <input
             type="text"
@@ -167,3 +168,5 @@ const ProfessionalInfoSection = ({ formData, onChange, errors }) => {
 };
 
 export default ProfessionalInfoSection
+
+

@@ -1,7 +1,11 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { authApi } from '../services/api'
+import toast from 'react-hot-toast'
+import { getFriendlyErrorMessage } from '../utils/userMessages'
 
 export default function RegisterPage() {
+  const navigate = useNavigate()
   const [currentStep, setCurrentStep] = useState(1)
   const totalSteps = 3
 
@@ -10,11 +14,20 @@ export default function RegisterPage() {
   const [dob, setDob] = useState('')
   const [bloodGroup, setBloodGroup] = useState('')
   const [gender, setGender] = useState('')
+  const [nationalId, setNationalId] = useState('')
 
   // Step 2 fields
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
+  const [allergies, setAllergies] = useState('')
+  const [existingConditions, setExistingConditions] = useState('')
+  const [currentMedications, setCurrentMedications] = useState('')
+  const [medicalNotes, setMedicalNotes] = useState('')
+  const [emergencyName, setEmergencyName] = useState('')
+  const [emergencyRelationship, setEmergencyRelationship] = useState('')
+  const [emergencyPhone, setEmergencyPhone] = useState('')
+  const [emergencyEmail, setEmergencyEmail] = useState('')
 
   // Step 3 fields
   const [password, setPassword] = useState('')
@@ -22,6 +35,8 @@ export default function RegisterPage() {
   const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [submitError, setSubmitError] = useState('')
 
   const getPasswordStrength = (val) => {
     if (!val) return { score: 0, label: 'Empty', color: 'text-on-surface-variant' }
@@ -51,13 +66,57 @@ export default function RegisterPage() {
     setCurrentStep(newStep)
   }
 
-  const handleSubmit = (e) => {
+  const generateTempPassword = () => {
+    const randomPart = Math.random().toString(36).slice(2, 8).toUpperCase()
+    const timestampPart = Date.now().toString(36).slice(-4).toUpperCase()
+    return `Pat@${randomPart}${timestampPart}`
+  }
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    setSubmitError('')
+
     if (password !== confirmPassword) {
-      alert('Passwords do not match')
+      const message = 'Passwords do not match'
+      setSubmitError(message)
+      toast.error(message)
       return
     }
-    alert('Registration Successful! Redirecting to Dashboard...')
+
+    setLoading(true)
+    try {
+      const payload = {
+        fullName,
+        email,
+        password: password || generateTempPassword(),
+        phone,
+        dob,
+        bloodGroup,
+        gender,
+        nationalId,
+        address,
+        allergies,
+        existingConditions,
+        currentMedications,
+        medicalNotes,
+        emergencyName,
+        emergencyRelationship,
+        emergencyPhone,
+        emergencyEmail,
+        status: 'Active',
+      }
+
+      await authApi.register(payload)
+      toast.success('Patient registered successfully')
+      navigate('/login')
+    } catch (err) {
+      console.error('Failed to register patient:', err)
+      const message = getFriendlyErrorMessage(err, 'We could not register the patient. Please try again.')
+      setSubmitError(message)
+      toast.error(message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const getStepIndicatorStyle = (step) => {
@@ -111,6 +170,10 @@ export default function RegisterPage() {
             <span className="text-2xl font-semibold text-primary tracking-tight">MedSys Healthcare</span>
           </div>
 
+          <div className="mb-6 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+            This registration form is for patients only. Admin and doctor accounts are created by the system admin and can sign in with existing credentials.
+          </div>
+
           {/* Multi-step Indicator */}
           <nav aria-label="Registration Progress" className="flex items-center justify-between mb-8 relative">
             <div className="absolute top-1/2 left-0 w-full h-0.5 bg-surface-container-high -translate-y-1/2 z-0"></div>
@@ -136,20 +199,26 @@ export default function RegisterPage() {
 
           {/* Registration Form */}
           <form className="space-y-6" onSubmit={handleSubmit}>
+            {submitError && (
+              <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+                {submitError}
+              </div>
+            )}
+
             {/* Step 1: Personal Details */}
             {currentStep === 1 && (
               <div className="animate-fade-in">
                 <h2 className="text-xl font-semibold text-on-surface mb-2 leading-7">Personal Details</h2>
-                <p className="text-sm text-on-surface-variant mb-6">Please provide your legal identification information.</p>
+                <p className="text-sm text-on-surface-variant mb-6">Please provide your personal identification information.</p>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs font-semibold tracking-widest uppercase mb-1 text-on-surface-variant" htmlFor="full_name">
+                      <label className="block text-xs font-semibold tracking-widest uppercase mb-1 text-on-surface-variant" htmlFor="full_name">
                       Full Name <span className="text-error">*</span>
                     </label>
                     <input
                       className="w-full h-12 px-4 bg-white border border-outline-variant rounded-lg text-base form-input-focus transition-all"
                       id="full_name"
-                      placeholder="Dr. John Doe"
+                      placeholder="John Doe"
                       required
                       type="text"
                       value={fullName}
@@ -158,16 +227,16 @@ export default function RegisterPage() {
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-semibold tracking-widest uppercase mb-1 text-on-surface-variant" htmlFor="dob">
-                        Date of Birth <span className="text-error">*</span>
+                      <label className="block text-xs font-semibold tracking-widest uppercase mb-1 text-on-surface-variant" htmlFor="national_id">
+                        National ID / NIC
                       </label>
                       <input
                         className="w-full h-12 px-4 bg-white border border-outline-variant rounded-lg text-base form-input-focus transition-all"
-                        id="dob"
-                        required
-                        type="date"
-                        value={dob}
-                        onChange={(e) => setDob(e.target.value)}
+                        id="national_id"
+                        placeholder="Enter NIC if available"
+                        type="text"
+                        value={nationalId}
+                        onChange={(e) => setNationalId(e.target.value)}
                       />
                     </div>
                     <div>
@@ -191,6 +260,21 @@ export default function RegisterPage() {
                         <option value="O+">O+</option>
                         <option value="O-">O-</option>
                       </select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold tracking-widest uppercase mb-1 text-on-surface-variant" htmlFor="dob">
+                        Date of Birth <span className="text-error">*</span>
+                      </label>
+                      <input
+                        className="w-full h-12 px-4 bg-white border border-outline-variant rounded-lg text-base form-input-focus transition-all"
+                        id="dob"
+                        required
+                        type="date"
+                        value={dob}
+                        onChange={(e) => setDob(e.target.value)}
+                      />
                     </div>
                   </div>
                   <div>
@@ -241,6 +325,65 @@ export default function RegisterPage() {
                     />
                   </div>
                   <div>
+                    <label className="block text-xs font-semibold tracking-widest uppercase mb-1 text-on-surface-variant" htmlFor="allergies">
+                      Allergies <span className="text-error">*</span>
+                    </label>
+                    <textarea
+                      className="w-full p-4 bg-white border border-outline-variant rounded-lg text-base form-input-focus transition-all resize-none"
+                      id="allergies"
+                      placeholder="List known allergies"
+                      required
+                      rows="3"
+                      value={allergies}
+                      onChange={(e) => setAllergies(e.target.value)}
+                    ></textarea>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold tracking-widest uppercase mb-1 text-on-surface-variant" htmlFor="existing_conditions">
+                        Existing Medical Conditions
+                      </label>
+                      <textarea
+                        className="w-full p-4 bg-white border border-outline-variant rounded-lg text-base form-input-focus transition-all resize-none"
+                        id="existing_conditions"
+                        placeholder="e.g. Diabetes, asthma, hypertension"
+                        rows="3"
+                        value={existingConditions}
+                        onChange={(e) => setExistingConditions(e.target.value)}
+                      ></textarea>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold tracking-widest uppercase mb-1 text-on-surface-variant" htmlFor="current_medications">
+                        Current Medications
+                      </label>
+                      <textarea
+                        className="w-full p-4 bg-white border border-outline-variant rounded-lg text-base form-input-focus transition-all resize-none"
+                        id="current_medications"
+                        placeholder="List current medicines and dosage if known"
+                        rows="3"
+                        value={currentMedications}
+                        onChange={(e) => setCurrentMedications(e.target.value)}
+                      ></textarea>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold tracking-widest uppercase mb-1 text-on-surface-variant" htmlFor="medical_notes">
+                      Additional Medical Notes
+                    </label>
+                    <textarea
+                      className="w-full p-4 bg-white border border-outline-variant rounded-lg text-base form-input-focus transition-all resize-none"
+                      id="medical_notes"
+                      placeholder="Add any other relevant medical notes"
+                      maxLength="500"
+                      rows="3"
+                      value={medicalNotes}
+                      onChange={(e) => setMedicalNotes(e.target.value)}
+                    ></textarea>
+                    <span className="text-[10px] text-slate-400 mt-1 block">
+                      {medicalNotes.length}/500 characters
+                    </span>
+                  </div>
+                  <div>
                     <label className="block text-xs font-semibold tracking-widest uppercase mb-1 text-on-surface-variant" htmlFor="phone">
                       Phone Number <span className="text-error">*</span>
                     </label>
@@ -268,6 +411,68 @@ export default function RegisterPage() {
                       onChange={(e) => setAddress(e.target.value)}
                     ></textarea>
                   </div>
+                  <div className="pt-2 border-t border-outline-variant/60">
+                    <h3 className="text-sm font-semibold text-on-surface mb-4">Emergency Contact</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-xs font-semibold tracking-widest uppercase mb-1 text-on-surface-variant" htmlFor="emergency_name">
+                          Emergency Name <span className="text-error">*</span>
+                        </label>
+                        <input
+                          className="w-full h-12 px-4 bg-white border border-outline-variant rounded-lg text-base form-input-focus transition-all"
+                          id="emergency_name"
+                          placeholder="Emergency contact name"
+                          required
+                          type="text"
+                          value={emergencyName}
+                          onChange={(e) => setEmergencyName(e.target.value)}
+                        />
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-semibold tracking-widest uppercase mb-1 text-on-surface-variant" htmlFor="emergency_relationship">
+                            Relationship <span className="text-error">*</span>
+                          </label>
+                          <input
+                            className="w-full h-12 px-4 bg-white border border-outline-variant rounded-lg text-base form-input-focus transition-all"
+                            id="emergency_relationship"
+                            placeholder="e.g. Parent"
+                            required
+                            type="text"
+                            value={emergencyRelationship}
+                            onChange={(e) => setEmergencyRelationship(e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold tracking-widest uppercase mb-1 text-on-surface-variant" htmlFor="emergency_phone">
+                            Emergency Phone <span className="text-error">*</span>
+                          </label>
+                          <input
+                            className="w-full h-12 px-4 bg-white border border-outline-variant rounded-lg text-base form-input-focus transition-all"
+                            id="emergency_phone"
+                            placeholder="+1 (555) 000-0000"
+                            required
+                            type="tel"
+                            value={emergencyPhone}
+                            onChange={(e) => setEmergencyPhone(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold tracking-widest uppercase mb-1 text-on-surface-variant" htmlFor="emergency_email">
+                          Emergency Email
+                        </label>
+                        <input
+                          className="w-full h-12 px-4 bg-white border border-outline-variant rounded-lg text-base form-input-focus transition-all"
+                          id="emergency_email"
+                          placeholder="contact@example.com"
+                          type="email"
+                          value={emergencyEmail}
+                          onChange={(e) => setEmergencyEmail(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -276,7 +481,7 @@ export default function RegisterPage() {
             {currentStep === 3 && (
               <div className="animate-fade-in">
                 <h2 className="text-xl font-semibold text-on-surface mb-2 leading-7">Security &amp; Privacy</h2>
-                <p className="text-sm text-on-surface-variant mb-6">Secure your account with a strong password.</p>
+                <p className="text-sm text-on-surface-variant mb-6">Secure your patient account with a strong password.</p>
                 <div className="space-y-4">
                   <div>
                     <label className="block text-xs font-semibold tracking-widest uppercase mb-1 text-on-surface-variant" htmlFor="reg-password">
@@ -378,10 +583,11 @@ export default function RegisterPage() {
                 )}
                 {currentStep === totalSteps && (
                   <button
-                    className="flex-1 h-12 bg-primary text-on-primary font-semibold rounded-lg hover:bg-primary-container active:scale-95 transition-all shadow-sm"
+                    className="flex-1 h-12 bg-primary text-on-primary font-semibold rounded-lg hover:bg-primary-container active:scale-95 transition-all shadow-sm disabled:opacity-60"
+                    disabled={loading}
                     type="submit"
                   >
-                    Create Account
+                    {loading ? 'Creating...' : 'Create Account'}
                   </button>
                 )}
               </div>

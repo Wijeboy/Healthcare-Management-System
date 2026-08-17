@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Edit, MoreHorizontal, ArrowLeft, AlertCircle } from "lucide-react";
 import { doctorApi } from "../../../services/api";
 import DoctorProfileHeaderCard from "../../../components/admin-components/doctors/doctor-details/DoctorProfileHeaderCard";
@@ -12,13 +12,14 @@ import UpcomingAppointmentsTable from "../../../components/admin-components/doct
 const mapApiDoctorToUiDoctor = (doc) => {
   if (!doc) return null;
 
+  const id = doc.id || doc._id?.toString() || "";
   const initials = doc.fullName
     ? doc.fullName
         .split(" ")
         .map((n) => n[0])
         .join("")
         .toUpperCase()
-    : "";
+    : "DR";
 
   const daysOfWeek = [
     "Monday",
@@ -51,14 +52,24 @@ const mapApiDoctorToUiDoctor = (doc) => {
     };
   });
 
+  const upcomingAppointments = (doc.appointments || []).map((app) => ({
+    id: app.id || app._id,
+    date: app.date ? new Date(app.date).toLocaleDateString() : "Scheduled",
+    time: app.time || "10:00 AM",
+    patientName: app.patient?.fullName || "Patient Record",
+    patientId: app.patientId || "PAT-101",
+    reason: app.reason || "Consultation",
+    status: app.status || "CONFIRMED",
+  }));
+
   return {
-    id: doc.id,
+    id,
     name: doc.fullName || "",
     initials: initials || "",
     bio: doc.bio || "",
     personal: {
       fullName: doc.fullName || "",
-      email: doc.user?.email || "",
+      email: doc.user?.email || doc.email || "",
       phone: doc.phone || "",
       dob: doc.dob || "",
       gender: doc.gender || "",
@@ -74,10 +85,11 @@ const mapApiDoctorToUiDoctor = (doc) => {
     },
     availabilityText: doc.availability || "Available",
     scheduleDetails,
+    upcomingAppointments,
     account: {
       systemRole: "Doctor",
       accountStatus: doc.status || "Active",
-      username: doc.user?.email ? doc.user.email.split("@")[0] : "",
+      username: (doc.user?.email || doc.email) ? (doc.user?.email || doc.email).split("@")[0] : "",
       profileCreated: doc.createdAt
         ? new Date(doc.createdAt).toLocaleDateString()
         : "Not available",
@@ -106,7 +118,8 @@ const DoctorDetails = () => {
       const data = await doctorApi.getById(doctorId);
       setDoctor(mapApiDoctorToUiDoctor(data));
     } catch (err) {
-      setError(err.message);
+      console.error("Failed to load doctor details:", err);
+      setError("We could not load the doctor profile. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -159,7 +172,7 @@ const DoctorDetails = () => {
                 <button
                   type="button"
                   onClick={loadDoctor}
-                  className="inline-flex items-center gap-2 rounded-lg bg-[#1E3A8A] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-950 transition-colors"
+                  className="inline-flex items-center gap-2 rounded-lg bg-[#1E3A8A] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-950 transition-colors cursor-pointer"
                 >
                   Try Again
                 </button>
@@ -211,7 +224,7 @@ const DoctorDetails = () => {
                 <Edit size={14} />
                 Edit Doctor
               </button>
-              <button className="p-2 border border-[#CBD5E1] bg-white text-slate-600 rounded-lg hover:bg-slate-50 transition">
+              <button className="p-2 border border-[#CBD5E1] bg-white text-slate-600 rounded-lg hover:bg-slate-50 transition cursor-pointer">
                 <MoreHorizontal size={16} />
               </button>
             </div>
@@ -264,3 +277,7 @@ const DoctorDetails = () => {
 };
 
 export default DoctorDetails;
+
+
+
+

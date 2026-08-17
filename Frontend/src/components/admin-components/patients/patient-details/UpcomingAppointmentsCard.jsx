@@ -12,7 +12,7 @@ const UpcomingAppointmentsCard = ({ appointments }) => {
             Next scheduled consultations for this patient
           </p>
         </div>
-        <button className="text-xs font-bold text-[#0256CA] hover:underline">
+        <button className="text-xs font-bold text-[#0256CA] hover:underline cursor-pointer">
           View All Appointments
         </button>
       </div>
@@ -58,7 +58,7 @@ const UpcomingAppointmentsCard = ({ appointments }) => {
                   </span>
                 </td>
                 <td className="px-5 py-3.5 text-right whitespace-nowrap">
-                  <button className="px-3 py-1 border border-[#CBD5E1] bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-lg transition">
+                  <button className="px-3 py-1 border border-[#CBD5E1] bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-lg transition cursor-pointer">
                     View
                   </button>
                 </td>
@@ -72,3 +72,6 @@ const UpcomingAppointmentsCard = ({ appointments }) => {
 };
 
 export default UpcomingAppointmentsCard;
+
+
+

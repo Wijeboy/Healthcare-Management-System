@@ -1,7 +1,16 @@
 import React from 'react'
-import { Mail, Phone, Clock, Eye, Edit2, Trash2 } from "lucide-react";
+import { Mail, Phone, Clock, Eye, Edit2, Trash2, Loader2 } from "lucide-react";
 
-const DoctorCard = ({ doctor, onView, onEdit, onDelete }) => {
+const DoctorCard = ({ doctor, onView, onEdit, onDelete, deleting = false }) => {
+    const displayName = doctor.fullName || doctor.name || "Unnamed Doctor";
+    const displaySpecialty = doctor.specialization || doctor.specialty || doctor.department || "Doctor";
+    const displayEmail = doctor.email || doctor.user?.email || "Email not available";
+    const displaySchedule =
+      doctor.schedule ||
+      (doctor.startTime && doctor.endTime ? `${doctor.startTime} - ${doctor.endTime}` : "") ||
+      (doctor.workingDays?.length ? doctor.workingDays.join(", ") : "") ||
+      "Schedule not set";
+
     const getStatusBadge = (status) => {
       switch (status) {
         case "ACTIVE":
@@ -32,13 +41,13 @@ const DoctorCard = ({ doctor, onView, onEdit, onDelete }) => {
           </div>
           <div>
             <h4 className="font-bold text-slate-900 text-base leading-snug">
-              {doctor.name}
+              {displayName}
             </h4>
             <p className="text-xs text-slate-400 font-medium">
-              Doctor ID: {doctor.id}
+              {displaySpecialty}
             </p>
             <span className="inline-block mt-1 px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded text-[10px] font-bold tracking-wider uppercase">
-              {doctor.specialty}
+              {displaySpecialty}
             </span>
           </div>
         </div>
@@ -46,7 +55,7 @@ const DoctorCard = ({ doctor, onView, onEdit, onDelete }) => {
         <div className="space-y-2 py-3 border-t border-b border-slate-100 text-xs text-slate-600">
           <div className="flex items-center gap-2">
             <Mail size={14} className="text-slate-400" />
-            <span>{doctor.email}</span>
+            <span>{displayEmail}</span>
           </div>
           <div className="flex items-center gap-2">
             <Phone size={14} className="text-slate-400" />
@@ -54,7 +63,7 @@ const DoctorCard = ({ doctor, onView, onEdit, onDelete }) => {
           </div>
           <div className="flex items-center gap-2">
             <Clock size={14} className="text-slate-400" />
-            <span>{doctor.schedule}</span>
+            <span>{displaySchedule}</span>
           </div>
         </div>
       </div>
@@ -70,21 +79,24 @@ const DoctorCard = ({ doctor, onView, onEdit, onDelete }) => {
         <div className="flex items-center gap-1">
           <button
             onClick={() => onView?.(doctor.id)}
+            disabled={deleting}
             className="p-1.5 border border-slate-200 rounded hover:bg-slate-50 text-slate-500 transition"
           >
             <Eye size={14} />
           </button>
           <button
             onClick={() => onEdit?.(doctor.id)}
+            disabled={deleting}
             className="p-1.5 border border-slate-200 rounded hover:bg-slate-50 text-slate-500 transition"
           >
             <Edit2 size={14} />
           </button>
           <button
             onClick={() => onDelete?.(doctor.id)}
-            className="p-1.5 border border-slate-200 rounded hover:bg-slate-50 text-slate-500 transition"
+            disabled={deleting}
+            className="p-1.5 border border-slate-200 rounded hover:bg-slate-50 text-slate-500 transition disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center"
           >
-            <Trash2 size={14} />
+            {deleting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
           </button>
         </div>
       </div>
@@ -93,3 +105,6 @@ const DoctorCard = ({ doctor, onView, onEdit, onDelete }) => {
 };
 
 export default DoctorCard
+
+
+

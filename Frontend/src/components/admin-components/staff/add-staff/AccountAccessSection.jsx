@@ -53,7 +53,7 @@ const AccountAccessSection = ({
             <button
               type="button"
               onClick={onGeneratePassword}
-              className="px-3 py-2 rounded-lg border border-[#CBD5E1] text-slate-700 font-semibold hover:bg-slate-50 transition"
+              className="px-3 py-2 rounded-lg border border-[#CBD5E1] text-slate-700 font-semibold hover:bg-slate-50 transition cursor-pointer"
             >
               Generate
             </button>
@@ -111,3 +111,7 @@ const AccountAccessSection = ({
 };
 
 export default AccountAccessSection;
+
+
+
+

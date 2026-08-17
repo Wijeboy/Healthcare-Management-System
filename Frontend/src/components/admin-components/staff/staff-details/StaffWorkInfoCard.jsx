@@ -67,3 +67,5 @@ const StaffWorkInfoCard = ({ work }) => {
 };
 
 export default StaffWorkInfoCard;
+
+
