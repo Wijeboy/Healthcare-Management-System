@@ -73,3 +73,34 @@ export const userApi = {
   assignRole: (id, role) => request('PATCH', `/admin/users/${id}/role`, { role }),
   delete:     (id)       => request('DELETE', `/admin/users/${id}`),
 };
+
+// ─── REPORTS & ANALYTICS ───────────────────────────────────────────────────
+export const reportApi = {
+  getOverview: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request('GET', `/admin/reports/overview${query ? `?${query}` : ''}`);
+  },
+  getAppointments: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request('GET', `/admin/reports/appointments${query ? `?${query}` : ''}`);
+  },
+  getPatients: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request('GET', `/admin/reports/patients${query ? `?${query}` : ''}`);
+  },
+  getDoctors: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request('GET', `/admin/reports/doctors${query ? `?${query}` : ''}`);
+  },
+  getRevenue: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request('GET', `/admin/reports/revenue${query ? `?${query}` : ''}`);
+  },
+  getExportUrl: (type = 'appointments', format = 'pdf', startDate = '', endDate = '') => {
+    const params = new URLSearchParams({ type, format });
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    return `${BASE_URL}/admin/reports/export?${params.toString()}`;
+  },
+};
+

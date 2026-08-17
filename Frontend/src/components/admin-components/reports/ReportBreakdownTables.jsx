@@ -1,7 +1,14 @@
 import React from "react";
 import { reportData } from "../../../data/reportData";
 
-const ReportBreakdownTables = () => {
+const ReportBreakdownTables = ({ liveDoctorStats }) => {
+  const doctorsList = liveDoctorStats && liveDoctorStats.length > 0
+    ? liveDoctorStats.map(d => ({
+        name: d.name,
+        department: d.department,
+        appointments: d.totalAppointments,
+      }))
+    : reportData.tables.doctors;
   return (
     <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -43,7 +50,7 @@ const ReportBreakdownTables = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {reportData.tables.doctors.map((doctor) => (
+              {doctorsList.map((doctor) => (
                 <tr key={doctor.name} className="hover:bg-slate-50/70">
                   <td className="px-4 py-3 font-medium text-slate-800">
                     {doctor.name}
