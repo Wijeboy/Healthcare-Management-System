@@ -19,9 +19,9 @@ import EditStaff from "./pages/AdminPages/staff/EditStaff";
 import StaffDetails from "./pages/AdminPages/staff/StaffDetails";
 import ReportsAnalytics from "./pages/AdminPages/reports/ReportsAnalytics";
 import UserManagement from "./pages/AdminPages/users/UserManagement";
-import GlobalAppointmentScheduler from "./pages/GlobalAppointmentScheduler";
-import RecordsUploadMain from "./pages/RecordsUploadMain";
-import FinancialBillingReports from "./pages/FinancialBillingReports";
+import GlobalAppointmentScheduler from "./pages/AdminPages/GlobalAppointmentScheduler";
+import RecordsUploadMain from "./pages/AdminPages/RecordsUploadMain";
+import FinancialBillingReports from "./pages/AdminPages/FinancialBillingReports";
 import SystemSettingsAccessControl from "./pages/SystemSettingsAccessControl";
 import DoctorDashboard from "./pages/DoctorDashboard";
 import PatientDashboard from "./pages/PatientDashboard";
@@ -96,7 +96,10 @@ function App() {
 
         <Route path="reports" element={<ReportsAnalytics />} />
         <Route path="settings" element={<SystemSettingsPage />} />
-        <Route path="access-control" element={<SystemSettingsAccessControl />} />
+        <Route
+          path="access-control"
+          element={<SystemSettingsAccessControl />}
+        />
         <Route path="users" element={<UserManagement />} />
         <Route path="appointments" element={<GlobalAppointmentScheduler />} />
         <Route path="records" element={<RecordsUploadMain />} />
@@ -119,14 +122,26 @@ function App() {
         <Route path="schedule" element={<DoctorSchedulePage />} />
         <Route path="appointments/today" element={<TodaysAppointmentsPage />} />
         <Route path="appointments/new" element={<BookAppointmentPage />} />
-        <Route path="appointments/:id" element={<DoctorAppointmentDetailsPage />} />
+        <Route
+          path="appointments/:id"
+          element={<DoctorAppointmentDetailsPage />}
+        />
         <Route path="patients/:patientId" element={<PatientHistoryPage />} />
         <Route path="notifications" element={<ClinicalNotificationsPage />} />
         <Route path="records" element={<DoctorRecordsPage />} />
         <Route path="prescriptions" element={<DoctorPrescriptionsPage />} />
-        <Route path="prescriptions/new" element={<DoctorPrescriptionFormPage />} />
-        <Route path="prescriptions/:id/edit" element={<DoctorPrescriptionFormPage />} />
-        <Route path="prescriptions/:id" element={<DoctorPrescriptionViewPage />} />
+        <Route
+          path="prescriptions/new"
+          element={<DoctorPrescriptionFormPage />}
+        />
+        <Route
+          path="prescriptions/:id/edit"
+          element={<DoctorPrescriptionFormPage />}
+        />
+        <Route
+          path="prescriptions/:id"
+          element={<DoctorPrescriptionViewPage />}
+        />
       </Route>
 
       {/* Patient Role Routes */}
@@ -141,15 +156,42 @@ function App() {
 
       {/* Legacy /dashboard redirects for backward compatibility */}
       <Route path="/dashboard" element={<Navigate to="/admin" replace />} />
-      <Route path="/dashboard/admin" element={<Navigate to="/admin" replace />} />
-      <Route path="/dashboard/doctor" element={<Navigate to="/doctor" replace />} />
-      <Route path="/dashboard/patient" element={<Navigate to="/patient" replace />} />
-      <Route path="/dashboard/doctors-management" element={<Navigate to="/admin/doctors" replace />} />
-      <Route path="/dashboard/patients-management" element={<Navigate to="/admin/patients" replace />} />
-      <Route path="/dashboard/staff-management" element={<Navigate to="/admin/staff" replace />} />
-      <Route path="/dashboard/user-management" element={<Navigate to="/admin/users" replace />} />
-      <Route path="/dashboard/system-settings" element={<Navigate to="/admin/settings" replace />} />
-      <Route path="/dashboard/reports-analytics" element={<Navigate to="/admin/reports" replace />} />
+      <Route
+        path="/dashboard/admin"
+        element={<Navigate to="/admin" replace />}
+      />
+      <Route
+        path="/dashboard/doctor"
+        element={<Navigate to="/doctor" replace />}
+      />
+      <Route
+        path="/dashboard/patient"
+        element={<Navigate to="/patient" replace />}
+      />
+      <Route
+        path="/dashboard/doctors-management"
+        element={<Navigate to="/admin/doctors" replace />}
+      />
+      <Route
+        path="/dashboard/patients-management"
+        element={<Navigate to="/admin/patients" replace />}
+      />
+      <Route
+        path="/dashboard/staff-management"
+        element={<Navigate to="/admin/staff" replace />}
+      />
+      <Route
+        path="/dashboard/user-management"
+        element={<Navigate to="/admin/users" replace />}
+      />
+      <Route
+        path="/dashboard/system-settings"
+        element={<Navigate to="/admin/settings" replace />}
+      />
+      <Route
+        path="/dashboard/reports-analytics"
+        element={<Navigate to="/admin/reports" replace />}
+      />
 
       {/* Default redirect */}
       <Route path="*" element={<Navigate to="/login" replace />} />
