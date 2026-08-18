@@ -22,7 +22,6 @@ import UserManagement from "./pages/AdminPages/users/UserManagement";
 import GlobalAppointmentScheduler from "./pages/AdminPages/GlobalAppointmentScheduler";
 import RecordsUploadMain from "./pages/AdminPages/RecordsUploadMain";
 import FinancialBillingReports from "./pages/AdminPages/FinancialBillingReports";
-import SystemSettingsAccessControl from "./pages/SystemSettingsAccessControl";
 import DoctorDashboard from "./pages/DoctorDashboard";
 import PatientDashboard from "./pages/PatientDashboard";
 
@@ -96,10 +95,6 @@ function App() {
 
         <Route path="reports" element={<ReportsAnalytics />} />
         <Route path="settings" element={<SystemSettingsPage />} />
-        <Route
-          path="access-control"
-          element={<SystemSettingsAccessControl />}
-        />
         <Route path="users" element={<UserManagement />} />
         <Route path="appointments" element={<GlobalAppointmentScheduler />} />
         <Route path="records" element={<RecordsUploadMain />} />
