@@ -33,6 +33,8 @@ const DoctorsManagement = () => {
   const [specialization, setSpecialization] = useState("All");
   const [status,         setStatus]         = useState("All");
 
+  const [summary, setSummary]         = useState({ total: 0, active: 0, available: 0, inactive: 0 });
+
   // ── Fetch doctors from API ─────────────────────────────────────────────────
   const fetchDoctors = useCallback(async () => {
     setLoading(true);
@@ -49,6 +51,17 @@ const DoctorsManagement = () => {
       setDoctors(res.data || []);
       setTotal(res.total || 0);
       setTotalPages(res.totalPages || 1);
+      if (res.summary) {
+        setSummary(res.summary);
+      } else {
+        const list = res.data || [];
+        setSummary({
+          total: res.total || list.length,
+          active: list.filter((d) => d.status === "Active").length,
+          available: list.filter((d) => d.availability === "Available").length,
+          inactive: list.filter((d) => d.status === "Inactive").length,
+        });
+      }
     } catch (err) {
       console.error("Failed to load doctors:", err);
       setError("We could not load the doctors list. Please try again.");
@@ -90,10 +103,6 @@ const DoctorsManagement = () => {
     }
   };
 
-  // Compute summary stats from fetched data
-  const activeCount   = doctors.filter((d) => d.status === "Active").length;
-  const inactiveCount = doctors.filter((d) => d.status === "Inactive").length;
-
   return (
     <div className="flex h-screen bg-[#F8FAFC] text-[#1E293B] font-sans antialiased overflow-hidden">
       <div className="flex-1 flex flex-col overflow-y-auto">
@@ -129,10 +138,10 @@ const DoctorsManagement = () => {
 
           {/* Stats Bar */}
           <div className="grid grid-cols-4 gap-4">
-            <DoctorsStatCard label="Total Doctors"  value={total}        icon={Users}     colorTheme="blue"    />
-            <DoctorsStatCard label="Active Doctors" value={activeCount}  icon={UserCheck} colorTheme="emerald" />
-            <DoctorsStatCard label="On Duty Today"  value="—"            icon={Clock}     colorTheme="amber"   />
-            <DoctorsStatCard label="Inactive"       value={inactiveCount} icon={CalendarX} colorTheme="rose"   />
+            <DoctorsStatCard label="Total Doctors"  value={summary.total}        icon={Users}     colorTheme="blue"    />
+            <DoctorsStatCard label="Active Doctors" value={summary.active}       icon={UserCheck} colorTheme="emerald" />
+            <DoctorsStatCard label="Available (On Duty)" value={summary.available} icon={Clock}  colorTheme="amber"   />
+            <DoctorsStatCard label="Inactive"       value={summary.inactive}     icon={CalendarX} colorTheme="rose"   />
           </div>
 
           {/* Filters */}

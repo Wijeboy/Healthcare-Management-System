@@ -14,7 +14,7 @@ export const getUsers = async (req, res) => {
       ...(status && status !== 'All' && { status }),
     };
 
-    const [users, total] = await Promise.all([
+    const [users, total, totalAll, adminCount, doctorCount, patientCount, staffCount, activeCount] = await Promise.all([
       prisma.user.findMany({
         where,
         skip,
@@ -27,7 +27,13 @@ export const getUsers = async (req, res) => {
           staff:   { select: { fullName: true } },
         },
       }),
-      prisma.user.count({ where })
+      prisma.user.count({ where }),
+      prisma.user.count(),
+      prisma.user.count({ where: { role: 'Admin' } }),
+      prisma.user.count({ where: { role: 'Doctor' } }),
+      prisma.user.count({ where: { role: 'Patient' } }),
+      prisma.user.count({ where: { role: 'Staff' } }),
+      prisma.user.count({ where: { status: 'Active' } }),
     ]);
 
     const safeUsers = users.map(({ password, ...u }) => u);
@@ -37,7 +43,15 @@ export const getUsers = async (req, res) => {
       total,
       page: parseInt(page),
       limit: parseInt(limit),
-      totalPages: Math.ceil(total / parseInt(limit))
+      totalPages: Math.ceil(total / parseInt(limit)),
+      summary: {
+        total: totalAll,
+        admin: adminCount,
+        doctor: doctorCount,
+        patient: patientCount,
+        staff: staffCount,
+        active: activeCount,
+      }
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

@@ -22,7 +22,7 @@ export const getPatients = async (req, res) => {
         ...(status && status !== 'All' && { status })
       };
 
-      const [patients, total] = await Promise.all([
+      const [patients, total, totalAll, activeCount, inactiveCount, allergiesCount] = await Promise.all([
         prisma.patient.findMany({
           where,
           skip,
@@ -30,7 +30,11 @@ export const getPatients = async (req, res) => {
           orderBy: { createdAt: 'desc' },
           include: { user: { select: { email: true, status: true } } }
         }),
-        prisma.patient.count({ where })
+        prisma.patient.count({ where }),
+        prisma.patient.count(),
+        prisma.patient.count({ where: { status: 'Active' } }),
+        prisma.patient.count({ where: { status: 'Inactive' } }),
+        prisma.patient.count({ where: { allergies: { not: null } } }),
       ]);
 
       return res.json({
@@ -38,7 +42,13 @@ export const getPatients = async (req, res) => {
         total,
         page: pageNum,
         limit: limitNum,
-        totalPages: Math.ceil(total / limitNum)
+        totalPages: Math.ceil(total / limitNum),
+        summary: {
+          total: totalAll,
+          active: activeCount,
+          inactive: inactiveCount,
+          allergies: allergiesCount,
+        }
       });
     } catch (prismaErr) {
       const db = await getDb();
@@ -109,12 +119,22 @@ export const getPatients = async (req, res) => {
         })
       );
 
+      const totalAll = await db.collection("Patient").countDocuments();
+      const activeCount = await db.collection("Patient").countDocuments({ status: "Active" });
+      const inactiveCount = await db.collection("Patient").countDocuments({ status: "Inactive" });
+
       return res.json({
         data: formattedData,
         total,
         page: pageNum,
         limit: limitNum,
-        totalPages: Math.ceil(total / limitNum)
+        totalPages: Math.ceil(total / limitNum),
+        summary: {
+          total: totalAll,
+          active: activeCount,
+          inactive: inactiveCount,
+          allergies: 0,
+        }
       });
     }
   } catch (error) {

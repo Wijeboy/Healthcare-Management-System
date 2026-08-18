@@ -39,6 +39,8 @@ const UserManagement = () => {
   const [showAddAdmin, setShowAddAdmin] = useState(false);
   const [deleting, setDeleting]       = useState(false);
 
+  const [summary, setSummary]         = useState({ total: 0, admin: 0, doctor: 0, patient: 0, staff: 0, active: 0 });
+
   // ── Fetch ────────────────────────────────────────────────────────────────
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -57,10 +59,31 @@ const UserManagement = () => {
         setUsers(res);
         setTotal(res.length);
         setTotalPages(1);
+        setSummary({
+          total: res.length,
+          admin: res.filter((u) => u.role === "Admin").length,
+          doctor: res.filter((u) => u.role === "Doctor").length,
+          patient: res.filter((u) => u.role === "Patient").length,
+          staff: res.filter((u) => u.role === "Staff").length,
+          active: res.filter((u) => u.status === "Active").length,
+        });
       } else {
         setUsers(res.data || []);
         setTotal(res.total || 0);
         setTotalPages(res.totalPages || 1);
+        if (res.summary) {
+          setSummary(res.summary);
+        } else {
+          const list = res.data || [];
+          setSummary({
+            total: res.total || list.length,
+            admin: list.filter((u) => u.role === "Admin").length,
+            doctor: list.filter((u) => u.role === "Doctor").length,
+            patient: list.filter((u) => u.role === "Patient").length,
+            staff: list.filter((u) => u.role === "Staff").length,
+            active: list.filter((u) => u.status === "Active").length,
+          });
+        }
       }
     } catch (err) {
       console.error("Failed to load users:", err);
@@ -89,11 +112,6 @@ const UserManagement = () => {
       setDeleting(false);
     }
   };
-
-  // ── Stats ────────────────────────────────────────────────────────────────
-  const adminCount  = users.filter((u) => u.role === "Admin").length;
-  const doctorCount = users.filter((u) => u.role === "Doctor").length;
-  const patientCount = users.filter((u) => u.role === "Patient").length;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-[#1E293B] font-sans">
@@ -128,10 +146,10 @@ const UserManagement = () => {
         {/* Stat Cards */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           {[
-            { label: "Total Users",   value: total,         icon: Users,       color: "bg-blue-50 text-blue-600" },
-            { label: "Admin Users",   value: adminCount,   icon: UserX,       color: "bg-purple-50 text-purple-600" },
-            { label: "Doctor Users",  value: doctorCount,  icon: ShieldCheck, color: "bg-blue-50 text-blue-600" },
-            { label: "Active Users",  value: users.filter((u) => u.status === "Active").length, icon: Users, color: "bg-emerald-50 text-emerald-600" },
+            { label: "Total Users",   value: summary.total,  icon: Users,       color: "bg-blue-50 text-blue-600" },
+            { label: "Admin Users",   value: summary.admin,  icon: UserX,       color: "bg-purple-50 text-purple-600" },
+            { label: "Doctor Users",  value: summary.doctor, icon: ShieldCheck, color: "bg-blue-50 text-blue-600" },
+            { label: "Active Users",  value: summary.active, icon: Users,       color: "bg-emerald-50 text-emerald-600" },
           ].map(({ label, value, icon: Icon, color }) => (
             <div key={label} className="bg-white border border-slate-200 rounded-xl p-5 flex items-center gap-4">
               <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${color}`}>
