@@ -1,14 +1,9 @@
-// src/components/EmergencyCall.tsx
+// src/components/EmergencyCall.jsx
 import React, { useState } from 'react';
 import { Phone, X, MapPin, Clock, AlertTriangle, User, MessageSquare } from 'lucide-react';
 
-interface EmergencyCallProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-const EmergencyCall: React.FC<EmergencyCallProps> = ({ isOpen, onClose }) => {
-  const [selectedService, setSelectedService] = useState<string>('');
+const EmergencyCall = ({ isOpen, onClose }) => {
+  const [selectedService, setSelectedService] = useState('');
   const [emergencyDetails, setEmergencyDetails] = useState({
     type: '',
     description: '',
@@ -63,7 +58,7 @@ const EmergencyCall: React.FC<EmergencyCallProps> = ({ isOpen, onClose }) => {
     }
   ];
 
-  const handleCall = (service: any) => {
+  const handleCall = (service) => {
     // In a real app, this would initiate the call
     alert(`Calling ${service.name} at ${service.number}`);
   };

@@ -1,11 +1,10 @@
-// src/pages/BookAppointment.tsx
+// src/pages/BookAppointment.jsx
 import React, { useState } from 'react';
-import Sidebar from '../components/common/Sidebar';
-import Header from '../components/common/Header';
+import Sidebar from '../../components/common/Sidebar';
+import Header from '../../components/common/Header';
 import { Calendar, Clock, User, Stethoscope, MapPin, ChevronLeft, ChevronRight, Check } from 'lucide-react';
-import { Patient } from '../types';
 
-const mockPatient: Patient = {
+const mockPatient = {
   id: 'P001',
   name: 'Imasha Perera',
   email: 'imasha@example.com',
@@ -15,26 +14,7 @@ const mockPatient: Patient = {
   address: 'Colombo, Sri Lanka',
 };
 
-interface Doctor {
-  id: string;
-  name: string;
-  specialization: string;
-  experience: number;
-  rating: number;
-  image?: string;
-  availableDays: string[];
-  fees: number;
-  location: string;
-  nextAvailable: string;
-}
-
-interface TimeSlot {
-  time: string;
-  available: boolean;
-  type: 'morning' | 'afternoon' | 'evening';
-}
-
-const mockDoctors: Doctor[] = [
+const mockDoctors = [
   {
     id: '1',
     name: 'Dr. Nimal Fernando',
@@ -81,7 +61,7 @@ const mockDoctors: Doctor[] = [
   }
 ];
 
-const timeSlots: TimeSlot[] = [
+const timeSlots = [
   { time: '09:00 AM', available: true, type: 'morning' },
   { time: '09:30 AM', available: true, type: 'morning' },
   { time: '10:00 AM', available: false, type: 'morning' },
@@ -100,11 +80,11 @@ const timeSlots: TimeSlot[] = [
   { time: '07:30 PM', available: true, type: 'evening' }
 ];
 
-const BookAppointment: React.FC = () => {
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
-  const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
-  const [selectedDate, setSelectedDate] = useState<string>('');
-  const [selectedTime, setSelectedTime] = useState<string>('');
+const BookAppointment = () => {
+  const [step, setStep] = useState(1);
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedTime, setSelectedTime] = useState('');
   const [appointmentDetails, setAppointmentDetails] = useState({
     reason: '',
     symptoms: '',
@@ -112,16 +92,16 @@ const BookAppointment: React.FC = () => {
     notes: ''
   });
 
-  const handleDoctorSelect = (doctor: Doctor) => {
+  const handleDoctorSelect = (doctor) => {
     setSelectedDoctor(doctor);
     setStep(2);
   };
 
-  const handleDateSelect = (date: string) => {
+  const handleDateSelect = (date) => {
     setSelectedDate(date);
   };
 
-  const handleTimeSelect = (time: string) => {
+  const handleTimeSelect = (time) => {
     setSelectedTime(time);
   };
 
@@ -173,7 +153,7 @@ const BookAppointment: React.FC = () => {
               </div>
               {step > 1 && (
                 <button
-                  onClick={() => setStep(Math.max(1, step - 1) as 1 | 2 | 3 | 4)}
+                  onClick={() => setStep(Math.max(1, step - 1))}
                   className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors flex items-center space-x-2"
                 >
                   <ChevronLeft size={20} />

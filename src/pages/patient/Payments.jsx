@@ -1,7 +1,7 @@
-// src/pages/Payments.tsx
+// src/pages/Payments.jsx
 import React, { useState } from 'react';
-import Sidebar from '../components/common/Sidebar';
-import Header from '../components/common/Header';
+import Sidebar from '../../components/common/Sidebar';
+import Header from '../../components/common/Header';
 import { 
   CreditCard, 
   Calendar, 
@@ -20,9 +20,8 @@ import {
   XCircle,
   Plus
 } from 'lucide-react';
-import { Patient } from '../types';
 
-const mockPatient: Patient = {
+const mockPatient = {
   id: 'P001',
   name: 'Imasha Perera',
   email: 'imasha@example.com',
@@ -32,28 +31,7 @@ const mockPatient: Patient = {
   address: 'Colombo, Sri Lanka',
 };
 
-interface Payment {
-  id: string;
-  date: string;
-  description: string;
-  amount: number;
-  status: 'Paid' | 'Pending' | 'Overdue';
-  dueDate?: string;
-  paymentMethod?: string;
-  receiptId?: string;
-  transactionId?: string;
-  type?: 'Medical' | 'Insurance';
-}
-
-interface PaymentMethod {
-  id: string;
-  type: 'card' | 'bank';
-  name: string;
-  details: string;
-  isDefault: boolean;
-}
-
-const mockPayments: Payment[] = [
+const mockPayments = [
   {
     id: '1',
     date: 'Aug 12, 2026',
@@ -109,7 +87,7 @@ const mockPayments: Payment[] = [
   }
 ];
 
-const mockPaymentMethods: PaymentMethod[] = [
+const mockPaymentMethods = [
   {
     id: '1',
     type: 'card',
@@ -134,13 +112,8 @@ const mockPaymentMethods: PaymentMethod[] = [
 ];
 
 // Payment Form Component
-const SecurePaymentForm: React.FC<{
-  isOpen: boolean;
-  onClose: () => void;
-  payment: Payment;
-  onPaymentSuccess: () => void;
-}> = ({ isOpen, onClose, payment, onPaymentSuccess }) => {
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'insurance'>('card');
+const SecurePaymentForm = ({ isOpen, onClose, payment, onPaymentSuccess }) => {
+  const [paymentMethod, setPaymentMethod] = useState('card');
   const [formData, setFormData] = useState({
     cardNumber: '',
     holderName: '',
@@ -368,16 +341,16 @@ const SecurePaymentForm: React.FC<{
   );
 };
 
-const Payments: React.FC = () => {
-  const [payments, setPayments] = useState<Payment[]>(mockPayments);
-  const [paymentMethods] = useState<PaymentMethod[]>(mockPaymentMethods);
-  const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [typeFilter, setTypeFilter] = useState<string>('all');
-  const [activeTab, setActiveTab] = useState<'bills' | 'history' | 'methods'>('bills');
+const Payments = () => {
+  const [payments, setPayments] = useState(mockPayments);
+  const [paymentMethods] = useState(mockPaymentMethods);
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
+  const [activeTab, setActiveTab] = useState('bills');
   const [showPaymentForm, setShowPaymentForm] = useState(false);
-  const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
+  const [selectedPayment, setSelectedPayment] = useState(null);
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status) => {
     switch (status) {
       case 'Paid': return 'text-green-700 bg-green-50 border-green-200';
       case 'Pending': return 'text-yellow-700 bg-yellow-50 border-yellow-200';
@@ -386,7 +359,7 @@ const Payments: React.FC = () => {
     }
   };
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status) => {
     switch (status) {
       case 'Paid': return <CheckCircle size={16} className="text-green-600" />;
       case 'Pending': return <Clock size={16} className="text-yellow-600" />;
@@ -395,7 +368,7 @@ const Payments: React.FC = () => {
     }
   };
 
-  const handlePayNow = (payment: Payment) => {
+  const handlePayNow = (payment) => {
     setSelectedPayment(payment);
     setShowPaymentForm(true);
   };
@@ -404,7 +377,7 @@ const Payments: React.FC = () => {
     if (selectedPayment) {
       setPayments(prev => prev.map(p => 
         p.id === selectedPayment.id 
-          ? { ...p, status: 'Paid' as const, paymentMethod: 'Visa ****1234', receiptId: `RCP-${Date.now()}` }
+          ? { ...p, status: 'Paid', paymentMethod: 'Visa ****1234', receiptId: `RCP-${Date.now()}` }
           : p
       ));
     }
@@ -499,7 +472,7 @@ const Payments: React.FC = () => {
                 ].map((tab) => (
                   <button
                     key={tab.key}
-                    onClick={() => setActiveTab(tab.key as any)}
+                    onClick={() => setActiveTab(tab.key)}
                     className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-medium text-sm ${
                       activeTab === tab.key
                         ? 'border-blue-500 text-blue-600'

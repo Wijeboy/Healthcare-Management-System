@@ -1,11 +1,10 @@
-// src/pages/Prescriptions.tsx
+// src/pages/Prescriptions.jsx
 import React, { useState } from 'react';
-import Sidebar from '../components/common/Sidebar';
-import Header from '../components/common/Header';
+import Sidebar from '../../components/common/Sidebar';
+import Header from '../../components/common/Header';
 import { Pill, Calendar, User, Clock, AlertCircle, Download } from 'lucide-react';
-import { Patient } from '../types';
 
-const mockPatient: Patient = {
+const mockPatient = {
   id: 'P001',
   name: 'Imasha Perera',
   email: 'imasha@example.com',
@@ -15,22 +14,7 @@ const mockPatient: Patient = {
   address: 'Colombo, Sri Lanka',
 };
 
-interface Prescription {
-  id: string;
-  date: string;
-  doctor: string;
-  medications: {
-    name: string;
-    dosage: string;
-    frequency: string;
-    duration: string;
-    instructions?: string;
-  }[];
-  status: 'Active' | 'Completed' | 'Expired';
-  notes?: string;
-}
-
-const mockPrescriptions: Prescription[] = [
+const mockPrescriptions = [
   {
     id: '1',
     date: 'June 5, 2026',
@@ -88,11 +72,11 @@ const mockPrescriptions: Prescription[] = [
   }
 ];
 
-const Prescriptions: React.FC = () => {
-  const [prescriptions] = useState<Prescription[]>(mockPrescriptions);
-  const [filterStatus, setFilterStatus] = useState<string>('all');
+const Prescriptions = () => {
+  const [prescriptions] = useState(mockPrescriptions);
+  const [filterStatus, setFilterStatus] = useState('all');
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status) => {
     switch (status) {
       case 'Active': return 'text-success bg-green-50 border-green-200';
       case 'Completed': return 'text-blue-600 bg-blue-50 border-blue-200';

@@ -1,11 +1,10 @@
-// src/pages/MedicalRecords.tsx
+// src/pages/MedicalRecords.jsx
 import React, { useState } from 'react';
-import Sidebar from '../components/common/Sidebar';
-import Header from '../components/common/Header';
+import Sidebar from '../../components/common/Sidebar';
+import Header from '../../components/common/Header';
 import { FileText, Download, Eye, Filter, Search, Calendar, User } from 'lucide-react';
-import { Patient } from '../types';
 
-const mockPatient: Patient = {
+const mockPatient = {
   id: 'P001',
   name: 'Imasha Perera',
   email: 'imasha@example.com',
@@ -15,18 +14,7 @@ const mockPatient: Patient = {
   address: 'Colombo, Sri Lanka',
 };
 
-interface MedicalRecord {
-  id: string;
-  date: string;
-  type: string;
-  doctor: string;
-  diagnosis: string;
-  notes?: string;
-  status: 'New' | 'Read';
-  attachments?: string[];
-}
-
-const mockRecords: MedicalRecord[] = [
+const mockRecords = [
   {
     id: '1',
     date: 'June 5, 2026',
@@ -68,11 +56,11 @@ const mockRecords: MedicalRecord[] = [
   }
 ];
 
-const MedicalRecords: React.FC = () => {
-  const [records] = useState<MedicalRecord[]>(mockRecords);
-  const [filterType, setFilterType] = useState<string>('all');
-  const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [searchTerm, setSearchTerm] = useState<string>('');
+const MedicalRecords = () => {
+  const [records] = useState(mockRecords);
+  const [filterType, setFilterType] = useState('all');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
 
   const filteredRecords = records.filter(record => {
     const matchesType = filterType === 'all' || record.type.toLowerCase().includes(filterType.toLowerCase());

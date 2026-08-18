@@ -1,11 +1,10 @@
-// src/pages/Settings.tsx
+// src/pages/Settings.jsx
 import React, { useState } from 'react';
-import Sidebar from '../components/common/Sidebar';
-import Header from '../components/common/Header';
+import Sidebar from '../../components/common/Sidebar';
+import Header from '../../components/common/Header';
 import { Settings as SettingsIcon, Bell, Shield, User, Moon, Globe, Smartphone, Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import { Patient } from '../types';
 
-const mockPatient: Patient = {
+const mockPatient = {
   id: 'P001',
   name: 'Imasha Perera',
   email: 'imasha@example.com',
@@ -15,37 +14,10 @@ const mockPatient: Patient = {
   address: 'Colombo, Sri Lanka',
 };
 
-interface SettingsState {
-  notifications: {
-    email: boolean;
-    sms: boolean;
-    push: boolean;
-    appointmentReminders: boolean;
-    paymentReminders: boolean;
-    reportAlerts: boolean;
-  };
-  privacy: {
-    dataSharing: boolean;
-    marketingEmails: boolean;
-    profileVisibility: 'public' | 'private' | 'limited';
-  };
-  preferences: {
-    language: string;
-    timezone: string;
-    dateFormat: string;
-    theme: 'light' | 'dark' | 'auto';
-  };
-  security: {
-    twoFactorAuth: boolean;
-    sessionTimeout: number;
-    loginAlerts: boolean;
-  };
-}
-
-const Settings: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'notifications' | 'privacy' | 'preferences' | 'security'>('notifications');
+const Settings = () => {
+  const [activeTab, setActiveTab] = useState('notifications');
   const [showPassword, setShowPassword] = useState(false);
-  const [settings, setSettings] = useState<SettingsState>({
+  const [settings, setSettings] = useState({
     notifications: {
       email: true,
       sms: true,
@@ -72,12 +44,12 @@ const Settings: React.FC = () => {
     }
   });
 
-  const handleToggle = (section: keyof SettingsState, key: string, value?: any) => {
+  const handleToggle = (section, key, value) => {
     setSettings(prev => ({
       ...prev,
       [section]: {
         ...prev[section],
-        [key]: value !== undefined ? value : !prev[section][key as keyof typeof prev[typeof section]]
+        [key]: value !== undefined ? value : !prev[section][key]
       }
     }));
   };
@@ -126,7 +98,7 @@ const Settings: React.FC = () => {
                   ].map((tab) => (
                     <button
                       key={tab.key}
-                      onClick={() => setActiveTab(tab.key as any)}
+                      onClick={() => setActiveTab(tab.key)}
                       className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
                         activeTab === tab.key
                           ? 'bg-primary text-white'
@@ -230,7 +202,7 @@ const Settings: React.FC = () => {
                               <label className="relative inline-flex items-center cursor-pointer">
                                 <input
                                   type="checkbox"
-                                  checked={settings.notifications[item.key as keyof typeof settings.notifications] as boolean}
+                                  checked={settings.notifications[item.key]}
                                   onChange={() => handleToggle('notifications', item.key)}
                                   className="sr-only peer"
                                 />

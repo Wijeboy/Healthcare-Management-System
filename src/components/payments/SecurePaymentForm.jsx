@@ -1,23 +1,15 @@
-// src/components/payments/SecurePaymentForm.tsx
+// src/components/payments/SecurePaymentForm.jsx
 import React, { useState } from 'react';
 import { CreditCard, Shield, Lock, X, CheckCircle } from 'lucide-react';
 
-interface PaymentFormProps {
-  isOpen: boolean;
-  onClose: () => void;
-  billAmount: number;
-  billDescription: string;
-  onPaymentSuccess: () => void;
-}
-
-const SecurePaymentForm: React.FC<PaymentFormProps> = ({
+const SecurePaymentForm = ({
   isOpen,
   onClose,
   billAmount,
   billDescription,
   onPaymentSuccess
 }) => {
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'insurance'>('card');
+  const [paymentMethod, setPaymentMethod] = useState('card');
   const [formData, setFormData] = useState({
     cardNumber: '',
     holderName: '',
@@ -27,7 +19,7 @@ const SecurePaymentForm: React.FC<PaymentFormProps> = ({
   });
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 

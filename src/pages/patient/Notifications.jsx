@@ -1,11 +1,10 @@
-// src/pages/Notifications.tsx
+// src/pages/Notifications.jsx
 import React, { useState } from 'react';
-import Sidebar from '../components/common/Sidebar';
-import Header from '../components/common/Header';
+import Sidebar from '../../components/common/Sidebar';
+import Header from '../../components/common/Header';
 import { Bell, Calendar, FileText, CreditCard, AlertTriangle, CheckCircle, Trash2 } from 'lucide-react';
-import { Patient } from '../types';
 
-const mockPatient: Patient = {
+const mockPatient = {
   id: 'P001',
   name: 'Imasha Perera',
   email: 'imasha@example.com',
@@ -15,18 +14,7 @@ const mockPatient: Patient = {
   address: 'Colombo, Sri Lanka',
 };
 
-interface Notification {
-  id: string;
-  type: 'appointment' | 'payment' | 'report' | 'system' | 'emergency';
-  title: string;
-  message: string;
-  timestamp: string;
-  isRead: boolean;
-  priority: 'low' | 'medium' | 'high';
-  actionUrl?: string;
-}
-
-const mockNotifications: Notification[] = [
+const mockNotifications = [
   {
     id: '1',
     type: 'appointment',
@@ -83,11 +71,11 @@ const mockNotifications: Notification[] = [
   }
 ];
 
-const Notifications: React.FC = () => {
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
-  const [filter, setFilter] = useState<'all' | 'unread' | 'appointment' | 'payment' | 'report' | 'system'>('all');
+const Notifications = () => {
+  const [notifications, setNotifications] = useState(mockNotifications);
+  const [filter, setFilter] = useState('all');
 
-  const getNotificationIcon = (type: string) => {
+  const getNotificationIcon = (type) => {
     switch (type) {
       case 'appointment': return Calendar;
       case 'payment': return CreditCard;
@@ -97,7 +85,7 @@ const Notifications: React.FC = () => {
     }
   };
 
-  const getNotificationColor = (type: string, priority: string) => {
+  const getNotificationColor = (type, priority) => {
     if (priority === 'high') return 'border-l-red-500 bg-red-50';
     if (type === 'appointment') return 'border-l-blue-500 bg-blue-50';
     if (type === 'payment') return 'border-l-yellow-500 bg-yellow-50';
@@ -106,7 +94,7 @@ const Notifications: React.FC = () => {
     return 'border-l-gray-500 bg-gray-50';
   };
 
-  const getTimeAgo = (timestamp: string) => {
+  const getTimeAgo = (timestamp) => {
     const now = new Date();
     const past = new Date(timestamp);
     const diffInHours = Math.floor((now.getTime() - past.getTime()) / (1000 * 60 * 60));
@@ -118,7 +106,7 @@ const Notifications: React.FC = () => {
     return past.toLocaleDateString();
   };
 
-  const markAsRead = (id: string) => {
+  const markAsRead = (id) => {
     setNotifications(prev => 
       prev.map(notif => 
         notif.id === id ? { ...notif, isRead: true } : notif
@@ -126,7 +114,7 @@ const Notifications: React.FC = () => {
     );
   };
 
-  const deleteNotification = (id: string) => {
+  const deleteNotification = (id) => {
     setNotifications(prev => prev.filter(notif => notif.id !== id));
   };
 
@@ -191,7 +179,7 @@ const Notifications: React.FC = () => {
               ].map((tab) => (
                 <button
                   key={tab.key}
-                  onClick={() => setFilter(tab.key as any)}
+                  onClick={() => setFilter(tab.key)}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2 ${
                     filter === tab.key
                       ? 'bg-primary text-white'

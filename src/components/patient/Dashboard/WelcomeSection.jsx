@@ -1,12 +1,8 @@
-// src/components/patient/Dashboard/WelcomeSection.tsx
+// src/components/patient/Dashboard/WelcomeSection.jsx
 import React from 'react';
 import { Calendar, Clock, Activity, Heart } from 'lucide-react';
 
-interface WelcomeSectionProps {
-  patientName: string;
-}
-
-const WelcomeSection: React.FC<WelcomeSectionProps> = ({ patientName }) => {
+const WelcomeSection = ({ patientName }) => {
   const currentTime = new Date().toLocaleTimeString('en-US', { 
     hour: '2-digit', 
     minute: '2-digit' 

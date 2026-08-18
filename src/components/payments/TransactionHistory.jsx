@@ -1,19 +1,8 @@
-// src/components/payments/TransactionHistory.tsx
+// src/components/payments/TransactionHistory.jsx
 import React, { useState } from 'react';
 import { Download, Filter, Calendar, TrendingUp, CheckCircle, Clock, XCircle } from 'lucide-react';
 
-interface Transaction {
-  id: string;
-  date: string;
-  transactionId: string;
-  description: string;
-  status: 'Success' | 'Pending' | 'Cancelled';
-  amount: number;
-  type: 'Medical' | 'Insurance';
-  paymentMethod?: string;
-}
-
-const mockTransactions: Transaction[] = [
+const mockTransactions = [
   {
     id: '1',
     date: 'Aug 12, 2026',
@@ -64,12 +53,12 @@ const mockTransactions: Transaction[] = [
   }
 ];
 
-const TransactionHistory: React.FC = () => {
-  const [transactions] = useState<Transaction[]>(mockTransactions);
-  const [filter, setFilter] = useState<'All' | 'Medical' | 'Insurance'>('All');
-  const [statusFilter, setStatusFilter] = useState<'All' | 'Success' | 'Pending' | 'Cancelled'>('All');
+const TransactionHistory = () => {
+  const [transactions] = useState(mockTransactions);
+  const [filter, setFilter] = useState('All');
+  const [statusFilter, setStatusFilter] = useState('All');
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status) => {
     switch (status) {
       case 'Success': return <CheckCircle size={16} className="text-green-600" />;
       case 'Pending': return <Clock size={16} className="text-yellow-600" />;
@@ -78,7 +67,7 @@ const TransactionHistory: React.FC = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status) => {
     switch (status) {
       case 'Success': return 'text-green-700 bg-green-50 border-green-200';
       case 'Pending': return 'text-yellow-700 bg-yellow-50 border-yellow-200';
@@ -164,7 +153,7 @@ const TransactionHistory: React.FC = () => {
             <Filter size={16} className="text-gray-500" />
             <select
               value={filter}
-              onChange={(e) => setFilter(e.target.value as any)}
+              onChange={(e) => setFilter(e.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
             >
               <option value="All">All</option>
@@ -176,7 +165,7 @@ const TransactionHistory: React.FC = () => {
             <span className="text-sm text-gray-600">Status:</span>
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as any)}
+              onChange={(e) => setStatusFilter(e.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
             >
               <option value="All">All</option>

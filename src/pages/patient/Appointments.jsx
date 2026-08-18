@@ -1,11 +1,10 @@
-// src/pages/Appointments.tsx
+// src/pages/Appointments.jsx
 import React, { useState } from 'react';
-import Sidebar from '../components/common/Sidebar';
-import Header from '../components/common/Header';
+import Sidebar from '../../components/common/Sidebar';
+import Header from '../../components/common/Header';
 import { Calendar, Clock, User, MapPin, Plus, Filter, Search, Eye, Edit, X } from 'lucide-react';
-import { Patient, Appointment } from '../types';
 
-const mockPatient: Patient = {
+const mockPatient = {
   id: 'P001',
   name: 'Imasha Perera',
   email: 'imasha@example.com',
@@ -15,7 +14,7 @@ const mockPatient: Patient = {
   address: 'Colombo, Sri Lanka',
 };
 
-const mockAppointments: Appointment[] = [
+const mockAppointments = [
   {
     id: '1',
     date: 'June 12, 2026',
@@ -50,12 +49,12 @@ const mockAppointments: Appointment[] = [
   }
 ];
 
-const Appointments: React.FC = () => {
-  const [appointments] = useState<Appointment[]>(mockAppointments);
-  const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [searchTerm, setSearchTerm] = useState<string>('');
+const Appointments = () => {
+  const [appointments] = useState(mockAppointments);
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status) => {
     switch (status) {
       case 'Confirmed': return 'text-success bg-green-50 border-green-200';
       case 'Pending': return 'text-warning bg-yellow-50 border-yellow-200';

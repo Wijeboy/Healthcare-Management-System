@@ -1,12 +1,11 @@
-// src/pages/Dashboard.tsx
+// src/pages/Dashboard.jsx
 import React, { useState } from 'react';
-import Sidebar from '../components/common/Sidebar';
-import Header from '../components/common/Header';
+import Sidebar from '../../components/common/Sidebar';
+import Header from '../../components/common/Header';
 import { Calendar, Clock, FileText, CreditCard, User, ChevronRight, Plus, MoreHorizontal, AlertTriangle } from 'lucide-react';
-import { Patient, DashboardData, Appointment } from '../types';
 
 // Enhanced mock data with patient photo
-const mockPatient: Patient = {
+const mockPatient = {
   id: 'P001',
   name: 'Imasha',
   email: 'imasha@medimate.com',
@@ -17,7 +16,7 @@ const mockPatient: Patient = {
   avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612e995?w=150&h=150&fit=crop&crop=face'
 };
 
-const mockDashboardData: DashboardData = {
+const mockDashboardData = {
   nextAppointment: {
     date: 'June 10',
     time: '10:00 AM',
@@ -28,7 +27,7 @@ const mockDashboardData: DashboardData = {
   pendingBills: 150
 };
 
-const mockAppointments: Appointment[] = [
+const mockAppointments = [
   {
     id: '1',
     date: 'June 12, 2024',
@@ -58,8 +57,8 @@ const mockAppointments: Appointment[] = [
   }
 ];
 
-const Dashboard: React.FC = () => {
-  const getStatusColor = (status: string) => {
+const Dashboard = () => {
+  const getStatusColor = (status) => {
     switch (status) {
       case 'Confirmed': return 'bg-green-100 text-green-800 border-green-200';
       case 'Pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
@@ -68,7 +67,7 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const getDepartmentColor = (department: string) => {
+  const getDepartmentColor = (department) => {
     switch (department) {
       case 'Cardiology': return 'bg-red-100 text-red-800';
       case 'General Medicine': return 'bg-blue-100 text-blue-800';
@@ -78,7 +77,7 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const formatDate = (dateStr: string) => {
+  const formatDate = (dateStr) => {
     const date = new Date(dateStr);
     const month = date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
     const day = date.getDate();
@@ -93,14 +92,14 @@ const Dashboard: React.FC = () => {
       <main className="ml-64 pt-20 p-6">
         <div className="max-w-7xl mx-auto">
           {/* Welcome Header Card - Simple */}
-<div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-8">
-  <h1 className="text-3xl font-bold text-black mb-2">
-    Welcome, {mockPatient.name}! 👋
-  </h1>
-  <p className="text-lg text-black">
-    Here's what's happening with your health today.
-  </p>
-</div>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-8">
+            <h1 className="text-3xl font-bold text-black mb-2">
+              Welcome, {mockPatient.name}! 👋
+            </h1>
+            <p className="text-lg text-black">
+              Here's what's happening with your health today.
+            </p>
+          </div>
 
           {/* Summary Overview Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

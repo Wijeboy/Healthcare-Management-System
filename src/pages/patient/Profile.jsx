@@ -1,11 +1,10 @@
-// src/pages/Profile.tsx
+// src/pages/Profile.jsx
 import React, { useState } from 'react';
-import Sidebar from '../components/common/Sidebar';
-import Header from '../components/common/Header';
+import Sidebar from '../../components/common/Sidebar';
+import Header from '../../components/common/Header';
 import { User, Edit, Save, X, Camera, Phone, Mail, MapPin, Calendar, Shield } from 'lucide-react';
-import { Patient } from '../types';
 
-const mockPatient: Patient = {
+const mockPatient = {
   id: 'P001',
   name: 'Imasha Perera',
   email: 'imasha@example.com',
@@ -15,23 +14,7 @@ const mockPatient: Patient = {
   address: 'No. 123, Galle Road, Colombo 03, Sri Lanka',
 };
 
-interface ExtendedPatient extends Patient {
-  emergencyContact: {
-    name: string;
-    relationship: string;
-    phone: string;
-  };
-  bloodType: string;
-  allergies: string[];
-  medicalHistory: string[];
-  insurance: {
-    provider: string;
-    policyNumber: string;
-    expiryDate: string;
-  };
-}
-
-const mockExtendedPatient: ExtendedPatient = {
+const mockExtendedPatient = {
   ...mockPatient,
   emergencyContact: {
     name: 'Saman Perera',
@@ -48,10 +31,10 @@ const mockExtendedPatient: ExtendedPatient = {
   }
 };
 
-const Profile: React.FC = () => {
-  const [patient, setPatient] = useState<ExtendedPatient>(mockExtendedPatient);
+const Profile = () => {
+  const [patient, setPatient] = useState(mockExtendedPatient);
   const [isEditing, setIsEditing] = useState(false);
-  const [editedPatient, setEditedPatient] = useState<ExtendedPatient>(mockExtendedPatient);
+  const [editedPatient, setEditedPatient] = useState(mockExtendedPatient);
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -68,18 +51,18 @@ const Profile: React.FC = () => {
     setIsEditing(false);
   };
 
-  const handleChange = (field: string, value: any) => {
+  const handleChange = (field, value) => {
     setEditedPatient(prev => ({
       ...prev,
       [field]: value
     }));
   };
 
-  const handleNestedChange = (parent: string, field: string, value: any) => {
+  const handleNestedChange = (parent, field, value) => {
     setEditedPatient(prev => ({
       ...prev,
       [parent]: {
-        ...(prev as any)[parent],
+        ...prev[parent],
         [field]: value
       }
     }));

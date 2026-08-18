@@ -1,7 +1,8 @@
 // pages/AppointmentBooking.jsx
 import React, { useState } from 'react';
-import Sidebar from '../components/common/Sidebar';
-import Header from '../components/common/Header';
+// In src/pages/patient/AppointmentBooking.jsx
+import Sidebar from '../../components/common/Sidebar'; 
+import Header from '../../components/common/Header';    
 
 const AppointmentBooking = () => {
   const [formData, setFormData] = useState({

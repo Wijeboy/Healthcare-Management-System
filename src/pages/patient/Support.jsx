@@ -1,11 +1,10 @@
-// src/pages/Support.tsx
+// src/pages/Support.jsx
 import React, { useState } from 'react';
-import Sidebar from '../components/common/Sidebar';
-import Header from '../components/common/Header';
+import Sidebar from '../../components/common/Sidebar';
+import Header from '../../components/common/Header';
 import { Phone, Mail, MessageCircle, Clock, HelpCircle, FileText, Send, ChevronDown, ChevronUp } from 'lucide-react';
-import { Patient } from '../types';
 
-const mockPatient: Patient = {
+const mockPatient = {
   id: 'P001',
   name: 'Imasha Perera',
   email: 'imasha@example.com',
@@ -15,14 +14,7 @@ const mockPatient: Patient = {
   address: 'Colombo, Sri Lanka',
 };
 
-interface FAQItem {
-  id: string;
-  question: string;
-  answer: string;
-  category: string;
-}
-
-const mockFAQs: FAQItem[] = [
+const mockFAQs = [
   {
     id: '1',
     question: 'How do I book an appointment?',
@@ -61,9 +53,9 @@ const mockFAQs: FAQItem[] = [
   }
 ];
 
-const Support: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'contact' | 'faq' | 'feedback'>('contact');
-  const [expandedFAQ, setExpandedFAQ] = useState<string | null>(null);
+const Support = () => {
+  const [activeTab, setActiveTab] = useState('contact');
+  const [expandedFAQ, setExpandedFAQ] = useState(null);
   const [feedbackForm, setFeedbackForm] = useState({
     subject: '',
     category: '',
@@ -71,11 +63,11 @@ const Support: React.FC = () => {
     priority: 'medium'
   });
 
-  const toggleFAQ = (id: string) => {
+  const toggleFAQ = (id) => {
     setExpandedFAQ(expandedFAQ === id ? null : id);
   };
 
-  const handleFeedbackSubmit = (e: React.FormEvent) => {
+  const handleFeedbackSubmit = (e) => {
     e.preventDefault();
     // Handle feedback submission
     console.log('Feedback submitted:', feedbackForm);
@@ -141,7 +133,7 @@ const Support: React.FC = () => {
                 ].map((tab) => (
                   <button
                     key={tab.key}
-                    onClick={() => setActiveTab(tab.key as any)}
+                    onClick={() => setActiveTab(tab.key)}
                     className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-medium text-sm ${
                       activeTab === tab.key
                         ? 'border-primary text-primary'
