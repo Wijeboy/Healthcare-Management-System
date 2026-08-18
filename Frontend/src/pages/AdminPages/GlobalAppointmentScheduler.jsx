@@ -1,42 +1,40 @@
-import { useState } from 'react'
-import AppointmentMonthView from '../components/appointments/AppointmentMonthView'
-import AppointmentDayView from '../components/appointments/AppointmentDayView'
+import { useState } from "react";
+import AppointmentMonthView from "../../components/admin-components/appointments/AppointmentMonthView";
+import AppointmentDayView from "../../components/admin-components/appointments/AppointmentDayView";
 
 export default function GlobalAppointmentScheduler() {
-  const [view, setView] = useState('week')
+  const [view, setView] = useState("week");
 
   const getDateHeading = () => {
-    if (view === 'month') {
+    if (view === "month") {
       return {
-        line1: 'Oct 1 - Oct 31,',
-        line2: '2026',
-      }
+        line1: "Oct 1 - Oct 31,",
+        line2: "2026",
+      };
     }
 
-    if (view === 'day') {
+    if (view === "day") {
       return {
-        line1: 'Oct 25,',
-        line2: '2026',
-      }
+        line1: "Oct 25,",
+        line2: "2026",
+      };
     }
 
     return {
-      line1: 'Oct 23 - Oct 29,',
-      line2: '2023',
-    }
-  }
+      line1: "Oct 23 - Oct 29,",
+      line2: "2023",
+    };
+  };
 
-  const dateHeading = getDateHeading()
+  const dateHeading = getDateHeading();
 
   return (
     <section className="min-h-full bg-surface">
-
       {/* =========================
           Scheduler Toolbar
       ========================== */}
       <div className="border-b border-outline-variant bg-white px-6 py-4">
         <div className="flex items-center justify-between gap-4">
-
           {/* Date Navigation */}
           <div className="flex items-center gap-4">
             <button
@@ -44,12 +42,10 @@ export default function GlobalAppointmentScheduler() {
               className="flex items-center justify-center text-on-surface-variant transition-colors hover:text-primary"
               aria-label="Previous"
             >
-              <span className="material-symbols-outlined">
-                chevron_left
-              </span>
+              <span className="material-symbols-outlined">chevron_left</span>
             </button>
 
-            <div className="min-w-[180px] text-center">
+            <div className="min-w-45 text-center">
               <h2 className="text-xl font-semibold text-on-surface">
                 {dateHeading.line1}
               </h2>
@@ -64,9 +60,7 @@ export default function GlobalAppointmentScheduler() {
               className="flex items-center justify-center text-on-surface-variant transition-colors hover:text-primary"
               aria-label="Next"
             >
-              <span className="material-symbols-outlined">
-                chevron_right
-              </span>
+              <span className="material-symbols-outlined">chevron_right</span>
             </button>
           </div>
 
@@ -89,22 +83,21 @@ export default function GlobalAppointmentScheduler() {
               <span className="material-symbols-outlined text-[18px]">
                 filter_list
               </span>
-
               Filters
             </button>
           </div>
 
           {/* Week / Month / Day */}
           <div className="flex rounded-md bg-surface-container p-1">
-            {['week', 'month', 'day'].map((item) => (
+            {["week", "month", "day"].map((item) => (
               <button
                 key={item}
                 type="button"
                 onClick={() => setView(item)}
                 className={`rounded-md px-5 py-2 text-sm font-medium capitalize transition ${
                   view === item
-                    ? 'bg-white text-primary shadow-sm'
-                    : 'text-on-surface-variant hover:text-on-surface'
+                    ? "bg-white text-primary shadow-sm"
+                    : "text-on-surface-variant hover:text-on-surface"
                 }`}
               >
                 {item}
@@ -117,13 +110,9 @@ export default function GlobalAppointmentScheduler() {
             type="button"
             className="flex items-center gap-3 rounded-md bg-primary px-5 py-3 text-white transition-colors hover:bg-primary-container"
           >
-            <span className="material-symbols-outlined">
-              add
-            </span>
+            <span className="material-symbols-outlined">add</span>
 
-            <span className="text-sm font-medium">
-              New Appointment
-            </span>
+            <span className="text-sm font-medium">New Appointment</span>
           </button>
         </div>
       </div>
@@ -132,7 +121,6 @@ export default function GlobalAppointmentScheduler() {
           Appointment Status Legend
       ========================== */}
       <div className="flex items-center gap-8 border-b border-outline-variant bg-white px-6 py-3 text-xs font-semibold">
-
         <div className="flex items-center gap-2">
           <span className="h-3 w-3 rounded-full bg-emerald-700"></span>
           <span>Completed</span>
@@ -157,36 +145,29 @@ export default function GlobalAppointmentScheduler() {
       {/* =====================================================
           WEEK VIEW
       ====================================================== */}
-      {view === 'week' && (
+      {view === "week" && (
         <div className="overflow-x-auto bg-white">
-          <div className="min-w-[1000px]">
-
+          <div className="min-w-250">
             {/* Day Headers */}
             <div className="grid grid-cols-[80px_repeat(6,1fr)] border-b border-outline-variant bg-surface-container-low">
               <div className="border-r border-outline-variant"></div>
 
-              {[
-                'MON 23',
-                'TUE 24',
-                'WED 25',
-                'THU 26',
-                'FRI 27',
-                'SAT 28',
-              ].map((day) => (
-                <div
-                  key={day}
-                  className="border-r border-outline-variant py-4 text-center text-sm font-medium text-on-surface-variant last:border-r-0"
-                >
-                  {day}
-                </div>
-              ))}
+              {["MON 23", "TUE 24", "WED 25", "THU 26", "FRI 27", "SAT 28"].map(
+                (day) => (
+                  <div
+                    key={day}
+                    className="border-r border-outline-variant py-4 text-center text-sm font-medium text-on-surface-variant last:border-r-0"
+                  >
+                    {day}
+                  </div>
+                ),
+              )}
             </div>
 
             {/* =========================
                 08:00 AM
             ========================== */}
-            <div className="grid min-h-[100px] grid-cols-[80px_repeat(6,1fr)] border-b border-outline-variant">
-
+            <div className="grid min-h-25 grid-cols-[80px_repeat(6,1fr)] border-b border-outline-variant">
               <div className="border-r border-outline-variant px-2 py-3 text-xs font-medium text-on-surface-variant">
                 08:00 AM
               </div>
@@ -194,17 +175,11 @@ export default function GlobalAppointmentScheduler() {
               {/* Monday */}
               <div className="border-r border-outline-variant p-1">
                 <div className="h-full rounded-md bg-blue-800 p-3 text-white">
-                  <p className="text-sm">
-                    08:00 AM
-                  </p>
+                  <p className="text-sm">08:00 AM</p>
 
-                  <p className="mt-1 font-semibold">
-                    John Doe
-                  </p>
+                  <p className="mt-1 font-semibold">John Doe</p>
 
-                  <p className="mt-1 text-[10px]">
-                    Dr. Aris • Cardiology
-                  </p>
+                  <p className="mt-1 text-[10px]">Dr. Aris • Cardiology</p>
                 </div>
               </div>
 
@@ -214,17 +189,11 @@ export default function GlobalAppointmentScheduler() {
               {/* Wednesday */}
               <div className="border-r border-outline-variant p-1">
                 <div className="h-full rounded-md bg-amber-500 p-3 text-white">
-                  <p className="text-sm">
-                    08:00 AM
-                  </p>
+                  <p className="text-sm">08:00 AM</p>
 
-                  <p className="mt-1 font-semibold">
-                    Sarah Miller
-                  </p>
+                  <p className="mt-1 font-semibold">Sarah Miller</p>
 
-                  <p className="mt-1 text-[10px]">
-                    Dr. Chen • Pediatrics
-                  </p>
+                  <p className="mt-1 text-[10px]">Dr. Chen • Pediatrics</p>
                 </div>
               </div>
 
@@ -241,8 +210,7 @@ export default function GlobalAppointmentScheduler() {
             {/* =========================
                 09:00 AM
             ========================== */}
-            <div className="grid min-h-[100px] grid-cols-[80px_repeat(6,1fr)] border-b border-outline-variant">
-
+            <div className="grid min-h-25 grid-cols-[80px_repeat(6,1fr)] border-b border-outline-variant">
               <div className="border-r border-outline-variant px-2 py-3 text-xs font-medium text-on-surface-variant">
                 09:00 AM
               </div>
@@ -250,17 +218,11 @@ export default function GlobalAppointmentScheduler() {
               {/* Monday */}
               <div className="border-r border-outline-variant p-1">
                 <div className="h-full rounded-md bg-emerald-700 p-3 text-white">
-                  <p className="text-sm">
-                    09:00 AM
-                  </p>
+                  <p className="text-sm">09:00 AM</p>
 
-                  <p className="mt-1 font-semibold">
-                    Mike Tyson
-                  </p>
+                  <p className="mt-1 font-semibold">Mike Tyson</p>
 
-                  <p className="mt-1 text-[10px]">
-                    Dr. Balboa • Neurology
-                  </p>
+                  <p className="mt-1 text-[10px]">Dr. Balboa • Neurology</p>
                 </div>
               </div>
 
@@ -273,17 +235,11 @@ export default function GlobalAppointmentScheduler() {
               {/* Thursday */}
               <div className="border-r border-outline-variant p-1">
                 <div className="h-full rounded-md bg-red-600 p-3 text-white">
-                  <p className="text-sm">
-                    09:00 AM
-                  </p>
+                  <p className="text-sm">09:00 AM</p>
 
-                  <p className="mt-1 font-semibold">
-                    Emily Rose
-                  </p>
+                  <p className="mt-1 font-semibold">Emily Rose</p>
 
-                  <p className="mt-1 text-[10px]">
-                    Dr. Strange • Radiology
-                  </p>
+                  <p className="mt-1 text-[10px]">Dr. Strange • Radiology</p>
                 </div>
               </div>
 
@@ -297,8 +253,7 @@ export default function GlobalAppointmentScheduler() {
             {/* =========================
                 10:00 AM
             ========================== */}
-            <div className="grid min-h-[100px] grid-cols-[80px_repeat(6,1fr)] border-b border-outline-variant">
-
+            <div className="grid min-h-25 grid-cols-[80px_repeat(6,1fr)] border-b border-outline-variant">
               <div className="border-r border-outline-variant px-2 py-3 text-xs font-medium text-on-surface-variant">
                 10:00 AM
               </div>
@@ -309,17 +264,11 @@ export default function GlobalAppointmentScheduler() {
               {/* Tuesday */}
               <div className="border-r border-outline-variant p-1">
                 <div className="h-full rounded-md bg-blue-800 p-3 text-white">
-                  <p className="text-sm">
-                    10:00 AM
-                  </p>
+                  <p className="text-sm">10:00 AM</p>
 
-                  <p className="mt-1 font-semibold">
-                    Alice Cooper
-                  </p>
+                  <p className="mt-1 font-semibold">Alice Cooper</p>
 
-                  <p className="mt-1 text-[10px]">
-                    Dr. Jekyll • General
-                  </p>
+                  <p className="mt-1 text-[10px]">Dr. Jekyll • General</p>
                 </div>
               </div>
 
@@ -339,8 +288,7 @@ export default function GlobalAppointmentScheduler() {
             {/* =========================
                 11:00 AM
             ========================== */}
-            <div className="grid min-h-[100px] grid-cols-[80px_repeat(6,1fr)] border-b border-outline-variant">
-
+            <div className="grid min-h-25 grid-cols-[80px_repeat(6,1fr)] border-b border-outline-variant">
               <div className="border-r border-outline-variant px-2 py-3 text-xs font-medium text-on-surface-variant">
                 11:00 AM
               </div>
@@ -360,17 +308,11 @@ export default function GlobalAppointmentScheduler() {
               {/* Friday */}
               <div className="border-r border-outline-variant p-1">
                 <div className="h-full rounded-md bg-amber-500 p-3 text-white">
-                  <p className="text-sm">
-                    11:00 AM
-                  </p>
+                  <p className="text-sm">11:00 AM</p>
 
-                  <p className="mt-1 font-semibold">
-                    Bob Marley
-                  </p>
+                  <p className="mt-1 font-semibold">Bob Marley</p>
 
-                  <p className="mt-1 text-[10px]">
-                    Dr. No • Ortho
-                  </p>
+                  <p className="mt-1 text-[10px]">Dr. No • Ortho</p>
                 </div>
               </div>
 
@@ -381,8 +323,7 @@ export default function GlobalAppointmentScheduler() {
             {/* =========================
                 12:00 PM
             ========================== */}
-            <div className="grid min-h-[100px] grid-cols-[80px_repeat(6,1fr)] border-b border-outline-variant">
-
+            <div className="grid min-h-25 grid-cols-[80px_repeat(6,1fr)] border-b border-outline-variant">
               <div className="border-r border-outline-variant px-2 py-3 text-xs font-medium text-on-surface-variant">
                 12:00 PM
               </div>
@@ -409,8 +350,7 @@ export default function GlobalAppointmentScheduler() {
             {/* =========================
                 01:00 PM
             ========================== */}
-            <div className="grid min-h-[100px] grid-cols-[80px_repeat(6,1fr)] border-b border-outline-variant">
-
+            <div className="grid min-h-25 grid-cols-[80px_repeat(6,1fr)] border-b border-outline-variant">
               <div className="border-r border-outline-variant px-2 py-3 text-xs font-medium text-on-surface-variant">
                 01:00 PM
               </div>
@@ -427,17 +367,11 @@ export default function GlobalAppointmentScheduler() {
               {/* Thursday */}
               <div className="border-r border-outline-variant p-1">
                 <div className="h-full rounded-md bg-blue-800 p-3 text-white">
-                  <p className="text-sm">
-                    01:00 PM
-                  </p>
+                  <p className="text-sm">01:00 PM</p>
 
-                  <p className="mt-1 font-semibold">
-                    Peter Parker
-                  </p>
+                  <p className="mt-1 font-semibold">Peter Parker</p>
 
-                  <p className="mt-1 text-[10px]">
-                    Dr. Octopus • Lab
-                  </p>
+                  <p className="mt-1 text-[10px]">Dr. Octopus • Lab</p>
                 </div>
               </div>
 
@@ -447,7 +381,6 @@ export default function GlobalAppointmentScheduler() {
               {/* Saturday */}
               <div></div>
             </div>
-
           </div>
         </div>
       )}
@@ -455,17 +388,12 @@ export default function GlobalAppointmentScheduler() {
       {/* =====================================================
           MONTH VIEW
       ====================================================== */}
-      {view === 'month' && (
-        <AppointmentMonthView />
-      )}
+      {view === "month" && <AppointmentMonthView />}
 
       {/* =====================================================
           DAY VIEW
       ====================================================== */}
-      {view === 'day' && (
-        <AppointmentDayView />
-      )}
-
+      {view === "day" && <AppointmentDayView />}
     </section>
-  )
+  );
 }
