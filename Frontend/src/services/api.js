@@ -7,9 +7,15 @@ const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 // Generic fetch wrapper with error handling
 const request = async (method, path, body = null) => {
+  const token = localStorage.getItem("hmsToken");
+  const headers = { "Content-Type": "application/json" };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
   const options = {
     method,
-    headers: { 'Content-Type': 'application/json' },
+    headers,
   };
   if (body) options.body = JSON.stringify(body);
 
@@ -17,7 +23,7 @@ const request = async (method, path, body = null) => {
   const data = await res.json();
 
   if (!res.ok) {
-    throw new Error(data.error || `Request failed: ${res.status}`);
+    throw new Error(data.error || data.message || `Request failed: ${res.status}`);
   }
   return data;
 };
@@ -111,8 +117,20 @@ export const settingsApi = {
   updateAdminProfile: (email, data) => request('PUT', `/admin/settings/profile?email=${encodeURIComponent(email)}`, data),
 };
 
-// â”€â”€â”€ AUTH â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── AUTH ───────────────────────────────────────────────────────────────────
 export const authApi = {
   login: (data) => request('POST', '/auth/login', data),
   register: (data) => request('POST', '/auth/register', data),
+  forgotPassword: (email) => request('POST', '/auth/forgot-password', { email }),
+  resetPassword: (resetToken, newPassword) => request('POST', '/auth/reset-password', { resetToken, newPassword }),
+  refreshToken: (refreshToken) => request('POST', '/auth/refresh', { refreshToken }),
+  logout: async () => {
+    try {
+      await request('POST', '/auth/logout');
+    } finally {
+      localStorage.removeItem('hmsToken');
+      localStorage.removeItem('hmsRole');
+      localStorage.removeItem('hmsEmail');
+    }
+  },
 };

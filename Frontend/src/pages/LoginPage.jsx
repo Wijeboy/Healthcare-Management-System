@@ -100,6 +100,9 @@ export default function LoginPage() {
         role: selectedRole,
       });
 
+      if (response.token) {
+        localStorage.setItem("hmsToken", response.token);
+      }
       localStorage.setItem("hmsRole", response.role || selectedRole);
       localStorage.setItem("hmsEmail", response.user?.email || email.trim());
 
