@@ -1,0 +1,53 @@
+// ============================================================
+// DOCTOR MODULE ADDITIONS — append this block to the END of
+// prisma/schema.prisma. Nothing above this line needs to change;
+// no existing model (Doctor, Patient, User, etc.) is modified.
+//
+// doctorId / patientId below are plain ObjectId-typed strings with
+// NO @relation back-reference into Doctor/Patient — this is
+// intentional so the existing Doctor and Patient model blocks never
+// need to be touched (which is what would otherwise cause merge
+// conflicts). Controllers fetch the related Doctor/Patient with a
+// separate findUnique() call when they need it.
+// ============================================================
+
+/// One row per (doctorId, day, hour) slot that deviates from the
+/// default "Available" state. Any slot with no row here is assumed
+/// Available — this keeps the table small instead of pre-creating
+/// every hour of every day for every doctor.
+model Availability {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  doctorId  String   @db.ObjectId
+  day       String   // "Monday".."Saturday"
+  hour      Int      // 24h clock, e.g. 8..16
+  status    String   @default("Available") // Available | Booked | Blocked
+  updatedAt DateTime @updatedAt
+
+  @@unique([doctorId, day, hour])
+}
+
+model Notification {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  doctorId    String   @db.ObjectId
+  group       String   // "Clinical Actions & Reviews" | "Patient Management" | "System & Records"
+  badge       String   // "Priority Review", "New Appointment Request", etc.
+  badgeTint   String   // "rose" | "blue" | "emerald" | "slate"
+  icon        String
+  title       String
+  detail      Json?    // array of {label, value} shown as a small key/value row
+  description String?
+  read        Boolean  @default(false)
+  patientId   String?  @db.ObjectId
+  createdAt   DateTime @default(now())
+}
+
+/// Free-text clinical notes a doctor adds to a patient's history —
+/// distinct from MedicalRecord (diagnosis/treatment/labReport).
+model ClinicalNote {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  patientId String   @db.ObjectId
+  doctorId  String   @db.ObjectId
+  note      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

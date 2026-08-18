@@ -1,7 +1,10 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
+import path from "path";
+import { fileURLToPath } from "url";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 
 app.use(helmet());
@@ -43,11 +46,14 @@ app.use(
 import doctorRoutes from "./routes/admin/doctorRoutes.js";
 import patientRoutes from "./routes/admin/patientRoutes.js";
 import userRoutes from "./routes/admin/userRoutes.js";
-import authRoutes from "./routes/authRoutes.js";
 import staffRoutes from "./routes/admin/staffRoutes.js";
 import reportRoutes from "./routes/admin/reportRoutes.js";
 import settingsRoutes from "./routes/admin/settingsRoutes.js";
 import contactRoutes from "./routes/admin/contactRoutes.js";
+
+// Doctor Module Routes imports
+import doctorSelfRoutes from "./routes/doctor/index.js";
+import doctorsDirectoryRoutes from "./routes/doctor/directoryRoutes.js";
 
 // Health check
 app.get("/api/health", (req, res) => {
@@ -61,10 +67,14 @@ app.get("/api/health", (req, res) => {
 app.use("/api/admin/doctors", doctorRoutes);
 app.use("/api/admin/patients", patientRoutes);
 app.use("/api/admin/users", userRoutes);
-app.use("/api/auth", authRoutes);
 app.use("/api/admin/staff", staffRoutes);
 app.use("/api/admin/reports", reportRoutes);
 app.use("/api/admin/settings", settingsRoutes);
 app.use("/api/admin/contact", contactRoutes);
+
+// Register Doctor Module Routes
+app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
+app.use("/api/doctor", doctorSelfRoutes);
+app.use("/api/doctors/public", doctorsDirectoryRoutes);
 
 export default app;
