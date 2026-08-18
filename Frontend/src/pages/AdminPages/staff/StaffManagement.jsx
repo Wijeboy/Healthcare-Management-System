@@ -25,6 +25,8 @@ const StaffManagement = () => {
   const [staffToDelete, setStaffToDelete] = useState(null);
   const [deleting, setDeleting]       = useState(false);
 
+  const [summary, setSummary]         = useState({ totalStaff: 0, activeStaff: 0, nurses: 0, adminStaff: 0, otherStaff: 0 });
+
   const [filters, setFilters] = useState({
     search: "", role: "", department: "", status: "", lastLogin: "",
   });
@@ -45,6 +47,18 @@ const StaffManagement = () => {
       setStaffList(res.data || []);
       setTotal(res.total || 0);
       setTotalPages(res.totalPages || 1);
+      if (res.summary) {
+        setSummary(res.summary);
+      } else {
+        const list = res.data || [];
+        setSummary({
+          totalStaff: res.total || list.length,
+          activeStaff: list.filter((s) => s.employeeStatus === "Active").length,
+          nurses: list.filter((s) => s.role?.toLowerCase().includes("nurse")).length,
+          adminStaff: list.filter((s) => s.department?.toLowerCase().includes("admin")).length,
+          otherStaff: list.filter((s) => !s.role?.toLowerCase().includes("nurse") && !s.department?.toLowerCase().includes("admin")).length,
+        });
+      }
     } catch (err) {
       console.error("Failed to load staff:", err);
       setError("We could not load the staff list. Please try again.");
@@ -75,8 +89,6 @@ const StaffManagement = () => {
       setDeleting(false);
     }
   };
-
-  const activeCount = staffList.filter((s) => s.employeeStatus === "Active").length;
 
   return (
     <div className="flex h-screen bg-[#F8FAFC] text-[#1E293B] font-sans antialiased overflow-hidden">
@@ -109,7 +121,7 @@ const StaffManagement = () => {
           </div>
 
           {/* Stat Cards */}
-          <StaffStatCards total={total} active={activeCount} />
+          <StaffStatCards summary={summary} />
 
           {/* Filter Bar */}
           <StaffFilterBar

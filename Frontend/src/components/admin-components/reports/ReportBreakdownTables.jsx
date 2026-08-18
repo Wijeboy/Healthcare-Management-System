@@ -1,7 +1,7 @@
 import React from "react";
 import { reportData } from "../../../data/reportData";
 
-const ReportBreakdownTables = ({ liveDoctorStats }) => {
+const ReportBreakdownTables = ({ liveDoctorStats, appointmentsSummary }) => {
   const doctorsList = liveDoctorStats && liveDoctorStats.length > 0
     ? liveDoctorStats.map(d => ({
         name: d.name,
@@ -9,6 +9,17 @@ const ReportBreakdownTables = ({ liveDoctorStats }) => {
         appointments: d.totalAppointments,
       }))
     : reportData.tables.doctors;
+
+  // Build appointment summary rows from live API data if available
+  const appointmentRows = appointmentsSummary
+    ? [
+        { label: "Total",     value: (appointmentsSummary.total     ?? 0).toLocaleString() },
+        { label: "Completed", value: (appointmentsSummary.completed ?? 0).toLocaleString() },
+        { label: "Pending",   value: (appointmentsSummary.pending   ?? 0).toLocaleString() },
+        { label: "Cancelled", value: (appointmentsSummary.cancelled ?? 0).toLocaleString() },
+      ]
+    : reportData.tables.appointments;
+
   return (
     <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -19,7 +30,7 @@ const ReportBreakdownTables = ({ liveDoctorStats }) => {
           Total, approved, cancelled, and pending appointments.
         </p>
         <div className="mt-5 space-y-3">
-          {reportData.tables.appointments.map((item) => (
+          {appointmentRows.map((item) => (
             <div
               key={item.label}
               className="flex items-center justify-between rounded-lg bg-slate-50 px-4 py-3"

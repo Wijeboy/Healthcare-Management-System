@@ -4,23 +4,42 @@ import PatientTable from "../components/admin-components/dashboard/PatientTable"
 import FacilityStatus from "../components/admin-components/dashboard/FacilityStatus";
 import SystemAlerts from "../components/admin-components/dashboard/SystemAlerts";
 import AnalyticsCharts from "../components/admin-components/dashboard/AnalyticsCharts";
-import { patientApi, doctorApi } from "../services/api";
+import { patientApi, doctorApi, reportApi } from "../services/api";
 
 export default function AdminDashboard() {
   const [totalPatients, setTotalPatients] = useState("...");
   const [totalDoctors, setTotalDoctors] = useState("...");
+  const [todayAppointments, setTodayAppointments] = useState("...");
+  const [totalRevenue, setTotalRevenue] = useState("...");
 
   useEffect(() => {
     const fetchCounts = async () => {
       try {
-        const [patRes, docRes] = await Promise.all([
+        // Today's date range for appointment count
+        const today = new Date().toISOString().split("T")[0];
+
+        const [patRes, docRes, reportRes] = await Promise.all([
           patientApi.getAll({ limit: 1 }),
           doctorApi.getAll({ limit: 1 }),
+          reportApi.getOverview({ startDate: today, endDate: today }).catch(() => null),
         ]);
+
         if (patRes?.total !== undefined) setTotalPatients(patRes.total.toLocaleString());
         if (docRes?.total !== undefined) setTotalDoctors(docRes.total.toLocaleString());
+
+        if (reportRes?.summary) {
+          setTodayAppointments(
+            (reportRes.summary.totalAppointments ?? 0).toLocaleString()
+          );
+          setTotalRevenue(reportRes.summary.totalRevenue ?? "$0");
+        } else {
+          setTodayAppointments("0");
+          setTotalRevenue("$0");
+        }
       } catch (err) {
         console.error("Failed to load dashboard metrics:", err);
+        setTodayAppointments("—");
+        setTotalRevenue("—");
       }
     };
     fetchCounts();
@@ -60,7 +79,7 @@ export default function AdminDashboard() {
         />
         <StatsCard
           icon="event_note"
-          value="12"
+          value={todayAppointments}
           label="Today's Appointments"
           pulse={true}
           iconBg="bg-tertiary/10"
@@ -68,7 +87,7 @@ export default function AdminDashboard() {
         />
         <StatsCard
           icon="account_balance_wallet"
-          value="$12,450"
+          value={totalRevenue}
           label="Total Revenue"
           trend="+12%"
           trendType="positive"

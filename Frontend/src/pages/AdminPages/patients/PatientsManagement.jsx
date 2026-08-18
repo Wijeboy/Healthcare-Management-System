@@ -25,6 +25,8 @@ const PatientsManagement = () => {
   const [patientToDelete, setPatientToDelete] = useState(null);
   const [deleting, setDeleting]       = useState(false);
 
+  const [summary, setSummary]         = useState({ total: 0, active: 0, inactive: 0, allergies: 0 });
+
   const [filters, setFilters] = useState({
     search: "", ageRange: "All", gender: "All",
     bloodGroup: "All", status: "All", lastVisitDate: "",
@@ -48,6 +50,17 @@ const PatientsManagement = () => {
       setPatients(res.data || []);
       setTotal(res.total || 0);
       setTotalPages(res.totalPages || 1);
+      if (res.summary) {
+        setSummary(res.summary);
+      } else {
+        const list = res.data || [];
+        setSummary({
+          total: res.total || list.length,
+          active: list.filter((p) => p.status === "Active").length,
+          inactive: list.filter((p) => p.status === "Inactive").length,
+          allergies: list.filter((p) => p.allergies).length,
+        });
+      }
     } catch (err) {
       console.error("Failed to load patients:", err);
       setError("We could not load the patients list. Please try again.");
@@ -81,10 +94,6 @@ const PatientsManagement = () => {
       setDeleting(false);
     }
   };
-
-  // Stat counts
-  const activeCount   = patients.filter((p) => p.status === "Active").length;
-  const criticalCount = patients.filter((p) => p.status === "Critical").length;
 
   return (
     <div className="flex h-screen bg-[#F8FAFC] text-[#1E293B] font-sans antialiased overflow-hidden">
@@ -121,10 +130,10 @@ const PatientsManagement = () => {
           {/* Stat Cards */}
           <PatientStatCards
             stats={{
-              totalPatients: total.toString(),
-              activeVisits:  activeCount.toString(),
-              criticalAlerts: criticalCount.toString(),
-              dataHealth: "99.2%",
+              totalPatients: summary.total.toString(),
+              activeVisits:  summary.active.toString(),
+              criticalAlerts: summary.allergies.toString(),
+              dataHealth: summary.inactive.toString(),
             }}
           />
 

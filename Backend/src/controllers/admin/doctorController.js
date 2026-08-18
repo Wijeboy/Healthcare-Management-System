@@ -21,7 +21,7 @@ export const getDoctors = async (req, res) => {
       ...(availability && availability !== 'All' && { availability }),
     };
 
-    const [doctors, total] = await Promise.all([
+    const [doctors, total, activeCount, availableCount, inactiveCount] = await Promise.all([
       prisma.doctor.findMany({
         where,
         skip,
@@ -29,7 +29,10 @@ export const getDoctors = async (req, res) => {
         orderBy: { createdAt: 'desc' },
         include: { user: { select: { email: true, status: true } } }
       }),
-      prisma.doctor.count({ where })
+      prisma.doctor.count({ where }),
+      prisma.doctor.count({ where: { status: 'Active' } }),
+      prisma.doctor.count({ where: { availability: 'Available' } }),
+      prisma.doctor.count({ where: { status: 'Inactive' } }),
     ]);
 
     res.json({
@@ -37,7 +40,13 @@ export const getDoctors = async (req, res) => {
       total,
       page: parseInt(page),
       limit: parseInt(limit),
-      totalPages: Math.ceil(total / parseInt(limit))
+      totalPages: Math.ceil(total / parseInt(limit)),
+      summary: {
+        total: await prisma.doctor.count(),
+        active: activeCount,
+        available: availableCount,
+        inactive: inactiveCount,
+      }
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

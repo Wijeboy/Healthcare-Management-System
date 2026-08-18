@@ -21,7 +21,7 @@ export const getStaff = async (req, res) => {
       ...(accessLevel    && accessLevel    !== 'All' && { accessLevel }),
     };
 
-    const [staff, total] = await Promise.all([
+    const [staff, total, totalAll, activeAll, nursesCount, adminCount, inactiveCount, doctorsCount] = await Promise.all([
       prisma.staff.findMany({
         where,
         skip,
@@ -29,7 +29,13 @@ export const getStaff = async (req, res) => {
         orderBy: { createdAt: 'desc' },
         include: { user: { select: { email: true, status: true } } }
       }),
-      prisma.staff.count({ where })
+      prisma.staff.count({ where }),
+      prisma.staff.count(),
+      prisma.staff.count({ where: { employeeStatus: 'Active' } }),
+      prisma.staff.count({ where: { role: { contains: 'Nurse', mode: 'insensitive' } } }),
+      prisma.staff.count({ where: { department: { contains: 'Admin', mode: 'insensitive' } } }),
+      prisma.staff.count({ where: { employeeStatus: 'Inactive' } }),
+      prisma.doctor.count(),
     ]);
 
     res.json({
@@ -37,7 +43,16 @@ export const getStaff = async (req, res) => {
       total,
       page: parseInt(page),
       limit: parseInt(limit),
-      totalPages: Math.ceil(total / parseInt(limit))
+      totalPages: Math.ceil(total / parseInt(limit)),
+      summary: {
+        totalStaff: totalAll,
+        activeStaff: activeAll,
+        inactiveStaff: inactiveCount,
+        nurses: nursesCount,
+        adminStaff: adminCount,
+        doctors: doctorsCount,
+        otherStaff: Math.max(0, totalAll - nursesCount - adminCount),
+      }
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

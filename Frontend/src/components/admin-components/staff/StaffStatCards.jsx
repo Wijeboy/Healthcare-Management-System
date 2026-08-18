@@ -1,16 +1,16 @@
 import React from "react";
 
-const statData = [
-  { label: "Total Staff", value: "158", bgColor: "bg-white" },
-  { label: "Active Staff", value: "146", bgColor: "bg-white" },
-  { label: "Doctors", value: "72", bgColor: "bg-white" },
-  { label: "Nurses", value: "48", bgColor: "bg-white" },
-  { label: "Other Staff", value: "38", bgColor: "bg-white" },
-];
+const StaffStatCards = ({ summary = {} }) => {
+  const statData = [
+    { label: "Total Staff", value: summary.totalStaff ?? "0", bgColor: "bg-white" },
+    { label: "Active Staff", value: summary.activeStaff ?? "0", bgColor: "bg-white" },
+    { label: "Nurses", value: summary.nurses ?? "0", bgColor: "bg-white" },
+    { label: "Admin Staff", value: summary.adminStaff ?? "0", bgColor: "bg-white" },
+    { label: "Other Staff", value: summary.otherStaff ?? "0", bgColor: "bg-white" },
+  ];
 
-const StaffStatCards = () => {
   return (
-    <div className="grid grid-cols-5 gap-4 mb-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
       {statData.map((stat, idx) => (
         <div
           key={idx}

@@ -202,7 +202,10 @@ const ReportsAnalytics = () => {
                 Appointment totals, doctor performance, and patient registration trends.
               </p>
             </div>
-            <ReportBreakdownTables liveDoctorStats={apiData?.doctorStats} />
+            <ReportBreakdownTables
+              liveDoctorStats={apiData?.doctorStats}
+              appointmentsSummary={apiData?.appointmentsSummary}
+            />
           </section>
 
           {/* Revenue & Payments Scope Section */}
