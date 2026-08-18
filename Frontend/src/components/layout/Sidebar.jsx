@@ -6,7 +6,6 @@ const ADMIN_NAV_ITEMS = [
   { icon: "dashboard",       label: "Dashboard",          path: "/admin" },
   { icon: "calendar_today",  label: "Appointments",        path: "/admin/appointments" },
   { icon: "folder_shared",   label: "Records",             path: "/admin/records" },
-  { icon: "medical_services",label: "Prescriptions",       path: "/admin/prescriptions" },
   { icon: "payments",        label: "Payments",            path: "/admin/payments" },
   { icon: "query_stats",     label: "Reports & Analytics", path: "/admin/reports" },
   { icon: "people",          label: "Doctor Management",   path: "/admin/doctors" },
