@@ -19,6 +19,10 @@ import EditStaff from "./pages/AdminPages/staff/EditStaff";
 import StaffDetails from "./pages/AdminPages/staff/StaffDetails";
 import ReportsAnalytics from "./pages/AdminPages/reports/ReportsAnalytics";
 import UserManagement from "./pages/AdminPages/users/UserManagement";
+import GlobalAppointmentScheduler from "./pages/GlobalAppointmentScheduler";
+import RecordsUploadMain from "./pages/RecordsUploadMain";
+import FinancialBillingReports from "./pages/FinancialBillingReports";
+import SystemSettingsAccessControl from "./pages/SystemSettingsAccessControl";
 import DoctorDashboard from "./pages/DoctorDashboard";
 import PatientDashboard from "./pages/PatientDashboard";
 
@@ -92,7 +96,11 @@ function App() {
 
         <Route path="reports" element={<ReportsAnalytics />} />
         <Route path="settings" element={<SystemSettingsPage />} />
+        <Route path="access-control" element={<SystemSettingsAccessControl />} />
         <Route path="users" element={<UserManagement />} />
+        <Route path="appointments" element={<GlobalAppointmentScheduler />} />
+        <Route path="records" element={<RecordsUploadMain />} />
+        <Route path="payments" element={<FinancialBillingReports />} />
       </Route>
 
       {/* Doctor Role Routes — same DashboardLayout shell (Sidebar switches to
