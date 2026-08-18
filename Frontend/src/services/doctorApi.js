@@ -15,7 +15,13 @@ const USE_MOCK_DATA = true;
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 async function request(method, path, body = null) {
-  const options = { method, headers: { "Content-Type": "application/json" } };
+  const token = localStorage.getItem("hmsToken");
+  const headers = { "Content-Type": "application/json" };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const options = { method, headers };
   if (body) options.body = JSON.stringify(body);
   const res = await fetch(`${BASE_URL}${path}`, options);
   const data = await res.json();

@@ -42,6 +42,12 @@ app.use(
   }),
 );
 
+// Auth & Authorization Middleware imports
+import { verifyToken, requireRole } from "./middleware/authMiddleware.js";
+
+// Auth Routes import
+import authRoutes from "./routes/authRoutes.js";
+
 // Admin Routes imports
 import doctorRoutes from "./routes/admin/doctorRoutes.js";
 import patientRoutes from "./routes/admin/patientRoutes.js";
@@ -63,18 +69,32 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// Register Admin Routes
-app.use("/api/admin/doctors", doctorRoutes);
-app.use("/api/admin/patients", patientRoutes);
-app.use("/api/admin/users", userRoutes);
-app.use("/api/admin/staff", staffRoutes);
-app.use("/api/admin/reports", reportRoutes);
-app.use("/api/admin/settings", settingsRoutes);
-app.use("/api/admin/contact", contactRoutes);
+// Register Authentication Routes
+app.use("/api/auth", authRoutes);
 
-// Register Doctor Module Routes
+// Register Protected Admin Routes (Requires valid JWT + Admin role)
+app.use("/api/admin/doctors", verifyToken, requireRole("Admin"), doctorRoutes);
+app.use("/api/admin/patients", verifyToken, requireRole("Admin"), patientRoutes);
+app.use("/api/admin/users", verifyToken, requireRole("Admin"), userRoutes);
+app.use("/api/admin/staff", verifyToken, requireRole("Admin"), staffRoutes);
+app.use("/api/admin/reports", verifyToken, requireRole("Admin"), reportRoutes);
+app.use("/api/admin/settings", verifyToken, requireRole("Admin"), settingsRoutes);
+app.use("/api/admin/contact", verifyToken, requireRole("Admin"), contactRoutes);
+
+// Register Protected Doctor Module Routes (Requires valid JWT + Doctor role)
 app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
-app.use("/api/doctor", doctorSelfRoutes);
+app.use("/api/doctor", verifyToken, requireRole("Doctor"), doctorSelfRoutes);
+
+// Global Error Handling Middleware imports
+import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
+
+// Public Doctor Directory (Public access)
 app.use("/api/doctors/public", doctorsDirectoryRoutes);
+
+// Catch 404 routes
+app.use(notFoundHandler);
+
+// Global Centralized Error Handler (Must be registered after all routes)
+app.use(errorHandler);
 
 export default app;
