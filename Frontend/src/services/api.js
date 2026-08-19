@@ -134,3 +134,54 @@ export const authApi = {
     }
   },
 };
+
+// ─── PATIENT PORTAL ───────────────────────────────────────────────────────────────────
+export const patientPortalApi = {
+  getDashboardOverview: () => request('GET', '/patient/dashboard/overview'),
+  getDashboardStatistics: () => request('GET', '/patient/dashboard/statistics'),
+
+  getProfile: () => request('GET', '/patient/profile'),
+  updateProfile: (data) => request('PUT', '/patient/profile', data),
+  updatePassword: (data) => request('PUT', '/patient/password', data),
+
+  uploadFile: (file) => {
+    const token = localStorage.getItem("hmsToken");
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const headers = {};
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    return fetch(`${BASE_URL}/upload`, {
+      method: "POST",
+      headers,
+      body: formData,
+    }).then(async (res) => {
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || data.message || `Request failed: ${res.status}`);
+      }
+      return data;
+    });
+  },
+
+  getAppointments: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request('GET', `/patient/appointments${query ? `?${query}` : ''}`);
+  },
+  searchDoctors: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request('GET', `/patient/doctors/search${query ? `?${query}` : ''}`);
+  },
+  bookAppointment: (data) => request('POST', '/patient/appointments/book', data),
+  cancelAppointment: (appointmentId, reason) =>
+    request('PUT', `/patient/appointments/${appointmentId}/cancel`, { reason }),
+
+  createSupportTicket: (data) => request('POST', '/patient/support/tickets', data),
+  getSupportTickets: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request('GET', `/patient/support/tickets${query ? `?${query}` : ''}`);
+  },
+};
