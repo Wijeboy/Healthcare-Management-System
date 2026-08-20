@@ -2,7 +2,16 @@
 import React, { useState } from 'react';
 import Sidebar from '../../components/common/Sidebar';
 import Header from '../../components/common/Header';
-import { Bell, Calendar, FileText, CreditCard, AlertTriangle, CheckCircle, Trash2 } from 'lucide-react';
+import {
+  Calendar,
+  Pill,
+  CreditCard,
+  Settings,
+  FlaskConical,
+  ShieldCheck,
+  CheckCircle,
+  Filter
+} from 'lucide-react';
 
 const mockPatient = {
   id: 'P001',
@@ -14,276 +23,228 @@ const mockPatient = {
   address: 'Colombo, Sri Lanka',
 };
 
-const mockNotifications = [
+const initialNotifications = [
   {
     id: '1',
     type: 'appointment',
-    title: 'Appointment Reminder',
-    message: 'Your appointment with Dr. Nimal Fernando is tomorrow at 10:00 AM',
-    timestamp: '2024-06-09T14:30:00Z',
+    title: 'Upcoming Appointment',
+    message: 'Appointment with Dr. Aris today at 2 PM in the Main Cardiology Wing.',
+    time: 'Today, 9:30 AM',
     isRead: false,
-    priority: 'high'
+    actions: ['View Details']
   },
   {
     id: '2',
-    type: 'report',
-    title: 'New Lab Results Available',
-    message: 'Your blood test results from June 5th are now available for review',
-    timestamp: '2024-06-08T09:15:00Z',
+    type: 'prescription',
+    title: 'Prescription Ready',
+    message: 'Your prescription for Metformin is ready for pickup at Pharmacy B.',
+    time: '2 hours ago',
     isRead: false,
-    priority: 'medium'
+    actions: ['Find Pharmacy']
   },
   {
     id: '3',
     type: 'payment',
-    title: 'Payment Due Soon',
-    message: 'Invoice #INV-2024-001 for Rs. 1,800 is due on June 15th',
-    timestamp: '2024-06-07T16:45:00Z',
-    isRead: true,
-    priority: 'medium'
+    title: 'Payment Successful',
+    message: 'Payment for invoice #88291 successful. You can download your receipt now.',
+    time: 'Yesterday',
+    isRead: false,
+    actions: ['Download Receipt']
   },
   {
     id: '4',
     type: 'system',
-    title: 'System Maintenance',
-    message: 'Scheduled maintenance on June 12th from 2:00 AM to 4:00 AM',
-    timestamp: '2024-06-06T11:20:00Z',
+    title: 'System Update',
+    message: 'The Medimate patient portal has been updated with new security features. Review the changes in Settings.',
+    time: '3 days ago',
     isRead: true,
-    priority: 'low'
+    actions: []
   },
   {
     id: '5',
-    type: 'appointment',
-    title: 'Appointment Confirmed',
-    message: 'Your appointment with Dr. Priya Silva has been confirmed for June 20th',
-    timestamp: '2024-06-05T13:10:00Z',
+    type: 'lab',
+    title: 'Lab Results Posted',
+    message: 'Your blood panel results from Oct 10 are now available for review.',
+    time: 'Oct 12, 2023',
     isRead: true,
-    priority: 'low'
-  },
-  {
-    id: '6',
-    type: 'emergency',
-    title: 'Emergency Contact Updated',
-    message: 'Your emergency contact information has been successfully updated',
-    timestamp: '2024-06-04T10:30:00Z',
-    isRead: true,
-    priority: 'medium'
+    actions: ['View Results']
   }
 ];
 
+const typeConfig = {
+  appointment: { icon: Calendar, iconBg: 'bg-blue-50', iconColor: 'text-blue-600' },
+  prescription: { icon: Pill, iconBg: 'bg-red-50', iconColor: 'text-red-500' },
+  payment: { icon: CreditCard, iconBg: 'bg-green-50', iconColor: 'text-green-600' },
+  system: { icon: Settings, iconBg: 'bg-gray-100', iconColor: 'text-gray-500' },
+  lab: { icon: FlaskConical, iconBg: 'bg-sky-50', iconColor: 'text-sky-600' }
+};
+
 const Notifications = () => {
-  const [notifications, setNotifications] = useState(mockNotifications);
-  const [filter, setFilter] = useState('all');
+  const [notifications, setNotifications] = useState(initialNotifications);
 
-  const getNotificationIcon = (type) => {
-    switch (type) {
-      case 'appointment': return Calendar;
-      case 'payment': return CreditCard;
-      case 'report': return FileText;
-      case 'emergency': return AlertTriangle;
-      default: return Bell;
-    }
-  };
-
-  const getNotificationColor = (type, priority) => {
-    if (priority === 'high') return 'border-l-red-500 bg-red-50';
-    if (type === 'appointment') return 'border-l-blue-500 bg-blue-50';
-    if (type === 'payment') return 'border-l-yellow-500 bg-yellow-50';
-    if (type === 'report') return 'border-l-green-500 bg-green-50';
-    if (type === 'emergency') return 'border-l-red-500 bg-red-50';
-    return 'border-l-gray-500 bg-gray-50';
-  };
-
-  const getTimeAgo = (timestamp) => {
-    const now = new Date();
-    const past = new Date(timestamp);
-    const diffInHours = Math.floor((now.getTime() - past.getTime()) / (1000 * 60 * 60));
-    
-    if (diffInHours < 1) return 'Just now';
-    if (diffInHours < 24) return `${diffInHours}h ago`;
-    const diffInDays = Math.floor(diffInHours / 24);
-    if (diffInDays < 7) return `${diffInDays}d ago`;
-    return past.toLocaleDateString();
-  };
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
+  const upcomingToday = notifications.filter((n) => n.time.startsWith('Today')).length;
 
   const markAsRead = (id) => {
-    setNotifications(prev => 
-      prev.map(notif => 
-        notif.id === id ? { ...notif, isRead: true } : notif
-      )
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
     );
-  };
-
-  const deleteNotification = (id) => {
-    setNotifications(prev => prev.filter(notif => notif.id !== id));
   };
 
   const markAllAsRead = () => {
-    setNotifications(prev => 
-      prev.map(notif => ({ ...notif, isRead: true }))
-    );
+    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
   };
-
-  const filteredNotifications = notifications.filter(notif => {
-    if (filter === 'unread') return !notif.isRead;
-    if (filter === 'all') return true;
-    return notif.type === filter;
-  });
-
-  const unreadCount = notifications.filter(notif => !notif.isRead).length;
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Sidebar patientData={mockPatient} />
       <Header />
-      
+
       <main className="ml-64 pt-20 p-6">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           {/* Page Header */}
-          <div className="bg-white rounded-xl shadow-md p-6 mb-8">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center">
-                  <Bell size={32} className="mr-3 text-primary" />
-                  Notifications
-                  {unreadCount > 0 && (
-                    <span className="ml-3 bg-danger text-white text-sm px-3 py-1 rounded-full">
-                      {unreadCount} new
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
+              <p className="text-gray-500 text-sm mt-1">Stay updated with your healthcare journey.</p>
+            </div>
+            <div className="flex items-center space-x-3 mt-4 sm:mt-0">
+              <button
+                onClick={markAllAsRead}
+                className="flex items-center space-x-2 border border-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-sm font-semibold"
+              >
+                <CheckCircle size={16} />
+                <span>Mark all as read</span>
+              </button>
+              <button className="flex items-center space-x-2 border border-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-sm font-semibold">
+                <Filter size={16} />
+                <span>Filter</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Column */}
+            <div className="lg:col-span-1 space-y-6">
+              {/* Activity Overview */}
+              <div className="bg-white rounded-2xl border border-gray-100 p-5">
+                <h3 className="font-bold text-gray-900 mb-4">Activity Overview</h3>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3">
+                    <span className="text-sm text-gray-600">Unread Notifications</span>
+                    <span className="w-6 h-6 flex items-center justify-center bg-primary text-white text-xs font-bold rounded-full">
+                      {unreadCount}
                     </span>
-                  )}
-                </h1>
-                <p className="text-gray-600">Stay updated with your healthcare information</p>
-              </div>
-              {unreadCount > 0 && (
-                <button
-                  onClick={markAllAsRead}
-                  className="mt-4 lg:mt-0 bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-dark transition-colors flex items-center space-x-2"
-                >
-                  <CheckCircle size={20} />
-                  <span>Mark All as Read</span>
-                </button>
-              )}
-            </div>
-          </div>
+                  </div>
+                  <div className="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3">
+                    <span className="text-sm text-gray-600">Upcoming Today</span>
+                    <span className="w-6 h-6 flex items-center justify-center bg-gray-300 text-white text-xs font-bold rounded-full">
+                      {upcomingToday}
+                    </span>
+                  </div>
+                </div>
 
-          {/* Filter Tabs */}
-          <div className="bg-white rounded-xl shadow-md p-6 mb-8">
-            <div className="flex flex-wrap gap-2">
-              {[
-                { key: 'all', label: 'All', count: notifications.length },
-                { key: 'unread', label: 'Unread', count: unreadCount },
-                { key: 'appointment', label: 'Appointments', count: notifications.filter(n => n.type === 'appointment').length },
-                { key: 'report', label: 'Reports', count: notifications.filter(n => n.type === 'report').length },
-                { key: 'payment', label: 'Payments', count: notifications.filter(n => n.type === 'payment').length },
-                { key: 'system', label: 'System', count: notifications.filter(n => n.type === 'system').length }
-              ].map((tab) => (
-                <button
-                  key={tab.key}
-                  onClick={() => setFilter(tab.key)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2 ${
-                    filter === tab.key
-                      ? 'bg-primary text-white'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                >
-                  <span>{tab.label}</span>
-                  <span className={`px-2 py-1 rounded-full text-xs ${
-                    filter === tab.key ? 'bg-white text-primary' : 'bg-gray-200 text-gray-600'
-                  }`}>
-                    {tab.count}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Notifications List */}
-          <div className="space-y-4">
-            {filteredNotifications.length === 0 ? (
-              <div className="bg-white rounded-xl shadow-md p-12 text-center">
-                <Bell size={64} className="mx-auto text-gray-300 mb-4" />
-                <h3 className="text-xl font-semibold text-gray-500 mb-2">No notifications found</h3>
-                <p className="text-gray-400">You're all caught up!</p>
+                <div className="bg-primary-light rounded-lg p-4 mt-4 flex items-start space-x-3">
+                  <ShieldCheck size={18} className="text-primary mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-xs font-bold text-primary tracking-wide">SECURE DATA ENCRYPTION</p>
+                    <p className="text-xs text-gray-600 mt-1">
+                      All your notification data is encrypted and HIPAA compliant.
+                    </p>
+                  </div>
+                </div>
               </div>
-            ) : (
-              filteredNotifications.map((notification) => {
-                const IconComponent = getNotificationIcon(notification.type);
-                
+
+              {/* Image Card */}
+              <div className="relative rounded-2xl overflow-hidden h-48">
+                <img
+                  src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=500&h=400&fit=crop"
+                  alt="Healthcare team in the lab"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-blue-900/70 to-transparent"></div>
+                <p className="absolute bottom-4 left-4 text-white font-semibold text-sm">
+                  Your health is our priority
+                </p>
+              </div>
+            </div>
+
+            {/* Right Column - Notification Feed */}
+            <div className="lg:col-span-2 space-y-4">
+              {notifications.map((notification) => {
+                const config = typeConfig[notification.type];
+                const Icon = config.icon;
                 return (
                   <div
                     key={notification.id}
-                    className={`bg-white rounded-xl shadow-md border-l-4 overflow-hidden transition-all duration-200 ${
-                      getNotificationColor(notification.type, notification.priority)
-                    } ${!notification.isRead ? 'ring-2 ring-blue-200' : ''}`}
+                    className="relative bg-white rounded-2xl border border-gray-100 p-5 pl-6"
                   >
-                    <div className="p-6">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start space-x-4 flex-1">
-                          <div className={`p-3 rounded-lg ${
-                            notification.priority === 'high' ? 'bg-red-100' :
-                            notification.type === 'appointment' ? 'bg-blue-100' :
-                            notification.type === 'payment' ? 'bg-yellow-100' :
-                            notification.type === 'report' ? 'bg-green-100' : 'bg-gray-100'
-                          }`}>
-                            <IconComponent size={24} className={`${
-                              notification.priority === 'high' ? 'text-red-600' :
-                              notification.type === 'appointment' ? 'text-blue-600' :
-                              notification.type === 'payment' ? 'text-yellow-600' :
-                              notification.type === 'report' ? 'text-green-600' : 'text-gray-600'
-                            }`} />
-                          </div>
-                          
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center space-x-2 mb-1">
-                              <h3 className="text-lg font-semibold text-gray-800">
-                                {notification.title}
-                              </h3>
-                              {!notification.isRead && (
-                                <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                              )}
-                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                notification.priority === 'high' ? 'bg-red-100 text-red-800' :
-                                notification.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                                'bg-gray-100 text-gray-600'
-                              }`}>
-                                {notification.priority}
-                              </span>
-                            </div>
-                            <p className="text-gray-600 mb-3">{notification.message}</p>
-                            <p className="text-sm text-gray-500">{getTimeAgo(notification.timestamp)}</p>
-                          </div>
-                        </div>
+                    {!notification.isRead && (
+                      <span className="absolute left-2 top-6 w-2 h-2 rounded-full bg-primary"></span>
+                    )}
 
-                        <div className="flex items-center space-x-2 ml-4">
-                          {!notification.isRead && (
-                            <button
-                              onClick={() => markAsRead(notification.id)}
-                              className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
-                              title="Mark as read"
-                            >
-                              <CheckCircle size={18} />
-                            </button>
-                          )}
-                          <button
-                            onClick={() => deleteNotification(notification.id)}
-                            className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
-                            title="Delete notification"
-                          >
-                            <Trash2 size={18} />
-                          </button>
+                    <div className="flex items-start space-x-4">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${config.iconBg}`}>
+                        <Icon size={20} className={config.iconColor} />
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <h4 className="font-semibold text-gray-900 text-sm">{notification.title}</h4>
+                          <span className="text-xs text-gray-400 flex-shrink-0">{notification.time}</span>
                         </div>
+                        <p className="text-sm text-gray-500 mt-1">{notification.message}</p>
+
+                        {(notification.actions.length > 0 || !notification.isRead) && (
+                          <div className="flex items-center space-x-4 mt-3">
+                            {notification.actions.map((action) => (
+                              <button
+                                key={action}
+                                className="text-xs font-semibold text-primary hover:text-primary-dark transition-colors"
+                              >
+                                {action}
+                              </button>
+                            ))}
+                            {!notification.isRead && (
+                              <button
+                                onClick={() => markAsRead(notification.id)}
+                                className="text-xs font-semibold text-gray-400 hover:text-gray-600 transition-colors"
+                              >
+                                Mark as read
+                              </button>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
                 );
-              })
-            )}
+              })}
+
+              <div className="flex justify-center pt-2">
+                <button className="border border-gray-200 text-gray-600 text-sm font-semibold px-5 py-2 rounded-full hover:bg-gray-50 transition-colors">
+                  Load Previous Notifications
+                </button>
+              </div>
+            </div>
           </div>
+
+          {/* Footer */}
+          <footer className="mt-8 pt-6 border-t border-gray-200">
+            <div className="flex flex-col md:flex-row justify-between items-center text-sm text-primary/70">
+              <p>© 2024 CareConnect Health Systems. All rights reserved.</p>
+              <div className="flex space-x-6 mt-3 md:mt-0">
+                <button className="hover:text-primary transition-colors">Privacy</button>
+                <button className="hover:text-primary transition-colors">Terms</button>
+                <button className="hover:text-primary transition-colors">Audit Log</button>
+              </div>
+            </div>
+          </footer>
         </div>
       </main>
     </div>
   );
 };
-
 
 export default Notifications;

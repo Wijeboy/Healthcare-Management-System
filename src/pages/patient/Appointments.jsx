@@ -1,8 +1,18 @@
 // src/pages/Appointments.jsx
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Sidebar from '../../components/common/Sidebar';
 import Header from '../../components/common/Header';
-import { Calendar, Clock, User, MapPin, Plus, Filter, Search, Eye, Edit, X } from 'lucide-react';
+import {
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Stethoscope,
+  User,
+  Clock,
+  Check,
+  CheckCircle2,
+  ArrowRight
+} from 'lucide-react';
 
 const mockPatient = {
   id: 'P001',
@@ -14,209 +24,419 @@ const mockPatient = {
   address: 'Colombo, Sri Lanka',
 };
 
-const mockAppointments = [
-  {
-    id: '1',
-    date: 'June 12, 2026',
-    time: '10:00 AM',
-    doctor: 'Dr. Nimal Fernando',
-    department: 'Cardiology',
-    status: 'Confirmed'
-  },
-  {
-    id: '2',
-    date: 'June 20, 2026',
-    time: '2:00 PM',
-    doctor: 'Dr. Priya Silva',
-    department: 'General Medicine',
-    status: 'Pending'
-  },
-  {
-    id: '3',
-    date: 'June 25, 2026',
-    time: '9:30 AM',
-    doctor: 'Dr. Rajesh Kumar',
-    department: 'Neurology',
-    status: 'Confirmed'
-  },
-  {
-    id: '4',
-    date: 'July 5, 2026',
-    time: '3:00 PM',
-    doctor: 'Dr. Sarah Johnson',
-    department: 'Dermatology',
-    status: 'Pending'
-  }
+const departments = [
+  'Cardiology',
+  'General Medicine',
+  'Neurology',
+  'Dermatology',
+  'Pediatrics',
+  'Orthopedics'
 ];
 
-const Appointments = () => {
-  const [appointments] = useState(mockAppointments);
-  const [filterStatus, setFilterStatus] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
+const doctors = [
+  { id: 'D1', name: 'Dr. Sarah Jayawardhana', department: 'Cardiology' },
+  { id: 'D2', name: 'Dr. Akash Pathirana', department: 'Cardiology' },
+  { id: 'D3', name: 'Dr. Harsha Silva', department: 'General Medicine' },
+  { id: 'D4', name: 'Dr. Imasha Sewwandi', department: 'Dermatology' },
+  { id: 'D5', name: 'Dr. Minidu Punsara', department: 'Neurology' },
+];
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'Confirmed': return 'text-success bg-green-50 border-green-200';
-      case 'Pending': return 'text-warning bg-yellow-50 border-yellow-200';
-      case 'Cancelled': return 'text-danger bg-red-50 border-red-200';
-      case 'Completed': return 'text-gray-600 bg-gray-50 border-gray-200';
-      default: return 'text-gray-600 bg-gray-50 border-gray-200';
+const timeSlots = [
+  '09:00 AM', '09:30 AM', '10:00 AM', '10:30 AM',
+  '11:00 AM', '01:30 PM', '02:00 PM', '02:30 PM'
+];
+
+const bookedSlots = ['09:30 AM', '10:30 AM', '02:00 PM', '02:30 PM'];
+
+const WEEKDAYS = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'];
+
+const StepHeader = ({ number, title, complete }) => (
+  <div className="flex items-center space-x-3 mb-6">
+    <div
+      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${
+        complete ? 'bg-primary text-white' : 'bg-primary text-white'
+      }`}
+    >
+      {complete ? <CheckCircle2 size={18} /> : number}
+    </div>
+    <h2 className="text-lg font-bold text-gray-800">{title}</h2>
+  </div>
+);
+
+const Appointments = () => {
+  const [patientName, setPatientName] = useState('');
+  const [department, setDepartment] = useState('Cardiology');
+  const [doctorQuery, setDoctorQuery] = useState('');
+  const [showDoctorList, setShowDoctorList] = useState(false);
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
+
+  const today = new Date();
+  const [viewMonth, setViewMonth] = useState(today.getMonth());
+  const [viewYear, setViewYear] = useState(today.getFullYear());
+  const [selectedDate, setSelectedDate] = useState(today);
+
+  const [selectedSlot, setSelectedSlot] = useState('10:00 AM');
+  const [submitted, setSubmitted] = useState(false);
+
+  const filteredDoctors = useMemo(() => {
+    return doctors.filter((doc) => {
+      const matchesDept = !department || doc.department === department;
+      const matchesQuery = doc.name.toLowerCase().includes(doctorQuery.toLowerCase());
+      return matchesDept && matchesQuery;
+    });
+  }, [department, doctorQuery]);
+
+  const monthLabel = new Date(viewYear, viewMonth).toLocaleString('default', {
+    month: 'long',
+    year: 'numeric'
+  });
+
+  const calendarDays = useMemo(() => {
+    const firstDay = new Date(viewYear, viewMonth, 1);
+    // Convert Sunday(0)-Saturday(6) into Monday-first index
+    const startOffset = (firstDay.getDay() + 6) % 7;
+    const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+    const prevMonthDays = new Date(viewYear, viewMonth, 0).getDate();
+
+    const cells = [];
+    for (let i = startOffset; i > 0; i--) {
+      cells.push({ day: prevMonthDays - i + 1, inMonth: false });
+    }
+    for (let d = 1; d <= daysInMonth; d++) {
+      cells.push({ day: d, inMonth: true });
+    }
+    while (cells.length % 7 !== 0) {
+      cells.push({ day: cells.length, inMonth: false });
+    }
+    return cells;
+  }, [viewMonth, viewYear]);
+
+  const isPastDate = (day) => {
+    const d = new Date(viewYear, viewMonth, day);
+    d.setHours(0, 0, 0, 0);
+    const t = new Date();
+    t.setHours(0, 0, 0, 0);
+    return d < t;
+  };
+
+  const isSelected = (day) =>
+    selectedDate &&
+    selectedDate.getDate() === day &&
+    selectedDate.getMonth() === viewMonth &&
+    selectedDate.getFullYear() === viewYear;
+
+  const goToPrevMonth = () => {
+    if (viewMonth === 0) {
+      setViewMonth(11);
+      setViewYear((y) => y - 1);
+    } else {
+      setViewMonth((m) => m - 1);
     }
   };
 
-  const filteredAppointments = appointments.filter(appointment => {
-    const matchesStatus = filterStatus === 'all' || appointment.status.toLowerCase() === filterStatus.toLowerCase();
-    const matchesSearch = appointment.doctor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         appointment.department.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesStatus && matchesSearch;
-  });
+  const goToNextMonth = () => {
+    if (viewMonth === 11) {
+      setViewMonth(0);
+      setViewYear((y) => y + 1);
+    } else {
+      setViewMonth((m) => m + 1);
+    }
+  };
+
+  const handleSelectDoctor = (doc) => {
+    setSelectedDoctor(doc);
+    setDoctorQuery(doc.name);
+    setDepartment(doc.department);
+    setShowDoctorList(false);
+  };
+
+  const availableSlotCount = timeSlots.length - bookedSlots.length;
+
+  const handleConfirm = () => {
+    if (!selectedSlot) return;
+    setSubmitted(true);
+  };
+
+  const handleCancel = () => {
+    setPatientName('');
+    setDoctorQuery('');
+    setSelectedDoctor(null);
+    setSelectedSlot(null);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Sidebar patientData={mockPatient} />
       <Header />
-      
+
       <main className="ml-64 pt-20 p-6">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           {/* Page Header */}
-          <div className="bg-white rounded-xl shadow-md p-6 mb-8">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-              <div className="mb-4 lg:mb-0">
-                <h1 className="text-3xl font-bold text-gray-800 mb-2">My Appointments</h1>
-                <p className="text-gray-600">Manage and track your medical appointments</p>
-              </div>
-              <button className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-dark transition-colors flex items-center space-x-2 font-medium">
-                <Plus size={20} />
-                <span>Book New Appointment</span>
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold text-primary mb-1">Schedule Appointment</h1>
+            <p className="text-gray-500 text-sm">Complete the steps below to book a consultation.</p>
+          </div>
+
+          {submitted ? (
+            <div className="bg-white rounded-xl shadow-md p-10 text-center">
+              <CheckCircle2 size={56} className="mx-auto text-success mb-4" />
+              <h3 className="text-xl font-bold text-gray-800 mb-2">Appointment Requested</h3>
+              <p className="text-gray-500 mb-6">
+                {selectedDoctor?.name || 'Any available doctor'} · {selectedDate.toLocaleDateString('default', {
+                  weekday: 'long',
+                  month: 'long',
+                  day: 'numeric'
+                })} · {selectedSlot}
+              </p>
+              <button
+                onClick={() => setSubmitted(false)}
+                className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark transition-colors font-medium"
+              >
+                Book Another Appointment
               </button>
             </div>
-          </div>
+          ) : (
+            <div className="space-y-6">
+              {/* Step 1 - Select Provider */}
+              <div className="bg-white rounded-xl shadow-md p-6">
+                <StepHeader number={1} title="Select Provider" />
 
-          {/* Filters and Search */}
-          <div className="bg-white rounded-xl shadow-md p-6 mb-8">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 lg:space-x-4">
-              {/* Search */}
-              <div className="flex-1 max-w-md">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                  <input
-                    type="text"
-                    placeholder="Search by doctor or department..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
-                </div>
-              </div>
-
-              {/* Status Filter */}
-              <div className="flex items-center space-x-2">
-                <Filter size={20} className="text-gray-400" />
-                <select 
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                >
-                  <option value="all">All Status</option>
-                  <option value="confirmed">Confirmed</option>
-                  <option value="pending">Pending</option>
-                  <option value="cancelled">Cancelled</option>
-                  <option value="completed">Completed</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Appointments Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {filteredAppointments.map((appointment) => (
-              <div key={appointment.id} className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
-                <div className="p-6">
-                  {/* Status Badge */}
-                  <div className="flex justify-between items-start mb-4">
-                    <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(appointment.status)}`}>
-                      {appointment.status}
-                    </span>
-                    <div className="flex space-x-2">
-                      <button className="p-2 text-primary hover:bg-primary-light rounded-lg transition-colors">
-                        <Eye size={16} />
-                      </button>
-                      <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                        <Edit size={16} />
-                      </button>
-                      <button className="p-2 text-danger hover:bg-red-100 rounded-lg transition-colors">
-                        <X size={16} />
-                      </button>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  {/* Patient Name */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500 mb-2">
+                      Patient Name
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={patientName}
+                        onChange={(e) => setPatientName(e.target.value)}
+                        placeholder="Name"
+                        className="w-full pl-4 pr-10 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:ring-2 focus:ring-primary focus:border-transparent text-gray-700"
+                      />
+                      <User
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none"
+                        size={16}
+                      />
                     </div>
                   </div>
 
-                  {/* Appointment Details */}
-                  <div className="space-y-3">
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2 bg-primary-light rounded-lg">
-                        <Calendar className="text-primary" size={20} />
+                  {/* Doctor */}
+                  <div className="relative">
+                    <label className="block text-sm font-medium text-gray-500 mb-2">
+                      Doctor <span className="text-gray-400 font-normal">(Optional)</span>
+                    </label>
+                    <div className="relative">
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-primary-light flex items-center justify-center overflow-hidden">
+                        <User size={14} className="text-primary" />
                       </div>
-                      <div>
-                        <div className="font-semibold text-gray-800">{appointment.date}</div>
-                        <div className="text-sm text-gray-600 flex items-center">
-                          <Clock size={14} className="mr-1" />
-                          {appointment.time}
-                        </div>
-                      </div>
+                      <input
+                        type="text"
+                        value={doctorQuery}
+                        onChange={(e) => {
+                          setDoctorQuery(e.target.value);
+                          setSelectedDoctor(null);
+                          setShowDoctorList(true);
+                        }}
+                        onFocus={() => setShowDoctorList(true)}
+                        onBlur={() => setTimeout(() => setShowDoctorList(false), 150)}
+                        placeholder="Search by Doctor Name"
+                        className="w-full pl-11 pr-10 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:ring-2 focus:ring-primary focus:border-transparent text-gray-700"
+                      />
+                      <Search
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                        size={16}
+                      />
                     </div>
 
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2 bg-green-100 rounded-lg">
-                        <User className="text-green-600" size={20} />
+                    {showDoctorList && (
+                      <div className="absolute z-20 mt-1 w-full bg-white border border-gray-100 rounded-lg shadow-lg overflow-hidden">
+                        {filteredDoctors.length > 0 ? (
+                          filteredDoctors.map((doc) => (
+                            <button
+                              type="button"
+                              key={doc.id}
+                              onMouseDown={() => handleSelectDoctor(doc)}
+                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-primary-light hover:text-primary transition-colors"
+                            >
+                              {doc.name}
+                              <span className="block text-xs text-gray-400">{doc.department}</span>
+                            </button>
+                          ))
+                        ) : (
+                          <div className="px-4 py-3 text-sm text-gray-400">No doctors found</div>
+                        )}
                       </div>
-                      <div>
-                        <div className="font-semibold text-gray-800">{appointment.doctor}</div>
-                        <div className="text-sm text-gray-600">{appointment.department}</div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2 bg-blue-100 rounded-lg">
-                        <MapPin className="text-blue-600" size={20} />
-                      </div>
-                      <div>
-                        <div className="font-semibold text-gray-800">Medimate Medical Center</div>
-                        <div className="text-sm text-gray-600">Main Building, Floor 2</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="mt-6 flex space-x-3">
-                    {appointment.status === 'Pending' && (
-                      <button className="flex-1 bg-success text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-colors font-medium">
-                        Confirm
-                      </button>
                     )}
-                    <button className="flex-1 bg-primary-light text-primary py-2 px-4 rounded-lg hover:bg-blue-200 transition-colors font-medium">
-                      View Details
-                    </button>
+                  </div>
+                </div>
+
+                {/* Department */}
+                <div className="max-w-md">
+                  <label className="block text-sm font-medium text-gray-500 mb-2">
+                    Department <span className="text-gray-400 font-normal">(Optional)</span>
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={department}
+                      onChange={(e) => {
+                        setDepartment(e.target.value);
+                        setSelectedDoctor(null);
+                      }}
+                      className="w-full appearance-none pl-4 pr-10 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:ring-2 focus:ring-primary focus:border-transparent text-gray-700"
+                    >
+                      <option value="">All Departments</option>
+                      {departments.map((dept) => (
+                        <option key={dept} value={dept}>{dept}</option>
+                      ))}
+                    </select>
+                    <Stethoscope
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                      size={16}
+                    />
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
 
-          {filteredAppointments.length === 0 && (
-            <div className="bg-white rounded-xl shadow-md p-12 text-center">
-              <Calendar size={64} className="mx-auto text-gray-300 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-500 mb-2">No appointments found</h3>
-              <p className="text-gray-400 mb-6">Try adjusting your search or filter criteria</p>
-              <button className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark transition-colors font-medium">
-                Book New Appointment
-              </button>
+              {/* Step 2 - Choose Date */}
+              <div className="bg-white rounded-xl shadow-md p-6">
+                <StepHeader number={2} title="Choose Date" />
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Calendar */}
+                  <div className="md:col-span-2 border border-gray-100 rounded-xl p-5">
+                    <div className="flex items-center justify-between mb-4">
+                      <button
+                        onClick={goToPrevMonth}
+                        className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+                      >
+                        <ChevronLeft size={18} />
+                      </button>
+                      <span className="font-semibold text-gray-800">{monthLabel}</span>
+                      <button
+                        onClick={goToNextMonth}
+                        className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+                      >
+                        <ChevronRight size={18} />
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-7 gap-y-2 text-center text-xs font-semibold text-gray-400 mb-2">
+                      {WEEKDAYS.map((wd) => (
+                        <div key={wd}>{wd}</div>
+                      ))}
+                    </div>
+
+                    <div className="grid grid-cols-7 gap-y-2 text-center text-sm">
+                      {calendarDays.map((cell, idx) => {
+                        const disabled = !cell.inMonth || isPastDate(cell.day);
+                        const selected = cell.inMonth && isSelected(cell.day);
+                        return (
+                          <button
+                            key={idx}
+                            disabled={disabled}
+                            onClick={() => {
+                              setSelectedDate(new Date(viewYear, viewMonth, cell.day));
+                              setSelectedSlot(null);
+                            }}
+                            className={`mx-auto w-8 h-8 rounded-full text-sm transition-colors ${
+                              selected
+                                ? 'bg-primary text-white font-semibold'
+                                : disabled
+                                ? 'text-gray-300 cursor-not-allowed'
+                                : 'text-gray-700 hover:bg-primary-light hover:text-primary'
+                            }`}
+                          >
+                            {cell.day}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Selected Date Summary */}
+                  <div className="bg-primary-light rounded-xl p-5 flex flex-col justify-center">
+                    <p className="text-xs font-semibold tracking-wide text-primary mb-2">SELECTED DATE</p>
+                    <p className="text-4xl font-bold text-gray-800 mb-1">
+                      {String(selectedDate.getDate()).padStart(2, '0')}
+                    </p>
+                    <p className="text-sm font-medium text-gray-700 mb-4">
+                      {selectedDate.toLocaleDateString('default', { weekday: 'long', month: 'long' })}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {availableSlotCount} time slots currently available for this day.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 3 - Select Time Slot */}
+              <div className="bg-white rounded-xl shadow-md p-6">
+                <StepHeader number={3} title="Select Time Slot" />
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                  {timeSlots.map((slot) => {
+                    const isBooked = bookedSlots.includes(slot);
+                    const isChosen = selectedSlot === slot;
+                    return (
+                      <button
+                        key={slot}
+                        type="button"
+                        disabled={isBooked}
+                        onClick={() => setSelectedSlot(slot)}
+                        className={`flex items-center justify-center space-x-1.5 py-2.5 rounded-lg text-sm font-medium border transition-colors ${
+                          isBooked
+                            ? 'border-gray-100 text-gray-300 bg-gray-50 cursor-not-allowed'
+                            : isChosen
+                            ? 'border-primary-dark bg-primary-dark text-white'
+                            : 'border-gray-200 text-gray-700 hover:border-primary hover:text-primary'
+                        }`}
+                      >
+                        {isChosen ? <Check size={14} /> : <Clock size={14} />}
+                        <span>{slot}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Cancel / Confirm */}
+                <div className="flex items-center justify-end space-x-4">
+                  <button
+                    type="button"
+                    onClick={handleCancel}
+                    className="text-gray-500 hover:text-gray-700 font-medium text-sm transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleConfirm}
+                    disabled={!selectedSlot}
+                    className="bg-primary-dark text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center space-x-2"
+                  >
+                    <span>Confirm Booking</span>
+                    <ArrowRight size={16} />
+                  </button>
+                </div>
+              </div>
             </div>
           )}
+
+          {/* Footer */}
+          <footer className="mt-8 pt-6 border-t border-gray-200">
+            <div className="flex flex-col md:flex-row justify-between items-center text-sm text-primary/70">
+              <p>© 2024 CareConnect Health Systems. All rights reserved.</p>
+              <div className="flex space-x-6 mt-3 md:mt-0">
+                <button className="hover:text-primary transition-colors">Privacy</button>
+                <button className="hover:text-primary transition-colors">Terms</button>
+                <button className="hover:text-primary transition-colors">Audit Log</button>
+              </div>
+            </div>
+          </footer>
         </div>
       </main>
     </div>
   );
 };
-
 
 export default Appointments;
