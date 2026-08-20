@@ -55,6 +55,7 @@ import userRoutes from "./routes/admin/userRoutes.js";
 import staffRoutes from "./routes/admin/staffRoutes.js";
 import reportRoutes from "./routes/admin/reportRoutes.js";
 import settingsRoutes from "./routes/admin/settingsRoutes.js";
+import systemSettingsRoutes from "./routes/admin/systemSettingsRoutes.js";
 import contactRoutes from "./routes/admin/contactRoutes.js";
 
 // Doctor Module Routes imports
@@ -79,6 +80,14 @@ app.use("/api/admin/users", verifyToken, requireRole("Admin"), userRoutes);
 app.use("/api/admin/staff", verifyToken, requireRole("Admin"), staffRoutes);
 app.use("/api/admin/reports", verifyToken, requireRole("Admin"), reportRoutes);
 app.use("/api/admin/settings", verifyToken, requireRole("Admin"), settingsRoutes);
+
+app.use(
+  "/api/admin/system-settings",
+  verifyToken,
+  requireRole("Admin"),
+  systemSettingsRoutes,
+);
+
 app.use("/api/admin/contact", verifyToken, requireRole("Admin"), contactRoutes);
 
 // Register Protected Doctor Module Routes (Requires valid JWT + Doctor role)
