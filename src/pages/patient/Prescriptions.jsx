@@ -308,4 +308,5 @@ const Prescriptions = () => {
   );
 };
 
+
 export default Prescriptions;

@@ -404,8 +404,7 @@ const MedicalRecords = () => {
                   </table>
                 </div>
               )}
-
-              <div className="flex justify-end gap-3 mt-6">
+                <div className="flex justify-end gap-3 mt-6">
                 <button
                   onClick={handleShare}
                   className="flex items-center gap-2 border border-gray-300 text-gray-700 px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"

@@ -90,7 +90,7 @@ const ResetPassword = () => {
       <div className="max-w-md w-full">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-primary mb-2">🏥 Medimate</h1>
+          <h1 className="text-3xl font-bold text-primary mb-2"> Medimate</h1>
           <h2 className="text-2xl font-semibold text-gray-800">Reset Password</h2>
           <p className="text-gray-600 mt-2">Enter your new password below</p>
         </div>
