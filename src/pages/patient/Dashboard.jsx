@@ -1,8 +1,21 @@
 // src/pages/Dashboard.jsx
-import React, { useState } from 'react';
+import React from 'react';
 import Sidebar from '../../components/common/Sidebar';
 import Header from '../../components/common/Header';
-import { Calendar, Clock, FileText, CreditCard, User, ChevronRight, Plus, MoreHorizontal, AlertTriangle } from 'lucide-react';
+import {
+  Calendar,
+  Clock,
+  Folder,
+  CreditCard,
+  ChevronRight,
+  Plus,
+  MoreVertical,
+  ExternalLink,
+  Heart,
+  Brain,
+  Sun,
+  Stethoscope
+} from 'lucide-react';
 
 // Enhanced mock data with patient photo
 const mockPatient = {
@@ -57,25 +70,25 @@ const mockAppointments = [
   }
 ];
 
+const departmentStyles = {
+  Cardiology: { icon: Heart, classes: 'bg-blue-50 text-blue-700' },
+  'General Medicine': { icon: Stethoscope, classes: 'bg-emerald-50 text-emerald-700' },
+  Neurology: { icon: Brain, classes: 'bg-purple-50 text-purple-700' },
+  Dermatology: { icon: Sun, classes: 'bg-orange-50 text-orange-700' }
+};
+
 const Dashboard = () => {
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Confirmed': return 'bg-green-100 text-green-800 border-green-200';
-      case 'Pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'Cancelled': return 'bg-red-100 text-red-800 border-red-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'Confirmed': return 'bg-green-50 text-green-700';
+      case 'Pending': return 'bg-yellow-50 text-yellow-700';
+      case 'Cancelled': return 'bg-red-50 text-red-700';
+      default: return 'bg-gray-50 text-gray-700';
     }
   };
 
-  const getDepartmentColor = (department) => {
-    switch (department) {
-      case 'Cardiology': return 'bg-red-100 text-red-800';
-      case 'General Medicine': return 'bg-blue-100 text-blue-800';
-      case 'Neurology': return 'bg-purple-100 text-purple-800';
-      case 'Dermatology': return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
+  const getDepartmentStyle = (department) =>
+    departmentStyles[department] || { icon: Stethoscope, classes: 'bg-gray-50 text-gray-700' };
 
   const formatDate = (dateStr) => {
     const date = new Date(dateStr);
@@ -88,194 +101,156 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gray-50">
       <Sidebar patientData={mockPatient} />
       <Header />
-      
+
       <main className="ml-64 pt-20 p-6">
         <div className="max-w-7xl mx-auto">
-          {/* Welcome Header Card - Simple */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-8">
-            <h1 className="text-3xl font-bold text-black mb-2">
-              Welcome, {mockPatient.name}! 👋
+          {/* Welcome Header */}
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-900 mb-1">
+              Welcome, {mockPatient.name} 👋
             </h1>
-            <p className="text-lg text-black">
-              Here's what's happening with your health today.
-            </p>
+            <p className="text-gray-500">Here's what's happening with your health today.</p>
           </div>
 
           {/* Summary Overview Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
             {/* Next Appointment Card */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 relative overflow-hidden hover:shadow-md transition-shadow">
-              {/* Urgent Badge */}
+            <div className="relative bg-white rounded-2xl border-2 border-primary p-5 overflow-hidden">
               {mockDashboardData?.nextAppointment?.isUrgent && (
-                <div className="absolute top-4 right-4">
-                  <div className="flex items-center space-x-1 bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-semibold">
-                    <AlertTriangle size={12} />
-                    <span>Urgent</span>
-                  </div>
+                <div className="absolute top-0 right-0 bg-primary text-white text-[10px] font-bold tracking-wide px-3 py-1 rounded-bl-lg">
+                  URGENT
                 </div>
               )}
-              
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center shadow-md">
-                  <Calendar className="text-white" size={24} />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800">Next Appointment</h3>
-                  <p className="text-sm text-gray-500">Upcoming consultation</p>
-                </div>
+
+              <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mb-4">
+                <Calendar className="text-primary" size={20} />
               </div>
 
+              <h3 className="text-sm font-semibold text-gray-500 mb-2">Next Appointment</h3>
+
               {mockDashboardData?.nextAppointment ? (
-                <div className="space-y-3 mb-4">
-                  <div className="flex items-center space-x-2">
-                    <Clock size={16} className="text-gray-400" />
-                    <span className="text-gray-700 font-semibold">
-                      {mockDashboardData.nextAppointment.date}, {mockDashboardData.nextAppointment.time}
-                    </span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <User size={16} className="text-gray-400" />
-                    <span className="text-gray-700 font-semibold">
-                      Dr. {mockDashboardData.nextAppointment.doctor}
-                    </span>
-                  </div>
-                </div>
+                <>
+                  <p className="text-base font-bold text-primary mb-1">
+                    {mockDashboardData.nextAppointment.date}, {mockDashboardData.nextAppointment.time}
+                  </p>
+                  <button className="flex items-center text-sm text-gray-500 mb-4 hover:text-gray-700 transition-colors">
+                    <span>Dr. {mockDashboardData.nextAppointment.doctor}</span>
+                    <ChevronRight size={14} className="ml-0.5" />
+                  </button>
+                </>
               ) : (
                 <p className="text-gray-500 mb-4">No upcoming appointments</p>
               )}
 
-              <button className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 py-3 px-4 rounded-xl transition-colors flex items-center justify-center space-x-2 font-semibold">
+              <button className="w-full border border-primary text-primary py-2.5 rounded-lg hover:bg-primary-light transition-colors flex items-center justify-center space-x-1 text-sm font-semibold">
                 <span>View Details</span>
-                <ChevronRight size={16} />
+                <ChevronRight size={14} />
               </button>
             </div>
 
-            {/* Unread Reports Card - DARK BLUE */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-12 h-12 bg-blue-800 rounded-xl flex items-center justify-center shadow-md">
-                  <FileText className="text-white" size={24} />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800">Unread Reports</h3>
-                  <p className="text-sm text-gray-500">Laboratory results</p>
-                </div>
+            {/* Unread Reports Card */}
+            <div className="bg-white rounded-2xl border border-gray-100 p-5">
+              <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mb-4">
+                <Folder className="text-primary" size={20} />
               </div>
 
-              <div className="mb-4">
-                <div className="text-4xl font-bold text-gray-800 mb-1">
-                  {mockDashboardData?.unreadReports || 0}
-                </div>
-                <p className="text-gray-600">New laboratory reports available</p>
-              </div>
+              <h3 className="text-sm font-semibold text-gray-500 mb-2">Unread Reports</h3>
+              <p className="text-base font-bold text-gray-900 mb-4">
+                {mockDashboardData?.unreadReports || 0} new reports
+              </p>
 
-              <button className="w-full bg-blue-800 hover:bg-blue-900 text-white py-3 px-4 rounded-xl transition-colors flex items-center justify-center space-x-2 font-semibold shadow-sm">
+              <button className="w-full border border-gray-200 text-gray-700 py-2.5 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center space-x-1.5 text-sm font-semibold">
                 <span>Open Portal</span>
-                <ChevronRight size={16} />
+                <ExternalLink size={14} />
               </button>
             </div>
 
             {/* Pending Bills Card */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center shadow-md">
-                  <CreditCard className="text-white" size={24} />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800">Pending Bills</h3>
-                  <p className="text-sm text-gray-500">Outstanding payments</p>
-                </div>
+            <div className="bg-white rounded-2xl border border-gray-100 p-5">
+              <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mb-4">
+                <CreditCard className="text-primary" size={20} />
               </div>
 
-              <div className="mb-4">
-                <div className="text-4xl font-bold text-red-600 mb-1">
-                  Rs.{mockDashboardData?.pendingBills?.toLocaleString() || 0}
-                </div>
-                <p className="text-gray-600">Amount due for medical services</p>
-              </div>
+              <h3 className="text-sm font-semibold text-gray-500 mb-2">Pending Bills</h3>
+              <p className="text-base font-bold text-red-600 mb-4">
+                Rs. {mockDashboardData?.pendingBills?.toLocaleString() || 0}
+              </p>
 
-              <button className="w-full bg-primary hover:bg-primary-dark text-white py-3 px-4 rounded-xl transition-colors flex items-center justify-center space-x-2 font-semibold shadow-sm">
-                <span>Pay Now</span>
-                <ChevronRight size={16} />
+              <button className="w-full bg-primary-dark text-white py-2.5 rounded-lg hover:bg-primary transition-colors flex items-center justify-center space-x-1.5 text-sm font-semibold">
+                <span>Pay now</span>
+                <CreditCard size={14} />
               </button>
             </div>
           </div>
 
           {/* Upcoming Appointments Table */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="px-6 py-5 border-b border-gray-100 bg-gray-50/50">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h2 className="text-xl font-bold text-gray-800">Upcoming Appointments</h2>
-                  <p className="text-sm text-gray-500 mt-1">Your scheduled consultations</p>
-                </div>
-                <button className="bg-primary text-white px-5 py-2.5 rounded-xl hover:bg-primary-dark transition-colors flex items-center space-x-2 font-semibold shadow-sm hover:shadow-md">
-                  <Plus size={18} />
-                  <span>Schedule New</span>
-                </button>
-              </div>
+          <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+            <div className="px-6 py-4 bg-gray-900 flex justify-between items-center">
+              <h2 className="text-base font-bold text-white">Upcoming Appointments</h2>
+              <button className="bg-primary text-white px-4 py-2 rounded-full hover:bg-primary-dark transition-colors flex items-center space-x-1.5 text-sm font-semibold">
+                <Plus size={16} />
+                <span>Schedule New</span>
+              </button>
             </div>
 
             {mockAppointments && mockAppointments.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-50/80">
+                  <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 uppercase tracking-wide">Date & Time</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 uppercase tracking-wide">Doctor</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 uppercase tracking-wide">Department</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 uppercase tracking-wide">Status</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 uppercase tracking-wide">Actions</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide">Date</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide">Doctor Name</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide">Department</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide">Action</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {mockAppointments.map((appointment, index) => {
                       const dateInfo = formatDate(appointment.date);
+                      const deptStyle = getDepartmentStyle(appointment.department);
+                      const DeptIcon = deptStyle.icon;
                       return (
                         <tr key={appointment.id || index} className="hover:bg-gray-50 transition-colors">
                           <td className="px-6 py-4">
-                            <div className="flex items-center space-x-4">
-                              <div className="text-center">
-                                <div className="w-12 h-12 bg-primary rounded-xl flex flex-col items-center justify-center text-white shadow-sm">
-                                  <span className="text-xs font-medium">{dateInfo.month}</span>
-                                  <span className="text-lg font-bold leading-none">{dateInfo.day}</span>
-                                </div>
+                            <div className="flex items-center space-x-3">
+                              <div className="w-11 h-11 bg-blue-50 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
+                                <span className="text-[10px] font-semibold text-primary leading-none">{dateInfo.month}</span>
+                                <span className="text-sm font-bold text-primary leading-tight">{dateInfo.day}</span>
                               </div>
                               <div>
-                                <div className="font-semibold text-gray-900">{appointment.date}</div>
-                                <div className="text-sm text-gray-500">{appointment.time}</div>
+                                <div className="font-semibold text-gray-900 text-sm">{appointment.date}</div>
+                                <div className="text-xs text-gray-400 flex items-center mt-0.5">
+                                  <Clock size={12} className="mr-1" />
+                                  {appointment.time}
+                                </div>
                               </div>
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="flex items-center space-x-3">
-                              {appointment.avatar ? (
-                                <img 
-                                  src={appointment.avatar} 
-                                  alt={appointment.doctor}
-                                  className="w-8 h-8 rounded-full object-cover"
-                                />
-                              ) : (
-                                <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                                  {appointment.doctor.split(' ').map(n => n[0]).join('').substring(0, 2)}
-                                </div>
-                              )}
-                              <span className="font-semibold text-gray-900">{appointment.doctor}</span>
+                            <div className="flex items-center space-x-2.5">
+                              <img
+                                src={appointment.avatar}
+                                alt={appointment.doctor}
+                                className="w-8 h-8 rounded-full object-cover"
+                              />
+                              <span className="font-semibold text-gray-900 text-sm">{appointment.doctor}</span>
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${getDepartmentColor(appointment.department)}`}>
+                            <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${deptStyle.classes}`}>
+                              <DeptIcon size={12} />
                               {appointment.department}
                             </span>
                           </td>
                           <td className="px-6 py-4">
-                            <span className={`inline-flex px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(appointment.status)}`}>
-                              {appointment.status?.toUpperCase()}
+                            <span className={`inline-flex px-3 py-1 rounded-full text-xs font-bold uppercase ${getStatusColor(appointment.status)}`}>
+                              {appointment.status}
                             </span>
                           </td>
                           <td className="px-6 py-4">
                             <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                              <MoreHorizontal size={16} />
+                              <MoreVertical size={16} />
                             </button>
                           </td>
                         </tr>
@@ -297,15 +272,13 @@ const Dashboard = () => {
           </div>
 
           {/* Footer */}
-          <footer className="mt-12 pt-8 border-t border-gray-200">
-            <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
-              <div>
-                <p>© 2024 Medimate Healthcare Systems. All rights reserved.</p>
-              </div>
-              <div className="flex space-x-6 mt-4 md:mt-0">
-                <button className="hover:text-gray-700 transition-colors">Privacy Policy</button>
-                <button className="hover:text-gray-700 transition-colors">Terms of Service</button>
-                <button className="hover:text-gray-700 transition-colors">Audit Log</button>
+          <footer className="mt-8 pt-6 border-t border-gray-200">
+            <div className="flex flex-col md:flex-row justify-between items-center text-sm text-primary/70">
+              <p>© 2024 CareConnect Health Systems. All rights reserved.</p>
+              <div className="flex space-x-6 mt-3 md:mt-0">
+                <button className="hover:text-primary transition-colors">Privacy</button>
+                <button className="hover:text-primary transition-colors">Terms</button>
+                <button className="hover:text-primary transition-colors">Audit Log</button>
               </div>
             </div>
           </footer>
