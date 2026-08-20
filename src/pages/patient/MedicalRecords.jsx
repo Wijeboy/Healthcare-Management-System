@@ -2,7 +2,16 @@
 import React, { useState } from 'react';
 import Sidebar from '../../components/common/Sidebar';
 import Header from '../../components/common/Header';
-import { FileText, Download, Eye, Filter, Search, Calendar, User } from 'lucide-react';
+import {
+  FileText,
+  Download,
+  Share2,
+  ChevronDown,
+  ChevronUp,
+  MoreVertical,
+  Droplet,
+  AlertTriangle,
+} from 'lucide-react';
 
 const mockPatient = {
   id: 'P001',
@@ -12,232 +21,408 @@ const mockPatient = {
   dateOfBirth: '1995-06-15',
   gender: 'Female',
   address: 'Colombo, Sri Lanka',
+  patientId: 'MR-8921',
+  age: 34,
+  bloodGroup: 'O+',
+  allergies: ['Penicillin'],
+  lastVisit: 'Oct 12, 2026',
+  emergencyContact: {
+    name: 'Thirasha Lamkamli',
+    phone: '+94 76 854 3890',
+  },
 };
+
+// Simple recovery/health-score trend used to render the sparkline in the patient card
+const healthScoreTrend = [62, 68, 65, 74, 78, 82, 88];
 
 const mockRecords = [
   {
     id: '1',
     date: 'June 5, 2026',
     type: 'Blood Test Results',
+    department: 'Pathology',
     doctor: 'Dr. Nimal Fernando',
     diagnosis: 'Complete Blood Count - Normal',
     notes: 'All values within normal range. Continue current medication.',
-    status: 'New',
-    attachments: ['blood_test_report.pdf']
+    resultStatus: 'Normal',
+    appointmentStatus: 'Confirmed',
+    attachments: ['blood_test_report.pdf'],
   },
   {
     id: '2',
     date: 'May 28, 2026',
     type: 'X-Ray Report',
+    department: 'Radiology',
     doctor: 'Dr. Priya Silva',
     diagnosis: 'Chest X-Ray - Clear',
     notes: 'No abnormalities detected. Follow-up in 6 months.',
-    status: 'Read',
-    attachments: ['xray_chest.pdf', 'xray_image.jpg']
+    resultStatus: 'Normal',
+    appointmentStatus: 'Confirmed',
+    attachments: ['xray_chest.pdf', 'xray_image.jpg'],
   },
   {
     id: '3',
     date: 'May 15, 2026',
     type: 'Consultation Notes',
+    department: 'General Medicine',
     doctor: 'Dr. Rajesh Kumar',
     diagnosis: 'General Checkup - Healthy',
     notes: 'Patient reports feeling well. Blood pressure normal. Recommended annual screening.',
-    status: 'Read'
+    resultStatus: 'Normal',
+    appointmentStatus: 'Pending',
   },
   {
     id: '4',
     date: 'April 20, 2026',
     type: 'ECG Report',
+    department: 'Cardiology',
     doctor: 'Dr. Sarah Johnson',
     diagnosis: 'Electrocardiogram - Normal Sinus Rhythm',
     notes: 'Heart rhythm regular. No signs of cardiac abnormalities.',
-    status: 'New',
-    attachments: ['ecg_report.pdf']
-  }
+    resultStatus: 'Normal',
+    appointmentStatus: 'Confirmed',
+    attachments: ['ecg_report.pdf'],
+  },
+  {
+    id: '5',
+    date: 'March 30, 2026',
+    type: 'Lipid Panel',
+    department: 'Pathology',
+    doctor: 'Dr. Nimal Fernando',
+    diagnosis: 'Cholesterol - Elevated LDL',
+    notes: 'LDL slightly above target range. Dietary changes and re-test in 3 months recommended.',
+    resultStatus: 'Abnormal',
+    appointmentStatus: 'Confirmed',
+    attachments: ['lipid_panel.pdf'],
+  },
 ];
+
+// Small inline sparkline so the patient card has a visual trend, no chart library needed
+const HealthScoreSparkline = ({ data }) => {
+  const width = 240;
+  const height = 64;
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min || 1;
+  const stepX = width / (data.length - 1);
+
+  const points = data.map((value, i) => {
+    const x = i * stepX;
+    const y = height - ((value - min) / range) * (height - 8) - 4;
+    return [x, y];
+  });
+
+  const linePath = points.map(([x, y], i) => `${i === 0 ? 'M' : 'L'} ${x} ${y}`).join(' ');
+  const areaPath = `${linePath} L ${width} ${height} L 0 ${height} Z`;
+  const [lastX, lastY] = points[points.length - 1];
+
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-16" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="healthScoreFill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#4F7CFF" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="#4F7CFF" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d={areaPath} fill="url(#healthScoreFill)" />
+      <path d={linePath} fill="none" stroke="#4F7CFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx={lastX} cy={lastY} r="3.5" fill="#4F7CFF" stroke="white" strokeWidth="1.5" />
+    </svg>
+  );
+};
+
+const ResultStatusPill = ({ status }) => {
+  const isNormal = status === 'Normal';
+  return (
+    <span
+      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+        isNormal ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'
+      }`}
+    >
+      {isNormal ? 'Normal Results' : 'Abnormal Results'}
+    </span>
+  );
+};
+
+const AppointmentStatusBadge = ({ status }) => {
+  const isConfirmed = status === 'Confirmed';
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
+        isConfirmed ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
+      }`}
+    >
+      <span className={`h-1.5 w-1.5 rounded-full ${isConfirmed ? 'bg-green-600' : 'bg-amber-600'}`} />
+      {status.toUpperCase()}
+    </span>
+  );
+};
+
+const RecordDetailRow = ({ record }) => (
+  <div className="px-4 py-4 border-t border-gray-100 bg-gray-50/60">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3 text-sm text-gray-600">
+      <span>
+        <strong className="text-gray-700">Doctor:</strong> {record.doctor}
+      </span>
+      <span>
+        <strong className="text-gray-700">Department:</strong> {record.department}
+      </span>
+    </div>
+    <p className="text-sm text-gray-600 mb-2">
+      <strong className="text-gray-700">Diagnosis:</strong> {record.diagnosis}
+    </p>
+    {record.notes && (
+      <p className="text-sm text-gray-600 mb-3">
+        <strong className="text-gray-700">Notes:</strong> {record.notes}
+      </p>
+    )}
+    {record.attachments && record.attachments.length > 0 && (
+      <div className="flex flex-wrap gap-2">
+        {record.attachments.map((attachment, index) => (
+          <div key={index} className="flex items-center space-x-2 bg-white border border-gray-200 px-3 py-1.5 rounded-lg">
+            <FileText size={14} className="text-gray-500" />
+            <span className="text-xs text-gray-700">{attachment}</span>
+            <button className="text-primary hover:text-primary-dark" aria-label={`Download ${attachment}`}>
+              <Download size={13} />
+            </button>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+);
+
+const LabReportsGroup = ({ title, records, tone }) => {
+  const [open, setOpen] = useState(title === 'Normal Results');
+  const toneStyles =
+    tone === 'normal'
+      ? { badge: 'bg-green-100 text-green-700', icon: 'text-green-600' }
+      : { badge: 'bg-orange-100 text-orange-700', icon: 'text-orange-600' };
+
+  return (
+    <div className="border border-gray-200 rounded-xl overflow-hidden mb-3">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between px-4 py-3 bg-white hover:bg-gray-50 transition-colors"
+      >
+        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${toneStyles.badge}`}>
+          {title}
+        </span>
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-gray-400">{records.length} report{records.length !== 1 ? 's' : ''}</span>
+          {open ? <ChevronUp size={18} className="text-gray-400" /> : <ChevronDown size={18} className="text-gray-400" />}
+        </div>
+      </button>
+      {open && (
+        <div>
+          {records.map((record) => (
+            <RecordDetailRow key={record.id} record={record} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const MedicalRecords = () => {
   const [records] = useState(mockRecords);
-  const [filterType, setFilterType] = useState('all');
-  const [filterStatus, setFilterStatus] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState('lab'); // 'lab' | 'history'
+  const [openMenuId, setOpenMenuId] = useState(null);
 
-  const filteredRecords = records.filter(record => {
-    const matchesType = filterType === 'all' || record.type.toLowerCase().includes(filterType.toLowerCase());
-    const matchesStatus = filterStatus === 'all' || record.status.toLowerCase() === filterStatus.toLowerCase();
-    const matchesSearch = record.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         record.doctor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         record.diagnosis.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesType && matchesStatus && matchesSearch;
-  });
+  const normalRecords = records.filter((r) => r.resultStatus === 'Normal');
+  const abnormalRecords = records.filter((r) => r.resultStatus === 'Abnormal');
+
+  const handleDownloadPdf = () => {
+    window.print();
+  };
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Medical Records',
+          text: `Medical records for ${mockPatient.name}`,
+        });
+      } catch (err) {
+        // user cancelled share - no action needed
+      }
+    } else {
+      alert('Sharing is not supported on this device.');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Sidebar patientData={mockPatient} />
       <Header />
-      
+
       <main className="ml-64 pt-20 p-6">
-        <div className="max-w-7xl mx-auto">
-          {/* Page Header */}
-          <div className="bg-white rounded-xl shadow-md p-6 mb-8">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-800 mb-2">Medical Records</h1>
-                <p className="text-gray-600">View and download your medical reports and test results</p>
+        <div className="max-w-6xl mx-auto">
+          <h1 className="text-2xl font-bold text-gray-800 mb-6">Medical Records</h1>
+
+          <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6 items-start">
+            {/* Patient Summary Card */}
+            <div className="bg-white rounded-xl shadow-md p-6">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="h-11 w-11 rounded-full bg-primary-light text-primary flex items-center justify-center font-semibold">
+                  IS
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-800">Imasha</h3>
+                  <span className="inline-block mt-0.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-green-100 text-green-700">
+                    Patient ID: #{mockPatient.patientId}
+                  </span>
+                </div>
               </div>
-              <div className="mt-4 lg:mt-0 flex space-x-3">
-                <div className="bg-primary-light text-primary px-4 py-2 rounded-lg">
-                  <span className="font-semibold">{records.filter(r => r.status === 'New').length}</span>
-                  <span className="ml-1">New Reports</span>
+
+              <dl className="space-y-3 text-sm mb-5">
+                <div className="flex items-center justify-between">
+                  <dt className="text-gray-500">Age</dt>
+                  <dd className="text-gray-800 font-medium">{mockPatient.age} Years</dd>
                 </div>
-                <div className="bg-gray-100 text-gray-600 px-4 py-2 rounded-lg">
-                  <span className="font-semibold">{records.length}</span>
-                  <span className="ml-1">Total Records</span>
+                <div className="flex items-center justify-between">
+                  <dt className="text-gray-500 flex items-center gap-1.5">
+                    <Droplet size={14} className="text-red-400" /> Blood Group
+                  </dt>
+                  <dd className="text-gray-800 font-medium">{mockPatient.bloodGroup}</dd>
                 </div>
+                <div className="flex items-center justify-between">
+                  <dt className="text-gray-500 flex items-center gap-1.5">
+                    <AlertTriangle size={14} className="text-red-400" /> Allergies
+                  </dt>
+                  <dd>
+                    {mockPatient.allergies.map((a) => (
+                      <span key={a} className="px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700">
+                        {a}
+                      </span>
+                    ))}
+                  </dd>
+                </div>
+                <div className="flex items-center justify-between">
+                  <dt className="text-gray-500">Last Visit</dt>
+                  <dd className="text-gray-800 font-medium">{mockPatient.lastVisit}</dd>
+                </div>
+              </dl>
+
+              <div className="border-t border-gray-100 pt-4 mb-5">
+                <p className="text-xs font-medium text-gray-500 mb-1">Recovery Progress · Health Score</p>
+                <HealthScoreSparkline data={healthScoreTrend} />
+              </div>
+
+              <div className="bg-gray-50 rounded-lg p-4">
+                <p className="text-xs font-medium text-gray-500 mb-1">Emergency Contact</p>
+                <p className="text-sm font-semibold text-gray-800">{mockPatient.emergencyContact.name}</p>
+                <p className="text-sm text-gray-500 mb-3">{mockPatient.emergencyContact.phone}</p>
+                <button className="w-full border border-gray-300 bg-white text-gray-700 text-sm font-medium py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                  View Full Profile
+                </button>
               </div>
             </div>
-          </div>
 
-          {/* Filters and Search */}
-          <div className="bg-white rounded-xl shadow-md p-6 mb-8">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              {/* Search */}
-              <div className="lg:col-span-1">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                  <input
-                    type="text"
-                    placeholder="Search records..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
+            {/* Records Panel */}
+            <div className="bg-white rounded-xl shadow-md p-6">
+              <div className="flex items-center gap-6 border-b border-gray-200 mb-5">
+                <button
+                  onClick={() => setActiveTab('lab')}
+                  className={`pb-3 text-sm font-semibold border-b-2 -mb-px transition-colors ${
+                    activeTab === 'lab'
+                      ? 'text-primary border-primary'
+                      : 'text-gray-400 border-transparent hover:text-gray-600'
+                  }`}
+                >
+                  Lab Reports
+                </button>
+                <button
+                  onClick={() => setActiveTab('history')}
+                  className={`pb-3 text-sm font-semibold border-b-2 -mb-px transition-colors ${
+                    activeTab === 'history'
+                      ? 'text-primary border-primary'
+                      : 'text-gray-400 border-transparent hover:text-gray-600'
+                  }`}
+                >
+                  History
+                </button>
+              </div>
+
+              {activeTab === 'lab' ? (
+                <div>
+                  <LabReportsGroup title="Normal Results" records={normalRecords} tone="normal" />
+                  <LabReportsGroup title="Abnormal Results" records={abnormalRecords} tone="abnormal" />
+                  {records.length === 0 && (
+                    <div className="text-center py-12">
+                      <FileText size={48} className="mx-auto text-gray-300 mb-3" />
+                      <p className="text-gray-400 text-sm">No lab reports available yet</p>
+                    </div>
+                  )}
                 </div>
-              </div>
-
-              {/* Type Filter */}
-              <div>
-                <select 
-                  value={filterType}
-                  onChange={(e) => setFilterType(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                >
-                  <option value="all">All Types</option>
-                  <option value="blood">Blood Test</option>
-                  <option value="xray">X-Ray</option>
-                  <option value="consultation">Consultation</option>
-                  <option value="ecg">ECG</option>
-                </select>
-              </div>
-
-              {/* Status Filter */}
-              <div>
-                <select 
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                >
-                  <option value="all">All Status</option>
-                  <option value="new">New Reports</option>
-                  <option value="read">Read Reports</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Records List */}
-          <div className="space-y-4">
-            {filteredRecords.map((record) => (
-              <div key={record.id} className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
-                <div className="p-6">
-                  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between">
-                    <div className="flex-1">
-                      {/* Header */}
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center space-x-3">
-                          <div className="p-3 bg-primary-light rounded-lg">
-                            <FileText className="text-primary" size={24} />
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-semibold text-gray-800">{record.type}</h3>
-                            {record.status === 'New' && (
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 mt-1">
-                                New
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Details */}
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-                        <div className="flex items-center space-x-2">
-                          <Calendar className="text-gray-400" size={16} />
-                          <span className="text-sm text-gray-600">Date: {record.date}</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <User className="text-gray-400" size={16} />
-                          <span className="text-sm text-gray-600">Doctor: {record.doctor}</span>
-                        </div>
-                      </div>
-
-                      {/* Diagnosis */}
-                      <div className="mb-4">
-                        <h4 className="font-medium text-gray-800 mb-2">Diagnosis</h4>
-                        <p className="text-gray-600">{record.diagnosis}</p>
-                      </div>
-
-                      {/* Notes */}
-                      {record.notes && (
-                        <div className="mb-4">
-                          <h4 className="font-medium text-gray-800 mb-2">Doctor's Notes</h4>
-                          <p className="text-gray-600">{record.notes}</p>
-                        </div>
-                      )}
-
-                      {/* Attachments */}
-                      {record.attachments && record.attachments.length > 0 && (
-                        <div className="mb-4">
-                          <h4 className="font-medium text-gray-800 mb-2">Attachments ({record.attachments.length})</h4>
-                          <div className="flex flex-wrap gap-2">
-                            {record.attachments.map((attachment, index) => (
-                              <div key={index} className="flex items-center space-x-2 bg-gray-100 px-3 py-2 rounded-lg">
-                                <FileText size={16} className="text-gray-600" />
-                                <span className="text-sm text-gray-700">{attachment}</span>
-                                <button className="text-primary hover:text-primary-dark">
-                                  <Download size={14} />
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                        <th className="pb-3 pr-4">Date</th>
+                        <th className="pb-3 pr-4">Doctor Name</th>
+                        <th className="pb-3 pr-4">Department</th>
+                        <th className="pb-3 pr-4">Status</th>
+                        <th className="pb-3 text-right">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {records.map((record) => (
+                        <tr key={record.id} className="border-t border-gray-100 hover:bg-gray-50/60">
+                          <td className="py-4 pr-4">
+                            <p className="text-sm font-semibold text-gray-800">{record.date}</p>
+                            <p className="text-xs text-gray-400">{record.type}</p>
+                          </td>
+                          <td className="py-4 pr-4 text-sm text-gray-700">{record.doctor}</td>
+                          <td className="py-4 pr-4 text-sm text-gray-700">{record.department}</td>
+                          <td className="py-4 pr-4">
+                            <AppointmentStatusBadge status={record.appointmentStatus} />
+                          </td>
+                          <td className="py-4 text-right relative">
+                            <button
+                              onClick={() => setOpenMenuId(openMenuId === record.id ? null : record.id)}
+                              className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400"
+                              aria-label="Row actions"
+                            >
+                              <MoreVertical size={18} />
+                            </button>
+                            {openMenuId === record.id && (
+                              <div className="absolute right-0 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10 text-left">
+                                <button className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                                  <FileText size={14} /> View details
+                                </button>
+                                <button className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                                  <Download size={14} /> Download
                                 </button>
                               </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex lg:flex-col space-x-3 lg:space-x-0 lg:space-y-3 mt-4 lg:mt-0 lg:ml-6">
-                      <button className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors flex items-center space-x-2">
-                        <Eye size={16} />
-                        <span>View</span>
-                      </button>
-                      <button className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors flex items-center space-x-2">
-                        <Download size={16} />
-                        <span>Download</span>
-                      </button>
-                    </div>
-                  </div>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-              </div>
-            ))}
-          </div>
+              )}
 
-          {filteredRecords.length === 0 && (
-            <div className="bg-white rounded-xl shadow-md p-12 text-center">
-              <FileText size={64} className="mx-auto text-gray-300 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-500 mb-2">No medical records found</h3>
-              <p className="text-gray-400">Try adjusting your search or filter criteria</p>
+              <div className="flex justify-end gap-3 mt-6">
+                <button
+                  onClick={handleShare}
+                  className="flex items-center gap-2 border border-gray-300 text-gray-700 px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+                >
+                  <Share2 size={16} />
+                  Share
+                </button>
+                <button
+                  onClick={handleDownloadPdf}
+                  className="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-primary-dark transition-colors"
+                >
+                  <Download size={16} />
+                  Download PDF
+                </button>
+              </div>
             </div>
-          )}
+          </div>
         </div>
       </main>
     </div>
