@@ -6,6 +6,41 @@ const DEFAULT_SETTINGS = {
   sessionTimeoutMinutes: 30,
 };
 
+const DEFAULT_ACCESS_CONTROL_RULES = [
+  {
+    id: 1,
+    name: "Edit Records",
+    description: "Ability to modify patient medical history and notes.",
+    admin: true,
+    doctor: true,
+    nurse: false,
+  },
+  {
+    id: 2,
+    name: "Process Refunds",
+    description: "Access to billing modules for financial adjustments.",
+    admin: true,
+    doctor: false,
+    nurse: false,
+  },
+  {
+    id: 3,
+    name: "Issue Prescriptions",
+    description: "Authorize and transmit digital prescriptions.",
+    admin: false,
+    doctor: true,
+    nurse: false,
+  },
+  {
+    id: 4,
+    name: "Manage Inventory",
+    description: "Update stock levels for medical supplies.",
+    admin: true,
+    doctor: true,
+    nurse: true,
+  },
+];
+
 // GET GLOBAL SYSTEM SETTINGS
 export const getGlobalSystemSettings = async (req, res) => {
   try {
@@ -148,6 +183,101 @@ export const updateGlobalSystemSettings = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to update global system settings",
+    });
+  }
+};
+
+// GET ACCESS CONTROL RULES
+export const getAccessControlRules = async (req, res) => {
+  try {
+    const db = await getDb();
+
+    const accessControl = await db
+      .collection("SystemSettings")
+      .findOne({ key: "accessControl" });
+
+    if (!accessControl) {
+      return res.status(200).json({
+        success: true,
+        configured: false,
+        data: DEFAULT_ACCESS_CONTROL_RULES,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      configured: true,
+      data: accessControl.rules || DEFAULT_ACCESS_CONTROL_RULES,
+    });
+  } catch (error) {
+    console.error("Get access control rules error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to retrieve access control rules",
+    });
+  }
+};
+
+// UPDATE ACCESS CONTROL RULES
+export const updateAccessControlRules = async (req, res) => {
+  try {
+    const db = await getDb();
+
+    const { rules } = req.body;
+
+    if (!Array.isArray(rules) || rules.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Access control rules must be a non-empty array",
+      });
+    }
+
+    // Validate every access control rule
+    for (const rule of rules) {
+      if (
+        typeof rule.id !== "number" ||
+        typeof rule.name !== "string" ||
+        typeof rule.description !== "string" ||
+        typeof rule.admin !== "boolean" ||
+        typeof rule.doctor !== "boolean" ||
+        typeof rule.nurse !== "boolean"
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid access control rule format",
+        });
+      }
+    }
+
+    const now = new Date();
+
+    await db.collection("SystemSettings").updateOne(
+      { key: "accessControl" },
+      {
+        $set: {
+          rules,
+          updatedAt: now,
+        },
+        $setOnInsert: {
+          key: "accessControl",
+          createdAt: now,
+        },
+      },
+      { upsert: true },
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Access control rules updated successfully",
+      data: rules,
+    });
+  } catch (error) {
+    console.error("Update access control rules error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update access control rules",
     });
   }
 };
