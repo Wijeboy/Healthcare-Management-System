@@ -23,6 +23,34 @@ const DOCTOR_NAV_ITEMS = [
   { icon: "notifications_active", label: "Clinical Notifications",  path: "/doctor/notifications" },
 ];
 
+const PATIENT_NAV_ITEMS = [
+  {
+    icon: "dashboard",
+    label: "Dashboard",
+    path: "/patient"
+  },
+  {
+    icon: "calendar_today",
+    label: "Appointments",
+    path: "/patient/appointments",
+  },
+  {
+    icon: "folder_shared",
+    label: "Records",
+    path: "/patient/medical-records"
+  },
+  {
+    icon: "medication",
+    label: "Prescriptions",
+    path: "/patient/prescriptions",
+  },
+  {
+    icon: "payments",
+    label: "Payments",
+    path: "/patient/payments",
+  },
+];
+
 export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -39,13 +67,19 @@ export default function Sidebar() {
   const currentPortalLabel = isDoctor ? "doctor" : isPatient ? "patient" : "admin";
   const currentPortalTitle = isDoctor ? "Doctor Portal" : isPatient ? "Patient Portal" : "Admin Portal";
 
-  const navItems = isDoctor ? DOCTOR_NAV_ITEMS : ADMIN_NAV_ITEMS;
-  const rootPath = isDoctor ? "/doctor" : "/admin";
+  const navItems = isDoctor ? DOCTOR_NAV_ITEMS : isPatient ? PATIENT_NAV_ITEMS : ADMIN_NAV_ITEMS;
+  const rootPath = isDoctor ? "/doctor" : isPatient ? "/patient" : "/admin";
   const brandLabel = currentPortalTitle;
 
   const bottomItems = isDoctor
     ? [
         { icon: "person",  label: "My Profile", path: "/doctor/profile" },
+        { icon: "logout",  label: "Logout",     path: "/login" },
+      ]
+    : isPatient
+    ? [
+        { icon: "person",  label: "My Profile", path: "/patient/profile" },
+        { icon: "help",    label: "Support",    path: "/patient/support" },
         { icon: "logout",  label: "Logout",     path: "/login" },
       ]
     : [
