@@ -1,281 +1,247 @@
-// src/pages/Notifications.jsx
+// src/pages/PatientPages/Notifications.jsx
 import React, { useState } from 'react';
-import { Bell, Calendar, FileText, CreditCard, AlertTriangle, CheckCircle, Trash2 } from 'lucide-react';
+import { 
+  Bell, 
+  CheckCheck, 
+  Filter, 
+  Calendar, 
+  Pill, 
+  Receipt, 
+  ShieldCheck, 
+  FlaskConical, 
+  Info, 
+  Activity,
+  CheckCircle2
+} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-const mockPatient = {
-  id: 'P001',
-  name: 'Imasha Perera',
-  email: 'imasha@example.com',
-  phone: '+94 77 123 4567',
-  dateOfBirth: '1995-06-15',
-  gender: 'Female',
-  address: 'Colombo, Sri Lanka',
-};
-
-const mockNotifications = [
+const initialNotifications = [
   {
-    id: '1',
+    id: 'n1',
     type: 'appointment',
-    title: 'Appointment Reminder',
-    message: 'Your appointment with Dr. Nimal Fernando is tomorrow at 10:00 AM',
-    timestamp: '2024-06-09T14:30:00Z',
-    isRead: false,
-    priority: 'high'
+    title: 'Upcoming Appointment',
+    time: 'Today, 9:30 AM',
+    message: 'Appointment with Dr. Aris today at 2 PM in the Main Cardiology Wing.',
+    read: false,
+    actionText: 'View Details',
+    actionRoute: '/patient/appointments'
   },
   {
-    id: '2',
-    type: 'report',
-    title: 'New Lab Results Available',
-    message: 'Your blood test results from June 5th are now available for review',
-    timestamp: '2024-06-08T09:15:00Z',
-    isRead: false,
-    priority: 'medium'
+    id: 'n2',
+    type: 'prescription',
+    title: 'Prescription Ready',
+    time: '2 hours ago',
+    message: 'Your prescription for Metformin is ready for pickup at Pharmacy B.',
+    read: false,
+    actionText: 'Find Pharmacy',
+    actionRoute: '/patient/prescriptions'
   },
   {
-    id: '3',
+    id: 'n3',
     type: 'payment',
-    title: 'Payment Due Soon',
-    message: 'Invoice #INV-2024-001 for Rs. 1,800 is due on June 15th',
-    timestamp: '2024-06-07T16:45:00Z',
-    isRead: true,
-    priority: 'medium'
+    title: 'Payment Successful',
+    time: 'Yesterday',
+    message: 'Payment for invoice #88291 successful. You can download your receipt now.',
+    read: false,
+    actionText: 'Download Receipt',
+    actionRoute: '/patient/payments'
   },
   {
-    id: '4',
+    id: 'n4',
     type: 'system',
-    title: 'System Maintenance',
-    message: 'Scheduled maintenance on June 12th from 2:00 AM to 4:00 AM',
-    timestamp: '2024-06-06T11:20:00Z',
-    isRead: true,
-    priority: 'low'
+    title: 'System Update',
+    time: '3 days ago',
+    message: 'The Medimate patient portal has been updated with new security features. Review the changes in Settings.',
+    read: true,
+    actionText: null,
+    actionRoute: null
   },
   {
-    id: '5',
-    type: 'appointment',
-    title: 'Appointment Confirmed',
-    message: 'Your appointment with Dr. Priya Silva has been confirmed for June 20th',
-    timestamp: '2024-06-05T13:10:00Z',
-    isRead: true,
-    priority: 'low'
-  },
-  {
-    id: '6',
-    type: 'emergency',
-    title: 'Emergency Contact Updated',
-    message: 'Your emergency contact information has been successfully updated',
-    timestamp: '2024-06-04T10:30:00Z',
-    isRead: true,
-    priority: 'medium'
+    id: 'n5',
+    type: 'lab',
+    title: 'Lab Results Posted',
+    time: 'Oct 12, 2023',
+    message: 'Your blood panel results from Oct 10 are now available for review.',
+    read: true,
+    actionText: 'View Results',
+    actionRoute: '/patient/medical-records'
   }
 ];
 
-const Notifications = () => {
-  const [notifications, setNotifications] = useState(mockNotifications);
-  const [filter, setFilter] = useState('all');
+export default function Notifications() {
+  const [notifications, setNotifications] = useState(initialNotifications);
+  const navigate = useNavigate();
 
-  const getNotificationIcon = (type) => {
-    switch (type) {
-      case 'appointment': return Calendar;
-      case 'payment': return CreditCard;
-      case 'report': return FileText;
-      case 'emergency': return AlertTriangle;
-      default: return Bell;
-    }
+  const handleMarkAllRead = () => {
+    setNotifications(notifications.map(n => ({ ...n, read: true })));
   };
 
-  const getNotificationColor = (type, priority) => {
-    if (priority === 'high') return 'border-l-red-500 bg-red-50';
-    if (type === 'appointment') return 'border-l-blue-500 bg-blue-50';
-    if (type === 'payment') return 'border-l-yellow-500 bg-yellow-50';
-    if (type === 'report') return 'border-l-green-500 bg-green-50';
-    if (type === 'emergency') return 'border-l-red-500 bg-red-50';
-    return 'border-l-gray-500 bg-gray-50';
+  const handleMarkRead = (id) => {
+    setNotifications(notifications.map(n => n.id === id ? { ...n, read: true } : n));
   };
 
-  const getTimeAgo = (timestamp) => {
-    const now = new Date();
-    const past = new Date(timestamp);
-    const diffInHours = Math.floor((now.getTime() - past.getTime()) / (1000 * 60 * 60));
-    
-    if (diffInHours < 1) return 'Just now';
-    if (diffInHours < 24) return `${diffInHours}h ago`;
-    const diffInDays = Math.floor(diffInHours / 24);
-    if (diffInDays < 7) return `${diffInDays}d ago`;
-    return past.toLocaleDateString();
-  };
-
-  const markAsRead = (id) => {
-    setNotifications(prev => 
-      prev.map(notif => 
-        notif.id === id ? { ...notif, isRead: true } : notif
-      )
-    );
-  };
-
-  const deleteNotification = (id) => {
-    setNotifications(prev => prev.filter(notif => notif.id !== id));
-  };
-
-  const markAllAsRead = () => {
-    setNotifications(prev => 
-      prev.map(notif => ({ ...notif, isRead: true }))
-    );
-  };
-
-  const filteredNotifications = notifications.filter(notif => {
-    if (filter === 'unread') return !notif.isRead;
-    if (filter === 'all') return true;
-    return notif.type === filter;
-  });
-
-  const unreadCount = notifications.filter(notif => !notif.isRead).length;
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <section className="p-6 space-y-8">
-        <div className="max-w-7xl mx-auto">
-          {/* Page Header */}
-          <div className="bg-white rounded-xl shadow-md p-6 mb-8">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center">
-                  <Bell size={32} className="mr-3 text-primary" />
-                  Notifications
-                  {unreadCount > 0 && (
-                    <span className="ml-3 bg-danger text-white text-sm px-3 py-1 rounded-full">
-                      {unreadCount} new
-                    </span>
-                  )}
-                </h1>
-                <p className="text-gray-600">Stay updated with your healthcare information</p>
+    <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-6">
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-bold text-[#003f87] tracking-tight">
+          Support
+        </h1>
+      </div>
+
+      {/* Title & Actions Row */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Notifications</h2>
+          <p className="text-xs text-gray-500 mt-1">Stay updated with your healthcare journey.</p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleMarkAllRead}
+            className="px-4 py-2 border border-gray-300 rounded-xl text-xs font-bold text-gray-700 hover:bg-gray-50 flex items-center gap-1.5 transition-all cursor-pointer"
+          >
+            <CheckCheck size={14} />
+            <span>Mark all as read</span>
+          </button>
+          <button className="px-4 py-2 border border-gray-300 rounded-xl text-xs font-bold text-gray-700 hover:bg-gray-50 flex items-center gap-1.5 transition-all">
+            <Filter size={14} />
+            <span>Filter</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Main Layout Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left Column: Activity Overview & Promo Banner (4 cols) */}
+        <div className="lg:col-span-4 space-y-5">
+          {/* Activity Overview Card */}
+          <div className="bg-white rounded-2xl border border-gray-200/80 p-5 shadow-xs space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-gray-900">Activity Overview</h3>
+              <Activity size={18} className="text-[#1d70f5]" />
+            </div>
+
+            <div className="space-y-2 text-xs">
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                <span className="font-semibold text-gray-700">Unread Notifications</span>
+                <span className="w-6 h-6 rounded-full bg-[#1d70f5] text-white flex items-center justify-center font-extrabold text-[11px]">
+                  {unreadCount}
+                </span>
               </div>
-              {unreadCount > 0 && (
-                <button
-                  onClick={markAllAsRead}
-                  className="mt-4 lg:mt-0 bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-dark transition-colors flex items-center space-x-2"
-                >
-                  <CheckCircle size={20} />
-                  <span>Mark All as Read</span>
-                </button>
-              )}
+
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                <span className="font-semibold text-gray-700">Upcoming Today</span>
+                <span className="w-6 h-6 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center font-extrabold text-[11px]">
+                  1
+                </span>
+              </div>
+            </div>
+
+            {/* Secure Data Encryption Box */}
+            <div className="bg-blue-50/70 p-4 rounded-xl border border-blue-100 text-xs space-y-1">
+              <div className="font-bold text-[#1d70f5] uppercase text-[10px] tracking-wider flex items-center gap-1">
+                <ShieldCheck size={14} /> Secure Data Encryption
+              </div>
+              <p className="text-gray-600 text-[11px] leading-relaxed">
+                All your notification data is encrypted and HIPAA compliant.
+              </p>
             </div>
           </div>
 
-          {/* Filter Tabs */}
-          <div className="bg-white rounded-xl shadow-md p-6 mb-8">
-            <div className="flex flex-wrap gap-2">
-              {[
-                { key: 'all', label: 'All', count: notifications.length },
-                { key: 'unread', label: 'Unread', count: unreadCount },
-                { key: 'appointment', label: 'Appointments', count: notifications.filter(n => n.type === 'appointment').length },
-                { key: 'report', label: 'Reports', count: notifications.filter(n => n.type === 'report').length },
-                { key: 'payment', label: 'Payments', count: notifications.filter(n => n.type === 'payment').length },
-                { key: 'system', label: 'System', count: notifications.filter(n => n.type === 'system').length }
-              ].map((tab) => (
-                <button
-                  key={tab.key}
-                  onClick={() => setFilter(tab.key)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2 ${
-                    filter === tab.key
-                      ? 'bg-primary text-white'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                >
-                  <span>{tab.label}</span>
-                  <span className={`px-2 py-1 rounded-full text-xs ${
-                    filter === tab.key ? 'bg-white text-primary' : 'bg-gray-200 text-gray-600'
-                  }`}>
-                    {tab.count}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Notifications List */}
-          <div className="space-y-4">
-            {filteredNotifications.length === 0 ? (
-              <div className="bg-white rounded-xl shadow-md p-12 text-center">
-                <Bell size={64} className="mx-auto text-gray-300 mb-4" />
-                <h3 className="text-xl font-semibold text-gray-500 mb-2">No notifications found</h3>
-                <p className="text-gray-400">You're all caught up!</p>
-              </div>
-            ) : (
-              filteredNotifications.map((notification) => {
-                const IconComponent = getNotificationIcon(notification.type);
-                
-                return (
-                  <div
-                    key={notification.id}
-                    className={`bg-white rounded-xl shadow-md border-l-4 overflow-hidden transition-all duration-200 ${
-                      getNotificationColor(notification.type, notification.priority)
-                    } ${!notification.isRead ? 'ring-2 ring-blue-200' : ''}`}
-                  >
-                    <div className="p-6">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start space-x-4 flex-1">
-                          <div className={`p-3 rounded-lg ${
-                            notification.priority === 'high' ? 'bg-red-100' :
-                            notification.type === 'appointment' ? 'bg-blue-100' :
-                            notification.type === 'payment' ? 'bg-yellow-100' :
-                            notification.type === 'report' ? 'bg-green-100' : 'bg-gray-100'
-                          }`}>
-                            <IconComponent size={24} className={`${
-                              notification.priority === 'high' ? 'text-red-600' :
-                              notification.type === 'appointment' ? 'text-blue-600' :
-                              notification.type === 'payment' ? 'text-yellow-600' :
-                              notification.type === 'report' ? 'text-green-600' : 'text-gray-600'
-                            }`} />
-                          </div>
-                          
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center space-x-2 mb-1">
-                              <h3 className="text-lg font-semibold text-gray-800">
-                                {notification.title}
-                              </h3>
-                              {!notification.isRead && (
-                                <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                              )}
-                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                notification.priority === 'high' ? 'bg-red-100 text-red-800' :
-                                notification.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                                'bg-gray-100 text-gray-600'
-                              }`}>
-                                {notification.priority}
-                              </span>
-                            </div>
-                            <p className="text-gray-600 mb-3">{notification.message}</p>
-                            <p className="text-sm text-gray-500">{getTimeAgo(notification.timestamp)}</p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center space-x-2 ml-4">
-                          {!notification.isRead && (
-                            <button
-                              onClick={() => markAsRead(notification.id)}
-                              className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
-                              title="Mark as read"
-                            >
-                              <CheckCircle size={18} />
-                            </button>
-                          )}
-                          <button
-                            onClick={() => deleteNotification(notification.id)}
-                            className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
-                            title="Delete notification"
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
-            )}
+          {/* Medical Image Graphic Card */}
+          <div className="rounded-2xl overflow-hidden relative shadow-xs group min-h-[160px] flex items-end p-4">
+            <img
+              src="https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&q=80&w=600"
+              alt="Medical Lab"
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+            <p className="relative z-10 text-white font-bold text-sm">
+              Your health is our priority.
+            </p>
           </div>
         </div>
-    </section>
-  );
-};
 
-export default Notifications;
+        {/* Right Column: Notification Feed (8 cols) */}
+        <div className="lg:col-span-8 space-y-3">
+          {notifications.map((n) => {
+            const getIcon = () => {
+              switch (n.type) {
+                case 'appointment': return <Calendar size={18} className="text-[#1d70f5]" />;
+                case 'prescription': return <Pill size={18} className="text-red-500" />;
+                case 'payment': return <Receipt size={18} className="text-green-600" />;
+                case 'lab': return <FlaskConical size={18} className="text-purple-600" />;
+                default: return <Info size={18} className="text-gray-500" />;
+              }
+            };
+
+            const getIconBg = () => {
+              switch (n.type) {
+                case 'appointment': return 'bg-blue-50';
+                case 'prescription': return 'bg-red-50';
+                case 'payment': return 'bg-green-50';
+                case 'lab': return 'bg-purple-50';
+                default: return 'bg-gray-100';
+              }
+            };
+
+            return (
+              <div
+                key={n.id}
+                className={`bg-white rounded-2xl border ${
+                  !n.read ? 'border-blue-200 bg-blue-50/10' : 'border-gray-200/80'
+                } p-5 shadow-xs flex items-start gap-4 hover:border-blue-300 transition-all relative`}
+              >
+                {!n.read && (
+                  <span className="w-2 h-2 rounded-full bg-[#1d70f5] absolute left-3 top-6" />
+                )}
+
+                <div className={`w-10 h-10 rounded-xl ${getIconBg()} flex items-center justify-center shrink-0`}>
+                  {getIcon()}
+                </div>
+
+                <div className="flex-1 text-xs space-y-1">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-bold text-gray-900 text-sm">{n.title}</h4>
+                    <span className="text-[11px] text-gray-400 font-medium">{n.time}</span>
+                  </div>
+
+                  <p className="text-gray-600 leading-relaxed">{n.message}</p>
+
+                  <div className="pt-2 flex items-center gap-4">
+                    {n.actionText && (
+                      <button
+                        onClick={() => navigate(n.actionRoute)}
+                        className="text-[#1d70f5] font-bold hover:underline cursor-pointer"
+                      >
+                        {n.actionText}
+                      </button>
+                    )}
+                    {!n.read && (
+                      <button
+                        onClick={() => handleMarkRead(n.id)}
+                        className="text-gray-400 hover:text-gray-600 font-medium"
+                      >
+                        Mark as read
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Load Previous Notifications Button */}
+          <div className="text-center pt-3">
+            <button className="px-6 py-2.5 bg-blue-50 hover:bg-blue-100 text-[#1d70f5] font-bold text-xs rounded-xl transition-all border border-blue-100 cursor-pointer">
+              Load Previous Notifications
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
