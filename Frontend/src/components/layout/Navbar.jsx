@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import NotificationPanel from "../admin-components/dashboard/NotificationPanel";
 
 export default function Navbar() {
@@ -8,6 +8,7 @@ export default function Navbar() {
   const [role, setRole] = useState("Admin");
   const notifRef = useRef(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const savedRole = localStorage.getItem("hmsRole");
@@ -78,7 +79,13 @@ export default function Navbar() {
         <div className="relative" ref={notifRef}>
           <button
             className="p-2 rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors active:scale-95 relative"
-            onClick={() => setShowNotifications(!showNotifications)}
+            onClick={() => {
+              if (role === "Patient") {
+                navigate("/patient/notifications");
+                return;
+              }
+              setShowNotifications(!showNotifications);
+            }}
           >
             <span className="material-symbols-outlined">notifications</span>
             {/* Badge */}
@@ -92,7 +99,7 @@ export default function Navbar() {
 
         {/* Settings */}
         <Link
-          to={currentSetting.route}
+          to={role === "Patient" ? "/patient/settings" : currentSetting.route}
           title={currentSetting.label}
           className="p-2 rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors active:scale-95"
           aria-label={currentSetting.label}

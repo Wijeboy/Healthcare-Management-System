@@ -24,6 +24,15 @@ import RecordsUploadMain from "./pages/AdminPages/RecordsUploadMain";
 import FinancialBillingReports from "./pages/AdminPages/FinancialBillingReports";
 import DoctorDashboard from "./pages/DoctorDashboard";
 import PatientDashboard from "./pages/PatientDashboard";
+import PatientAppointments from "./pages/PatientPages/Appointments";
+import PatientMedicalRecords from "./pages/PatientPages/MedicalRecords";
+import PatientPrescriptions from "./pages/PatientPages/Prescriptions";
+import PatientPayments from "./pages/PatientPages/Payments";
+import PatientProfile from "./pages/PatientPages/Profile";
+import PatientSettings from "./pages/PatientPages/Settings";
+import PatientSupport from "./pages/PatientPages/Support";
+import PatientNotifications from "./pages/PatientPages/Notifications";
+import PatientBookAppointment from "./pages/PatientPages/BookAppointment";
 
 // --- Doctor Portal pages (all doctor-only content lives under DoctorPages/) ---
 import DoctorDashboardPage from "./pages/DoctorDashboard";
@@ -144,49 +153,27 @@ function App() {
         path="/patient"
         element={
           <RequireRole role="Patient">
-            <PatientDashboard />
+            <DashboardLayout />
           </RequireRole>
         }
-      />
+      >
+        <Route index element={<PatientDashboard />} />
+        <Route path="dashboard" element={<PatientDashboard />} />
+        <Route path="appointments" element={<PatientAppointments />} />
+        <Route path="medical-records" element={<PatientMedicalRecords />} />
+        <Route path="prescriptions" element={<PatientPrescriptions />} />
+        <Route path="payments" element={<PatientPayments />} />
+        <Route path="profile" element={<PatientProfile />} />
+        <Route path="settings" element={<PatientSettings />} />
+        <Route path="support" element={<PatientSupport />} />
+        <Route path="notifications" element={<PatientNotifications />} />
+        <Route path="book-appointment" element={<PatientBookAppointment />} />
+      </Route>
 
       {/* Legacy /dashboard redirects for backward compatibility */}
-      <Route path="/dashboard" element={<Navigate to="/admin" replace />} />
-      <Route
-        path="/dashboard/admin"
-        element={<Navigate to="/admin" replace />}
-      />
-      <Route
-        path="/dashboard/doctor"
-        element={<Navigate to="/doctor" replace />}
-      />
-      <Route
-        path="/dashboard/patient"
-        element={<Navigate to="/patient" replace />}
-      />
-      <Route
-        path="/dashboard/doctors-management"
-        element={<Navigate to="/admin/doctors" replace />}
-      />
-      <Route
-        path="/dashboard/patients-management"
-        element={<Navigate to="/admin/patients" replace />}
-      />
-      <Route
-        path="/dashboard/staff-management"
-        element={<Navigate to="/admin/staff" replace />}
-      />
-      <Route
-        path="/dashboard/user-management"
-        element={<Navigate to="/admin/users" replace />}
-      />
-      <Route
-        path="/dashboard/system-settings"
-        element={<Navigate to="/admin/settings" replace />}
-      />
-      <Route
-        path="/dashboard/reports-analytics"
-        element={<Navigate to="/admin/reports" replace />}
-      />
+      <Route path="dashboard" element={<Navigate to="/patient" replace />} />
+      
+      
 
       {/* Default redirect */}
       <Route path="*" element={<Navigate to="/login" replace />} />
