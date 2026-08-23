@@ -57,6 +57,7 @@ import reportRoutes from "./routes/admin/reportRoutes.js";
 import settingsRoutes from "./routes/admin/settingsRoutes.js";
 import systemSettingsRoutes from "./routes/admin/systemSettingsRoutes.js";
 import contactRoutes from "./routes/admin/contactRoutes.js";
+import billingRoutes from "./routes/admin/billingRoutes.js";
 
 // Doctor Module Routes imports
 import doctorSelfRoutes from "./routes/doctor/index.js";
@@ -89,6 +90,14 @@ app.use(
 );
 
 app.use("/api/admin/contact", verifyToken, requireRole("Admin"), contactRoutes);
+
+// Financial & Billing Routes
+app.use(
+  "/api/admin/billing",
+  verifyToken,
+  requireRole("Admin"),
+  billingRoutes,
+);
 
 // Register Protected Doctor Module Routes (Requires valid JWT + Doctor role)
 app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
