@@ -1,425 +1,243 @@
-// src/pages/Support.jsx
+// src/pages/PatientPages/Support.jsx
 import React, { useState } from 'react';
-import { Phone, Mail, MessageCircle, Clock, HelpCircle, FileText, Send, ChevronDown, ChevronUp } from 'lucide-react';
+import { 
+  PhoneCall, 
+  Lock, 
+  Send, 
+  Headphones, 
+  CreditCard, 
+  Wrench, 
+  ChevronDown, 
+  ChevronUp, 
+  CheckCircle2,
+  Mail,
+  Clock,
+  Phone
+} from 'lucide-react';
 
-const mockPatient = {
-  id: 'P001',
-  name: 'Imasha Perera',
-  email: 'imasha@example.com',
-  phone: '+94 77 123 4567',
-  dateOfBirth: '1995-06-15',
-  gender: 'Female',
-  address: 'Colombo, Sri Lanka',
-};
-
-const mockFAQs = [
+const faqs = [
   {
-    id: '1',
-    question: 'How do I book an appointment?',
-    answer: 'You can book an appointment by clicking on the "Book Appointment" button in the dashboard or navigating to the Appointments page. Select your preferred doctor, date, and time slot.',
-    category: 'Appointments'
+    id: 'faq1',
+    question: 'How do I view my payment history?',
+    answer: 'Navigate to Payments in the sidebar to review your billing statements, invoices, and payment history.'
   },
   {
-    id: '2',
-    question: 'Can I cancel or reschedule my appointment?',
-    answer: 'Yes, you can cancel or reschedule your appointment up to 24 hours before the scheduled time. Go to your appointments page and select the appointment you want to modify.',
-    category: 'Appointments'
+    id: 'faq2',
+    question: 'Where are my lab results?',
+    answer: 'Your lab results are posted under Records -> Lab Reports tab as soon as they are released by the pathology clinic.'
   },
   {
-    id: '3',
-    question: 'How do I access my medical records?',
-    answer: 'Your medical records are available in the Medical Records section. You can view, download, and print your test results, reports, and consultation notes.',
-    category: 'Medical Records'
+    id: 'faq3',
+    question: 'Can I message my doctor?',
+    answer: 'Yes, you can send secure clinical inquiries through this support portal or request a tele-consultation appointment.'
   },
   {
-    id: '4',
-    question: 'How can I make payments online?',
-    answer: 'Go to the Payments section to view your bills and make payments. We accept credit cards, debit cards, and bank transfers. All transactions are secure and encrypted.',
-    category: 'Payments'
-  },
-  {
-    id: '5',
-    question: 'What should I do in case of emergency?',
-    answer: 'For medical emergencies, please call our 24/7 emergency hotline at +94 11 123 4567 or visit the nearest emergency room. You can also use the Emergency Call button in the sidebar.',
-    category: 'Emergency'
-  },
-  {
-    id: '6',
-    question: 'How do I update my personal information?',
-    answer: 'You can update your personal information by going to your Profile page. Click on the Edit button and update your details. Make sure to save the changes.',
-    category: 'Account'
+    id: 'faq4',
+    question: 'Resetting my password?',
+    answer: 'You can update your security credentials under Settings -> Security, or click "Forgot Password" on the login screen.'
   }
 ];
 
-const Support = () => {
-  const [activeTab, setActiveTab] = useState('contact');
-  const [expandedFAQ, setExpandedFAQ] = useState(null);
-  const [feedbackForm, setFeedbackForm] = useState({
-    subject: '',
-    category: '',
-    message: '',
-    priority: 'medium'
+export default function Support() {
+  const [formData, setFormData] = useState({
+    name: 'asmith',
+    email: 'asmith@medcore.health',
+    message: ''
   });
+  const [submitted, setSubmitted] = useState(false);
+  const [openFaq, setOpenFaq] = useState('faq1');
 
-  const toggleFAQ = (id) => {
-    setExpandedFAQ(expandedFAQ === id ? null : id);
-  };
-
-  const handleFeedbackSubmit = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle feedback submission
-    console.log('Feedback submitted:', feedbackForm);
-    // Reset form
-    setFeedbackForm({
-      subject: '',
-      category: '',
-      message: '',
-      priority: 'medium'
-    });
-    alert('Thank you for your feedback! We will get back to you soon.');
+    setSubmitted(true);
+    setTimeout(() => {
+      setSubmitted(false);
+      setFormData({ ...formData, message: '' });
+    }, 3000);
   };
-
-  const faqCategories = ['All', ...Array.from(new Set(mockFAQs.map(faq => faq.category)))];
-  const [selectedCategory, setSelectedCategory] = useState('All');
-
-  const filteredFAQs = selectedCategory === 'All' 
-    ? mockFAQs 
-    : mockFAQs.filter(faq => faq.category === selectedCategory);
 
   return (
-    <section className="p-6 space-y-8">
-        <div className="max-w-7xl mx-auto">
-          {/* Page Header */}
-          <div className="bg-white rounded-xl shadow-md p-6 mb-8">
-            <div className="text-center">
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">Support Center</h1>
-              <p className="text-gray-600">Get help and support for your healthcare needs</p>
+    <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-6">
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-bold text-[#003f87] tracking-tight">
+          Support
+        </h1>
+      </div>
+
+      {/* Subheader Title */}
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900">Contact Support</h2>
+        <p className="text-xs text-gray-500 mt-1">
+          We're here to help you manage your health and answer any questions you may have.
+        </p>
+      </div>
+
+      {/* Urgent Medical Needs Red Alert Banner */}
+      <div className="bg-red-50 border-l-4 border-red-500 rounded-2xl p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-start gap-3">
+          <div className="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-extrabold text-base shrink-0 mt-0.5">
+            *
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-red-900">Urgent Medical Needs</h3>
+            <p className="text-xs text-red-700 mt-0.5 max-w-xl leading-relaxed">
+              If you are experiencing a life-threatening emergency, please call 911 immediately or visit the nearest emergency room.
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => alert("Connecting to 24/7 Nurse Hotline: 1-800-CARE-CLN")}
+          className="bg-[#b91c1c] hover:bg-red-800 text-white font-bold text-xs px-5 py-3 rounded-xl flex items-center justify-center gap-2 shadow-xs transition-all shrink-0 cursor-pointer"
+        >
+          <PhoneCall size={16} />
+          <span>24/7 Nurse Hotline</span>
+        </button>
+      </div>
+
+      {/* Main Grid Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left Column: Secure Message Form (7 cols) */}
+        <div className="lg:col-span-7 bg-white rounded-2xl border border-gray-200/80 p-6 shadow-xs space-y-5">
+          <div className="flex items-center gap-2">
+            <Lock size={18} className="text-[#003f87]" />
+            <h3 className="text-base font-bold text-gray-900">Secure Message</h3>
+          </div>
+
+          {submitted && (
+            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-xs font-bold flex items-center gap-2 animate-fade-in">
+              <CheckCircle2 size={16} />
+              <span>Message transmitted securely! Our clinical team will respond shortly.</span>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">Name</label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full px-3.5 py-2.5 bg-gray-50/80 border border-gray-200 rounded-xl text-xs font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#003f87]/20 focus:border-[#003f87]"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">Email Address</label>
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="w-full px-3.5 py-2.5 bg-gray-50/80 border border-gray-200 rounded-xl text-xs font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#003f87]/20 focus:border-[#003f87]"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-gray-700 mb-1">Message</label>
+              <textarea
+                rows={5}
+                value={formData.message}
+                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                placeholder="Please describe your needs in detail..."
+                className="w-full p-3.5 bg-gray-50/80 border border-gray-200 rounded-xl text-xs font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#003f87]/20 focus:border-[#003f87]"
+                required
+              />
+            </div>
+
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <span className="text-[11px] text-gray-400 font-medium flex items-center gap-1">
+                <Lock size={12} /> HIPAA Compliant Secure Channel
+              </span>
+              <button
+                type="submit"
+                className="w-full sm:w-auto bg-[#003f87] hover:bg-blue-900 text-white font-bold py-2.5 px-6 rounded-xl text-xs flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"
+              >
+                <Send size={15} />
+                <span>Send Securely</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        {/* Right Column: Contact Cards & Quick Answers (5 cols) */}
+        <div className="lg:col-span-5 space-y-6">
+          {/* 3 Contact Cards */}
+          <div className="space-y-3">
+            {/* Card 1: Clinical Support */}
+            <div className="bg-white rounded-2xl border border-gray-200/80 p-4 shadow-xs flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-blue-50 text-[#1d70f5] flex items-center justify-center shrink-0">
+                <Headphones size={18} />
+              </div>
+              <div className="text-xs space-y-1">
+                <h4 className="font-bold text-gray-900">Clinical Support</h4>
+                <p className="text-gray-600 flex items-center gap-1.5"><Phone size={12} className="text-gray-400" /> 1-800-CARE-CLN</p>
+                <p className="text-gray-600 flex items-center gap-1.5"><Mail size={12} className="text-gray-400" /> nurse@carepulse.com</p>
+                <p className="text-gray-400 flex items-center gap-1.5 text-[11px]"><Clock size={12} /> Mon-Fri: 8AM - 8PM</p>
+              </div>
+            </div>
+
+            {/* Card 2: Billing Inquiries */}
+            <div className="bg-white rounded-2xl border border-gray-200/80 p-4 shadow-xs flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-green-50 text-green-600 flex items-center justify-center shrink-0">
+                <CreditCard size={18} />
+              </div>
+              <div className="text-xs space-y-1">
+                <h4 className="font-bold text-gray-900">Billing Inquiries</h4>
+                <p className="text-gray-600 flex items-center gap-1.5"><Phone size={12} className="text-gray-400" /> 1-800-CARE-BILL</p>
+                <p className="text-gray-600 flex items-center gap-1.5"><Mail size={12} className="text-gray-400" /> billing@carepulse.com</p>
+                <p className="text-gray-400 flex items-center gap-1.5 text-[11px]"><Clock size={12} /> Mon-Fri: 9AM - 5PM</p>
+              </div>
+            </div>
+
+            {/* Card 3: Technical Support */}
+            <div className="bg-white rounded-2xl border border-gray-200/80 p-4 shadow-xs flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+                <Wrench size={18} />
+              </div>
+              <div className="text-xs space-y-1">
+                <h4 className="font-bold text-gray-900">Technical Support</h4>
+                <p className="text-gray-600 flex items-center gap-1.5"><Phone size={12} className="text-gray-400" /> 1-800-CARE-TECH</p>
+                <p className="text-gray-600 flex items-center gap-1.5"><Mail size={12} className="text-gray-400" /> support@carepulse.com</p>
+                <p className="text-gray-400 flex items-center gap-1.5 text-[11px]"><Clock size={12} /> 24/7 Availability</p>
+              </div>
             </div>
           </div>
 
-          {/* Emergency Contact Banner */}
-          <div className="bg-danger rounded-xl shadow-md p-6 mb-8 text-white">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="p-3 bg-white/20 rounded-lg">
-                  <Phone className="text-white" size={24} />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold">Emergency Hotline</h3>
-                  <p className="text-red-100">24/7 Emergency Support</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-2xl font-bold">+94 11 123 4567</div>
-                <p className="text-red-100">Available 24/7</p>
-              </div>
-            </div>
-          </div>
+          {/* Quick Answers Accordion Box */}
+          <div className="bg-blue-50/50 rounded-2xl border border-blue-100 p-5 space-y-3">
+            <h3 className="text-base font-bold text-gray-900">Quick Answers</h3>
 
-          {/* Tab Navigation */}
-          <div className="bg-white rounded-xl shadow-md mb-8">
-            <div className="border-b border-gray-200">
-              <nav className="flex space-x-8 px-6">
-                {[
-                  { key: 'contact', label: 'Contact Us', icon: Phone },
-                  { key: 'faq', label: 'FAQ', icon: HelpCircle },
-                  { key: 'feedback', label: 'Feedback', icon: MessageCircle }
-                ].map((tab) => (
-                  <button
-                    key={tab.key}
-                    onClick={() => setActiveTab(tab.key)}
-                    className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-medium text-sm ${
-                      activeTab === tab.key
-                        ? 'border-primary text-primary'
-                        : 'border-transparent text-gray-500 hover:text-gray-700'
-                    }`}
-                  >
-                    <tab.icon size={20} />
-                    <span>{tab.label}</span>
-                  </button>
-                ))}
-              </nav>
-            </div>
-
-            <div className="p-6">
-              {/* Contact Us Tab */}
-              {activeTab === 'contact' && (
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-800 mb-6">Get in Touch</h3>
-                  
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {/* Contact Methods */}
-                    <div className="space-y-6">
-                      <div className="border border-gray-200 rounded-lg p-6">
-                        <div className="flex items-center space-x-4 mb-4">
-                          <div className="p-3 bg-primary-light rounded-lg">
-                            <Phone className="text-primary" size={24} />
-                          </div>
-                          <div>
-                            <h4 className="font-semibold text-gray-800">Phone Support</h4>
-                            <p className="text-sm text-gray-600">Speak with our support team</p>
-                          </div>
-                        </div>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">General Inquiries:</span>
-                            <span className="font-medium">+94 11 234 5678</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Appointments:</span>
-                            <span className="font-medium">+94 11 234 5679</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Billing:</span>
-                            <span className="font-medium">+94 11 234 5680</span>
-                          </div>
-                        </div>
+            <div className="space-y-2">
+              {faqs.map((faq) => {
+                const isOpen = openFaq === faq.id;
+                return (
+                  <div key={faq.id} className="bg-white rounded-xl border border-gray-200/70 overflow-hidden text-xs">
+                    <button
+                      type="button"
+                      onClick={() => setOpenFaq(isOpen ? '' : faq.id)}
+                      className="w-full p-3 font-bold text-gray-800 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
+                    >
+                      <span>{faq.question}</span>
+                      {isOpen ? <ChevronUp size={16} className="text-gray-400 shrink-0" /> : <ChevronDown size={16} className="text-gray-400 shrink-0" />}
+                    </button>
+                    {isOpen && (
+                      <div className="px-3 pb-3 pt-1 text-gray-600 text-[11px] leading-relaxed border-t border-gray-100">
+                        {faq.answer}
                       </div>
-
-                      <div className="border border-gray-200 rounded-lg p-6">
-                        <div className="flex items-center space-x-4 mb-4">
-                          <div className="p-3 bg-blue-100 rounded-lg">
-                            <Mail className="text-blue-600" size={24} />
-                          </div>
-                          <div>
-                            <h4 className="font-semibold text-gray-800">Email Support</h4>
-                            <p className="text-sm text-gray-600">Send us your questions</p>
-                          </div>
-                        </div>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">General:</span>
-                            <span className="font-medium">support@medimate.lk</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Technical:</span>
-                            <span className="font-medium">tech@medimate.lk</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Billing:</span>
-                            <span className="font-medium">billing@medimate.lk</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="border border-gray-200 rounded-lg p-6">
-                        <div className="flex items-center space-x-4 mb-4">
-                          <div className="p-3 bg-green-100 rounded-lg">
-                            <Clock className="text-green-600" size={24} />
-                          </div>
-                          <div>
-                            <h4 className="font-semibold text-gray-800">Support Hours</h4>
-                            <p className="text-sm text-gray-600">When we're available</p>
-                          </div>
-                        </div>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Monday - Friday:</span>
-                            <span className="font-medium">8:00 AM - 8:00 PM</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Saturday:</span>
-                            <span className="font-medium">9:00 AM - 5:00 PM</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Sunday:</span>
-                            <span className="font-medium">Emergency Only</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Quick Actions */}
-                    <div className="space-y-6">
-                      <div>
-                        <h4 className="font-semibold text-gray-800 mb-4">Quick Actions</h4>
-                        <div className="space-y-3">
-                          <button className="w-full bg-primary text-white p-4 rounded-lg hover:bg-primary-dark transition-colors flex items-center space-x-3">
-                            <Phone size={20} />
-                            <span>Call Support Now</span>
-                          </button>
-                          <button className="w-full bg-green-600 text-white p-4 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-3">
-                            <MessageCircle size={20} />
-                            <span>Start Live Chat</span>
-                          </button>
-                          <button className="w-full bg-gray-100 text-gray-700 p-4 rounded-lg hover:bg-gray-200 transition-colors flex items-center space-x-3">
-                            <Mail size={20} />
-                            <span>Send Email</span>
-                          </button>
-                        </div>
-                      </div>
-
-                      <div>
-                        <h4 className="font-semibold text-gray-800 mb-4">Self-Service</h4>
-                        <div className="space-y-3">
-                          <button className="w-full border border-gray-300 p-4 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              <FileText size={20} className="text-gray-600" />
-                              <span>User Guide</span>
-                            </div>
-                            <span className="text-sm text-gray-500">PDF Download</span>
-                          </button>
-                          <button className="w-full border border-gray-300 p-4 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              <HelpCircle size={20} className="text-gray-600" />
-                              <span>Video Tutorials</span>
-                            </div>
-                            <span className="text-sm text-gray-500">YouTube</span>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
+                    )}
                   </div>
-                </div>
-              )}
-
-              {/* FAQ Tab */}
-              {activeTab === 'faq' && (
-                <div>
-                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4 lg:mb-0">Frequently Asked Questions</h3>
-                    <div className="flex space-x-2">
-                      {faqCategories.map((category) => (
-                        <button
-                          key={category}
-                          onClick={() => setSelectedCategory(category)}
-                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                            selectedCategory === category
-                              ? 'bg-primary text-white'
-                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                          }`}
-                        >
-                          {category}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    {filteredFAQs.map((faq) => (
-                      <div key={faq.id} className="border border-gray-200 rounded-lg">
-                        <button
-                          onClick={() => toggleFAQ(faq.id)}
-                          className="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
-                        >
-                          <div className="flex items-center space-x-3">
-                            <span className="text-sm text-primary bg-primary-light px-2 py-1 rounded">
-                              {faq.category}
-                            </span>
-                            <span className="font-medium text-gray-800">{faq.question}</span>
-                          </div>
-                          {expandedFAQ === faq.id ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                        </button>
-                        {expandedFAQ === faq.id && (
-                          <div className="p-4 pt-0 text-gray-600 border-t border-gray-200">
-                            {faq.answer}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Feedback Tab */}
-              {activeTab === 'feedback' && (
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-800 mb-6">Send Feedback</h3>
-                  
-                  <form onSubmit={handleFeedbackSubmit} className="space-y-6">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Subject *
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={feedbackForm.subject}
-                          onChange={(e) => setFeedbackForm({...feedbackForm, subject: e.target.value})}
-                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="Brief description of your feedback"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Category *
-                        </label>
-                        <select
-                          required
-                          value={feedbackForm.category}
-                          onChange={(e) => setFeedbackForm({...feedbackForm, category: e.target.value})}
-                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                        >
-                          <option value="">Select Category</option>
-                          <option value="technical">Technical Issue</option>
-                          <option value="billing">Billing</option>
-                          <option value="appointment">Appointments</option>
-                          <option value="feature">Feature Request</option>
-                          <option value="general">General Feedback</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Priority
-                      </label>
-                      <div className="flex space-x-4">
-                        {['low', 'medium', 'high'].map((priority) => (
-                          <label key={priority} className="flex items-center space-x-2">
-                            <input
-                              type="radio"
-                              name="priority"
-                              value={priority}
-                              checked={feedbackForm.priority === priority}
-                              onChange={(e) => setFeedbackForm({...feedbackForm, priority: e.target.value})}
-                              className="text-primary focus:ring-primary"
-                            />
-                            <span className="capitalize text-gray-700">{priority}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Message *
-                      </label>
-                      <textarea
-                        required
-                        rows={6}
-                        value={feedbackForm.message}
-                        onChange={(e) => setFeedbackForm({...feedbackForm, message: e.target.value})}
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                        placeholder="Please provide detailed information about your feedback or issue..."
-                      />
-                    </div>
-
-                    <div className="flex justify-end space-x-4">
-                      <button
-                        type="button"
-                        className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors flex items-center space-x-2"
-                      >
-                        <Send size={18} />
-                        <span>Send Feedback</span>
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              )}
+                );
+              })}
             </div>
           </div>
         </div>
-    </section>
+      </div>
+    </div>
   );
-};
-
-export default Support;
+}
