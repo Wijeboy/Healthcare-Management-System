@@ -59,6 +59,7 @@ import systemSettingsRoutes from "./routes/admin/systemSettingsRoutes.js";
 import contactRoutes from "./routes/admin/contactRoutes.js";
 import billingRoutes from "./routes/admin/billingRoutes.js";
 import appointmentSchedulerRoutes from "./routes/admin/appointmentSchedulerRoutes.js";
+import medicalRecordRoutes from "./routes/admin/medicalRecordRoutes.js";
 
 // Doctor Module Routes imports
 import doctorSelfRoutes from "./routes/doctor/index.js";
@@ -106,6 +107,14 @@ app.use(
   verifyToken,
   requireRole("Admin"),
   appointmentSchedulerRoutes,
+);
+
+// Medical Records Upload Routes
+app.use(
+  "/api/admin/records",
+  verifyToken,
+  requireRole("Admin"),
+  medicalRecordRoutes,
 );
 
 // Register Protected Doctor Module Routes (Requires valid JWT + Doctor role)
