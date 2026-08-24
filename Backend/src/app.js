@@ -60,6 +60,7 @@ import contactRoutes from "./routes/admin/contactRoutes.js";
 import billingRoutes from "./routes/admin/billingRoutes.js";
 import appointmentSchedulerRoutes from "./routes/admin/appointmentSchedulerRoutes.js";
 import medicalRecordRoutes from "./routes/admin/medicalRecordRoutes.js";
+import labReportRoutes from "./routes/admin/labReportRoutes.js";
 
 // Doctor Module Routes imports
 import doctorSelfRoutes from "./routes/doctor/index.js";
@@ -115,6 +116,14 @@ app.use(
   verifyToken,
   requireRole("Admin"),
   medicalRecordRoutes,
+);
+
+// Lab Report Upload Routes
+app.use(
+  "/api/admin/lab-reports",
+  verifyToken,
+  requireRole("Admin"),
+  labReportRoutes,
 );
 
 // Register Protected Doctor Module Routes (Requires valid JWT + Doctor role)
