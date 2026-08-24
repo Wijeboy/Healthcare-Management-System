@@ -118,6 +118,7 @@ model Patient {
   medicalRecords       MedicalRecord[]
   prescriptions        Prescription[]
   payments             Payment[]
+  supportTickets       SupportTicket[]
 }
 
 model Appointment {
@@ -192,3 +193,31 @@ model ContactMessage {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model SupportTicket {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  ticketNo  String   @unique
+  patientId String   @db.ObjectId
+  subject   String
+  category  String   @default("General") // General, Appointment, Billing, Technical, Medical
+  priority  String   @default("Medium")  // Low, Medium, High, Urgent
+  message   String
+  status    String   @default("Open")    // Open, In Progress, Resolved, Closed
+  responses Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  patient   Patient  @relation(fields: [patientId], references: [id])
+}
+
+model TermsAndConditions {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  title         String   @default("Patient Terms & Conditions")
+  version       String   @default("1.0")
+  role          String   @default("Patient") // Patient, Doctor, Staff
+  effectiveDate DateTime @default(now())
+  sections      Json
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+

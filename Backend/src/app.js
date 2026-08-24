@@ -66,6 +66,9 @@ import labReportRoutes from "./routes/admin/labReportRoutes.js";
 import doctorSelfRoutes from "./routes/doctor/index.js";
 import doctorsDirectoryRoutes from "./routes/doctor/directoryRoutes.js";
 
+// Patient Module Routes import
+import patientSelfRoutes from "./routes/patient/index.js";
+
 // Health check
 app.get("/api/health", (req, res) => {
   res.json({
@@ -76,6 +79,10 @@ app.get("/api/health", (req, res) => {
 
 // Register Authentication Routes
 app.use("/api/auth", authRoutes);
+
+// Register Patient Module Routes
+app.use("/api/patient", patientSelfRoutes);
+
 
 // Register Protected Admin Routes (Requires valid JWT + Admin role)
 app.use("/api/admin/doctors", verifyToken, requireRole("Admin"), doctorRoutes);
