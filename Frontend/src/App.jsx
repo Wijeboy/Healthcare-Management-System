@@ -33,6 +33,7 @@ import PatientSettings from "./pages/PatientPages/Settings";
 import PatientSupport from "./pages/PatientPages/Support";
 import PatientNotifications from "./pages/PatientPages/Notifications";
 import PatientBookAppointment from "./pages/PatientPages/BookAppointment";
+import PatientEmergencyCall from "./pages/PatientPages/EmergencyCallPage";
 
 // --- Doctor Portal pages (all doctor-only content lives under DoctorPages/) ---
 import DoctorDashboardPage from "./pages/DoctorDashboard";
@@ -168,6 +169,7 @@ function App() {
         <Route path="support" element={<PatientSupport />} />
         <Route path="notifications" element={<PatientNotifications />} />
         <Route path="book-appointment" element={<PatientBookAppointment />} />
+        <Route path="emergency" element={<PatientEmergencyCall />} />
       </Route>
 
       {/* Legacy /dashboard redirects for backward compatibility */}

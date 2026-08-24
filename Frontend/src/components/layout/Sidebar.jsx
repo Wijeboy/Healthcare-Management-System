@@ -51,7 +51,7 @@ const PATIENT_NAV_ITEMS = [
   },
 ];
 
-export default function Sidebar({ onEmergencyCall }) {
+export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -165,8 +165,8 @@ export default function Sidebar({ onEmergencyCall }) {
         {isPatient && (
           <button
             type="button"
-            onClick={onEmergencyCall}
-            className="w-full mt-2 bg-[#be123c] hover:bg-[#9f1239] text-white font-semibold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-xs text-sm"
+            onClick={() => navigate("/patient/emergency")}
+            className="w-full mt-2 bg-[#be123c] hover:bg-[#9f1239] text-white font-semibold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-xs text-sm cursor-pointer"
           >
             <span>Call Doctor</span>
           </button>
