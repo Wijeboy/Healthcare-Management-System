@@ -1,16 +1,12 @@
-import { useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import Navbar from './Navbar'
-import EmergencyCall from '../patient-components/EmergencyCall'
 
 export default function DashboardLayout() {
-  const [showEmergencyModal, setShowEmergencyModal] = useState(false);
-
   return (
     <div className="min-h-screen bg-background">
       {/* Sidebar */}
-      <Sidebar onEmergencyCall={() => setShowEmergencyModal(true)} />
+      <Sidebar />
       
       {/* Main Content */}
       <main className="ml-64 min-h-screen flex flex-col">
@@ -32,13 +28,8 @@ export default function DashboardLayout() {
           </div>
         </footer>
       </main>
-
-      {/* Emergency Call Modal */}
-      <EmergencyCall
-        isOpen={showEmergencyModal}
-        onClose={() => setShowEmergencyModal(false)}
-      />
     </div>
   )
 }
+
 
