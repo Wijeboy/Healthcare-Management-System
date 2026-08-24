@@ -55,7 +55,12 @@ import userRoutes from "./routes/admin/userRoutes.js";
 import staffRoutes from "./routes/admin/staffRoutes.js";
 import reportRoutes from "./routes/admin/reportRoutes.js";
 import settingsRoutes from "./routes/admin/settingsRoutes.js";
+import systemSettingsRoutes from "./routes/admin/systemSettingsRoutes.js";
 import contactRoutes from "./routes/admin/contactRoutes.js";
+import billingRoutes from "./routes/admin/billingRoutes.js";
+import appointmentSchedulerRoutes from "./routes/admin/appointmentSchedulerRoutes.js";
+import medicalRecordRoutes from "./routes/admin/medicalRecordRoutes.js";
+import labReportRoutes from "./routes/admin/labReportRoutes.js";
 
 // Doctor Module Routes imports
 import doctorSelfRoutes from "./routes/doctor/index.js";
@@ -79,7 +84,47 @@ app.use("/api/admin/users", verifyToken, requireRole("Admin"), userRoutes);
 app.use("/api/admin/staff", verifyToken, requireRole("Admin"), staffRoutes);
 app.use("/api/admin/reports", verifyToken, requireRole("Admin"), reportRoutes);
 app.use("/api/admin/settings", verifyToken, requireRole("Admin"), settingsRoutes);
+
+app.use(
+  "/api/admin/system-settings",
+  verifyToken,
+  requireRole("Admin"),
+  systemSettingsRoutes,
+);
+
 app.use("/api/admin/contact", verifyToken, requireRole("Admin"), contactRoutes);
+
+// Financial & Billing Routes
+app.use(
+  "/api/admin/billing",
+  verifyToken,
+  requireRole("Admin"),
+  billingRoutes,
+);
+
+// Global Appointment Scheduler Routes
+app.use(
+  "/api/admin/appointments",
+  verifyToken,
+  requireRole("Admin"),
+  appointmentSchedulerRoutes,
+);
+
+// Medical Records Upload Routes
+app.use(
+  "/api/admin/records",
+  verifyToken,
+  requireRole("Admin"),
+  medicalRecordRoutes,
+);
+
+// Lab Report Upload Routes
+app.use(
+  "/api/admin/lab-reports",
+  verifyToken,
+  requireRole("Admin"),
+  labReportRoutes,
+);
 
 // Register Protected Doctor Module Routes (Requires valid JWT + Doctor role)
 app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));

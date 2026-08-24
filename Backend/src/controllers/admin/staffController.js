@@ -293,3 +293,56 @@ export const deleteStaff = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+// GET USER PERMISSIONS
+export const getUserPermissions = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid staff ID",
+      });
+    }
+
+    const db = await getDb();
+
+    const staff = await db.collection("Staff").findOne(
+      { _id: new ObjectId(id) },
+      {
+        projection: {
+          fullName: 1,
+          role: 1,
+          accessLevel: 1,
+          permissions: 1,
+        },
+      },
+    );
+
+    if (!staff) {
+      return res.status(404).json({
+        success: false,
+        message: "Staff member not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        staffId: staff._id,
+        fullName: staff.fullName,
+        role: staff.role,
+        accessLevel: staff.accessLevel,
+        permissions: staff.permissions || [],
+      },
+    });
+  } catch (error) {
+    console.error("Get user permissions error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to retrieve user permissions",
+    });
+  }
+};
