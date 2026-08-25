@@ -1,28 +1,65 @@
-import { useState, useRef, useEffect } from 'react'
-import { Link } from "react-router-dom"
-import NotificationPanel from '../dashboard/NotificationPanel'
+import { useState, useRef, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import NotificationPanel from "../admin-components/dashboard/NotificationPanel";
 
 export default function Navbar() {
-  const [showNotifications, setShowNotifications] = useState(false)
-  const [searchFocused, setSearchFocused] = useState(false)
-  const notifRef = useRef(null)
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [role, setRole] = useState("Admin");
+  const notifRef = useRef(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const savedRole = localStorage.getItem("hmsRole");
+    if (location.pathname.startsWith("/doctor")) {
+      setRole("Doctor");
+    } else if (location.pathname.startsWith("/patient")) {
+      setRole("Patient");
+    } else if (location.pathname.startsWith("/admin") || savedRole === "Admin") {
+      setRole("Admin");
+    } else if (savedRole) {
+      setRole(savedRole);
+    } else {
+      setRole("Admin");
+    }
+  }, [location.pathname]);
+
+  const settingsConfigByRole = {
+    Admin: {
+      route: "/admin/settings",
+      label: "System Settings",
+    },
+    Doctor: {
+      route: "/doctor",
+      label: "Doctor Settings & Profile",
+    },
+    Patient: {
+      route: "/patient",
+      label: "Patient Settings & Profile",
+    },
+  };
+
+  const currentSetting = settingsConfigByRole[role] || settingsConfigByRole.Admin;
 
   // Close notification panel on outside click
   useEffect(() => {
     function handleClickOutside(event) {
       if (notifRef.current && !notifRef.current.contains(event.target)) {
-        setShowNotifications(false)
+        setShowNotifications(false);
       }
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <header className="sticky top-0 z-30 flex justify-between items-center w-full px-6 h-16 bg-surface-bright border-b border-outline-variant shadow-sm">
       {/* Search Bar */}
       <div className="flex items-center flex-1 max-w-xl">
-        <div className={`relative w-full transition-shadow ${searchFocused ? 'shadow-md' : ''}`}>
+        <div
+          className={`relative w-full transition-shadow ${searchFocused ? "shadow-md" : ""}`}
+        >
           <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">
             search
           </span>
@@ -42,21 +79,30 @@ export default function Navbar() {
         <div className="relative" ref={notifRef}>
           <button
             className="p-2 rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors active:scale-95 relative"
-            onClick={() => setShowNotifications(!showNotifications)}
+            onClick={() => {
+              if (role === "Patient") {
+                navigate("/patient/notifications");
+                return;
+              }
+              setShowNotifications(!showNotifications);
+            }}
           >
             <span className="material-symbols-outlined">notifications</span>
             {/* Badge */}
             <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-error rounded-full border-2 border-surface-bright"></span>
           </button>
-          
-          {showNotifications && <NotificationPanel onClose={() => setShowNotifications(false)} />}
+
+          {showNotifications && (
+            <NotificationPanel onClose={() => setShowNotifications(false)} role={role} />
+          )}
         </div>
 
         {/* Settings */}
         <Link
-          to="/dashboard/system-settings"
+          to={role === "Patient" ? "/patient/settings" : currentSetting.route}
+          title={currentSetting.label}
           className="p-2 rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors active:scale-95"
-          aria-label="Open system settings"
+          aria-label={currentSetting.label}
         >
           <span className="material-symbols-outlined">settings</span>
         </Link>
@@ -71,5 +117,5 @@ export default function Navbar() {
         </div>
       </div>
     </header>
-  )
+  );
 }

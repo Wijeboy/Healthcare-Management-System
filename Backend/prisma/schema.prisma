@@ -1,0 +1,223 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "mongodb"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model User {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  password  String
+  role      String   @default("Patient") // Patient, Doctor, Admin, Staff
+  status    String   @default("Active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  admin     Admin?
+  doctor    Doctor?
+  patient   Patient?
+  staff     Staff?
+}
+
+model Admin {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String   @unique @db.ObjectId
+  fullName   String
+  phone      String
+  nationalId String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model Staff {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId         String   @unique @db.ObjectId
+  fullName       String
+  phone          String
+  email          String?
+  dob            String?
+  age            Int?
+  gender         String?
+  nationalId     String?
+  address        String?
+  department     String?
+  role           String?  // Job title e.g. Nurse, Receptionist
+  employeeStatus String   @default("Active")
+  accessLevel    String   @default("Standard")
+  shift          String?
+  joiningDate    String?
+  permissions    String[]
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user           User     @relation(fields: [userId], references: [id])
+}
+
+model Doctor {
+  id                   String          @id @default(auto()) @map("_id") @db.ObjectId
+  userId               String          @unique @db.ObjectId
+  fullName             String
+  phone                String
+  dob                  String?
+  gender               String?
+  nationalId           String?
+  address              String?
+  licenceNumber        String?
+  department           String
+  specialization       String
+  qualification        String?
+  experience           String
+  bio                  String?
+  startTime            String?
+  endTime              String?
+  workingDays          String[]
+  consultationDuration String?
+  availability         String          @default("Available")
+  status               String          @default("Active")
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  user                 User            @relation(fields: [userId], references: [id])
+  appointments         Appointment[]
+  medicalRecords       MedicalRecord[]
+  prescriptions        Prescription[]
+}
+
+model Patient {
+  id                   String          @id @default(auto()) @map("_id") @db.ObjectId
+  userId               String          @unique @db.ObjectId
+  fullName             String
+  phone                String
+  dob                  String?
+  bloodGroup           String?
+  age                  Int?
+  gender               String?
+  nationalId           String?
+  address              String?
+  allergies            String?
+  existingConditions   String?
+  currentMedications   String?
+  medicalNotes         String?
+  emergencyName        String?
+  emergencyRelationship String?
+  emergencyPhone       String?
+  emergencyEmail       String?
+  status               String          @default("Active")
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  user                 User            @relation(fields: [userId], references: [id])
+  appointments         Appointment[]
+  medicalRecords       MedicalRecord[]
+  prescriptions        Prescription[]
+  payments             Payment[]
+  supportTickets       SupportTicket[]
+}
+
+model Appointment {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  patientId String   @db.ObjectId
+  doctorId  String   @db.ObjectId
+  date      DateTime
+  time      String
+  status    String   @default("Pending")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  patient   Patient  @relation(fields: [patientId], references: [id])
+  doctor    Doctor   @relation(fields: [doctorId], references: [id])
+}
+
+model MedicalRecord {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  patientId String   @db.ObjectId
+  doctorId  String   @db.ObjectId
+  diagnosis String
+  treatment String
+  labReport String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  patient   Patient  @relation(fields: [patientId], references: [id])
+  doctor    Doctor   @relation(fields: [doctorId], references: [id])
+}
+
+model Prescription {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  patientId    String   @db.ObjectId
+  doctorId     String   @db.ObjectId
+  medicines    String[] 
+  instructions String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  patient      Patient  @relation(fields: [patientId], references: [id])
+  doctor       Doctor   @relation(fields: [doctorId], references: [id])
+}
+
+model Payment {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  patientId     String   @db.ObjectId
+  amount        Float
+  paymentMethod String
+  paymentStatus String   @default("Pending")
+  invoiceNumber String   @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  patient       Patient  @relation(fields: [patientId], references: [id])
+}
+
+model SystemSetting {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ContactMessage {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  email     String
+  subject   String
+  message   String
+  status    String   @default("Unread") // Unread, Read, Resolved
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SupportTicket {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  ticketNo  String   @unique
+  patientId String   @db.ObjectId
+  subject   String
+  category  String   @default("General") // General, Appointment, Billing, Technical, Medical
+  priority  String   @default("Medium")  // Low, Medium, High, Urgent
+  message   String
+  status    String   @default("Open")    // Open, In Progress, Resolved, Closed
+  responses Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  patient   Patient  @relation(fields: [patientId], references: [id])
+}
+
+model TermsAndConditions {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  title         String   @default("Patient Terms & Conditions")
+  version       String   @default("1.0")
+  role          String   @default("Patient") // Patient, Doctor, Staff
+  effectiveDate DateTime @default(now())
+  sections      Json
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
